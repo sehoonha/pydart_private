@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 using std::cout;
+using std::cerr;
 using std::endl;
 
 // Dart headers
@@ -254,6 +255,32 @@ void getSkeletonWorldCOMVelocity(int skid, double outv3[3]) {
     Eigen::Vector3d CV = skel->getWorldCOMVelocity();
     for (int i = 0; i < CV.size(); i++) {
         outv3[i] = CV(i);
+    }
+}
+
+// BodyNode functions
+void getBodyNodeWorldLinearJacobian(int skid, const char* const bname, double* array2, int nrows, int ncols) {
+    using namespace dart::dynamics;
+    Skeleton* skel = Manager::skeleton(skid);
+    BodyNode* body = skel->getBodyNode(bname);
+    if (!body) {
+        cerr << "cannot find the body : " << bname << endl;
+    }
+
+    int N = skel->getNumDofs();
+    Eigen::MatrixXd J = body->getWorldLinearJacobian();
+    Eigen::MatrixXd JF = Eigen::MatrixXd::Zero(3, N);
+
+    for (int i = 0; i < J.cols(); i++) {
+        int j = body->getDependentGenCoordIndex(i);
+        JF.col(j) = J.col(i);
+    }
+
+    int ptr = 0;
+    for (int i = 0; i < JF.rows(); i++) {
+        for (int j = 0; j < JF.cols(); j++) {
+            array2[ptr++] = JF(i, j);
+        }
     }
 }
 

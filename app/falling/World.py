@@ -4,17 +4,19 @@ sys.path.append(Config.PYDART_PATH)
 
 import pydart_api
 import numpy as np
+import numpy.linalg as LA
 import math
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import GLTools
 import PDController
+import JTController
 
 class World:
     def __init__(self):
         pydart_api.init()
-        pydart_api.createWorld(1.0 / 5000.0)
+        pydart_api.createWorld(1.0 / 2000.0)
         pydart_api.addSkeleton(Config.DATA_PATH + "sdf/ground.urdf")
 
         # Configure the robot
@@ -33,13 +35,45 @@ class World:
 
         self.pd = PDController.PDController(self.ndofs, 20.0, 1.0)
         self.pd.target = q
+
+        self.jt = JTController.JTController(self)
         
+
     def control(self):
-        return self.pd.control( self.getPositions(), self.getVelocities() )
+        tau = np.zeros(self.ndofs)
+        # Track the initial pose
+        tau += self.pd.control( self.getPositions(), self.getVelocities() )
+
+        # Apply VF to feet and shrink the length
+        C = pydart_api.getSkeletonWorldCOM(self.rid)
+        u = C / LA.norm(C)
+        f = u * 20.0
+        tau += self.jt.control( "l_foot", f )
+        tau += self.jt.control( "r_foot", f )
+
+        w = np.array([1.0, 0.0, 0.0])
+        v = np.cross(w, u)
+        # v = np.array([0.0, -1.0, 0.0])
+        f_hand = v * 20.0
+        tau += self.jt.control( "l_hand", f_hand )
+        tau += self.jt.control( "r_hand", f_hand )
+        
+        
+        tau[10] += 2.0
+        tau[12] += 2.0
+
+        # Erase the first six dof forces
+        tau[0:6] = 0
+        return tau
 
     def step(self):
         pydart_api.setSkeletonForces(self.rid, self.control())
         pydart_api.stepWorld()
+        # if pydart_api.getWorldSimFrames() % 1 == 0:
+        #     C = pydart_api.getSkeletonWorldCOM(self.rid)
+        #     print "%.4f, %.4f" % (pydart_api.getWorldTime(), math.atan2(C[2], C[1])),
+        #     print "".join([", %.4f" % x for x in C]),
+        #     print ", %.4f" % LA.norm(C)
 
     def glMove(self, pos):
         glPopMatrix()
@@ -48,8 +82,8 @@ class World:
 
     def render(self):
         glPushMatrix()
+        # GLTools.renderArrow(np.array([0.0, 0.0, 0.0]), np.array([1.0, 1.0, 1.0]))
         # Draw skeleton
-        GLTools.renderArrow(np.array([0.0, 0.0, 0.0]), np.array([1.0, 1.0, 1.0]))
         pydart_api.renderSkeleton(self.rid)
 
         # Draw chess board
@@ -78,6 +112,11 @@ class World:
 
     def setPositions(self, q):
         pydart_api.setSkeletonPositions(self.rid, q)
+
+    def getBodyNodeWorldLinearJacobian(self, name):
+        J = np.zeros((3, self.ndofs))
+        pydart_api.getBodyNodeWorldLinearJacobian(self.rid, name, J)
+        return J
         
     def numSimFrames(self):
         return pydart_api.getWorldSimFrames()

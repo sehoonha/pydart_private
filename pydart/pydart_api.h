@@ -40,6 +40,9 @@ void setSkeletonForces(int skid, double* intorque, int ndofs);
 void getSkeletonWorldCOM(int skid, double outv3[3]);
 void getSkeletonWorldCOMVelocity(int skid, double outv3[3]);
 
+// BodyNode functions
+void getBodyNodeWorldLinearJacobian(int skid, const char* const bname, double* array2, int nrows, int ncols);
+
 // World functions
 void stepWorld();
 void render();
