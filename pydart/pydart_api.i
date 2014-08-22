@@ -16,6 +16,7 @@
 %apply (double* IN_ARRAY1, int DIM1) {(double* inpose, int ndofs)};
 %apply (double* IN_ARRAY1, int DIM1) {(double* intorque, int ndofs)};
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double* outpose, int ndofs)};
+%apply (double* ARGOUT_ARRAY1, int DIM1) {(double* outv, int len)};
 %apply (double ARGOUT_ARRAY1[ANY]) {(double outv3[3])};
 %apply (double* INPLACE_ARRAY2, int DIM1, int DIM2) {(double* array2, int nrows, int ncols)};
 

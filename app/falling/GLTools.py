@@ -45,12 +45,18 @@ def renderChessBoard(n, sz):
     
 
 def renderArrow(p, q):
+    glDisable(GL_LIGHTING)
+    glLineWidth(3)
     glPushMatrix()
     glBegin(GL_LINES)
     glVertex(p)
     glVertex(q)
     glEnd()
+    glTranslate(p[0], p[1], p[2])
+    glutSolidSphere(0.005, 10, 10)
     glPopMatrix()
+    glLineWidth(1)
+    glEnable(GL_LIGHTING)
 
     
     

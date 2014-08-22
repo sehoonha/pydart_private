@@ -69,9 +69,10 @@ class World:
     def step(self):
         pydart_api.setSkeletonForces(self.rid, self.control())
         pydart_api.stepWorld()
-        # if pydart_api.getWorldSimFrames() % 1 == 0:
+        # if pydart_api.getWorldSimFrames() % 10 == 0:
         #     C = pydart_api.getSkeletonWorldCOM(self.rid)
-        #     print "%.4f, %.4f" % (pydart_api.getWorldTime(), math.atan2(C[2], C[1])),
+        #     Cd = pydart_api.getSkeletonWorldCOMVelocity(self.rid)
+        #     print "%.4f, %.4f, %.4f" % (pydart_api.getWorldTime(), Cd[1], math.atan2(C[2], C[1])),
         #     print "".join([", %.4f" % x for x in C]),
         #     print ", %.4f" % LA.norm(C)
 
@@ -82,9 +83,11 @@ class World:
 
     def render(self):
         glPushMatrix()
-        # GLTools.renderArrow(np.array([0.0, 0.0, 0.0]), np.array([1.0, 1.0, 1.0]))
         # Draw skeleton
         pydart_api.renderSkeleton(self.rid)
+
+        for c in self.getWorldContacts():
+            GLTools.renderArrow(c[0:3], c[0:3] - 1.0 * c[3:6])
 
         # Draw chess board
         self.glMove([0.0, -0.01, 0.0])
@@ -96,6 +99,7 @@ class World:
         glutSolidSphere(0.05, 4, 2)
         
         glPopMatrix()
+
 
     def statusString(self):
         status = ""
@@ -117,6 +121,11 @@ class World:
         J = np.zeros((3, self.ndofs))
         pydart_api.getBodyNodeWorldLinearJacobian(self.rid, name, J)
         return J
+
+    def getWorldContacts(self):
+        n = pydart_api.getWorldNumContacts()
+        contacts = pydart_api.getWorldContacts(6 * n)
+        return [contacts[6 * i : 6 * i + 6] for i in range(n)]
         
     def numSimFrames(self):
         return pydart_api.getWorldSimFrames()

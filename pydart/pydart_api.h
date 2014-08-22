@@ -43,6 +43,10 @@ void getSkeletonWorldCOMVelocity(int skid, double outv3[3]);
 // BodyNode functions
 void getBodyNodeWorldLinearJacobian(int skid, const char* const bname, double* array2, int nrows, int ncols);
 
+// World query functions
+int getWorldNumContacts();
+void getWorldContacts(double* outv, int len);
+
 // World functions
 void stepWorld();
 void render();

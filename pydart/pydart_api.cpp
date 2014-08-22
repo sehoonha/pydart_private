@@ -20,6 +20,8 @@ using std::endl;
 #include "dart/dynamics/Skeleton.h"
 #include "dart/dynamics/BodyNode.h"
 #include "dart/dynamics/Joint.h"
+#include "dart/constraint/ConstraintSolver.h"
+#include "dart/collision/CollisionDetector.h"
 #include "dart/utils/Paths.h"
 #include "dart/utils/SkelParser.h"
 #include "dart/utils/sdf/SoftSdfParser.h"
@@ -284,6 +286,38 @@ void getBodyNodeWorldLinearJacobian(int skid, const char* const bname, double* a
     }
 }
 
+// World query functions
+int getWorldNumContacts() {
+    dart::simulation::World* world = Manager::world();
+    dart::collision::CollisionDetector* cd =
+        world->getConstraintSolver()->getCollisionDetector();
+    return cd->getNumContacts();
+}
+
+
+void getWorldContacts(double* outv, int len) {
+    dart::simulation::World* world = Manager::world();
+    dart::collision::CollisionDetector* cd =
+        world->getConstraintSolver()->getCollisionDetector();
+    int n = cd->getNumContacts();
+    if (6 * n != len) {
+        cerr << "6n is needed for the output vector. n = " << n << ", len =  " << len << endl;
+        return;
+    }
+
+    int ptr = 0;
+    for (size_t i = 0; i < n; i++) {
+        Eigen::Vector3d v = cd->getContact(i).point;
+        Eigen::Vector3d f = cd->getContact(i).force / 10.0;
+        for (int j = 0; j < 3; j++) {
+            outv[ptr++] = v(j);
+        }
+        for (int j = 0; j < 3; j++) {
+            outv[ptr++] = f(j);
+        }
+
+    }    
+}
 
 // World functions
 void stepWorld() {
