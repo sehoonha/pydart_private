@@ -28,6 +28,8 @@ int addSkeleton(const char* const path);
 double getSkeletonMass(int skid);
 int getSkeletonNumBodies(int skid);
 int getSkeletonNumDofs(int skid);
+const char* getSkeletonBodyName(int skid, int bodyid);
+const char* getSkeletonDofName(int skid, int dofid);
 void setSkeletonJointDamping(int skid, double damping);
 
 // Pose functions

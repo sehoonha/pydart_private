@@ -196,6 +196,16 @@ int getSkeletonNumDofs(int skid) {
     return skel->getNumDofs();
 }
 
+const char* getSkeletonBodyName(int skid, int bodyid) {
+    dart::dynamics::Skeleton* skel = Manager::skeleton(skid);
+    return skel->getBodyNode(bodyid)->getName().c_str();
+}
+
+const char* getSkeletonDofName(int skid, int dofid) {
+    dart::dynamics::Skeleton* skel = Manager::skeleton(skid);
+    return skel->getGenCoordInfo(dofid).joint->getName().c_str();
+}
+
 void getSkeletonPositions(int skid, double* outpose, int ndofs) {
     using namespace dart::dynamics;
     Skeleton* skel = Manager::skeleton(skid);

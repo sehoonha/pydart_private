@@ -134,7 +134,9 @@ class MyWindow(QtGui.QMainWindow):
     def idleTimerEvent(self):
         if not self.playAction.isChecked():
             return
-        self.world.step()
+        result = self.world.step()
+        if result:
+            self.playAction.setChecked(False)
 
     def renderTimerEvent(self):
         self.glwidget.updateGL()
