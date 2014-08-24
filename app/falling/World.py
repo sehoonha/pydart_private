@@ -13,6 +13,7 @@ import GLTools
 from control.PDController import *
 from control.JTController import *
 from control.COMTracker import *
+from ik.IK import *
 
 def confine(x, lo, hi):
     return min(max(lo, x), hi)
@@ -51,10 +52,16 @@ class World:
         self.pd.target[18] += 0.5
         self.pd.target[19] += 0.5
 
-
-
         self.jt = JTController(self)
         self.ct = COMTracker(self, Config.DATA_PATH + 'COM.csv')
+
+        # Test IK
+        self.ik = IK(self)
+        self.ik.getCOMToBodyPoint().target = 0.12
+        self.pd.target = self.ik.optimize()
+        # print self.ik.evaluate()
+
+        # self.ik.evaluate( [0.0, 0.0, 0.0, 0.0, 1.0] )
 
     def control(self):
         tau = np.zeros(self.ndofs)
@@ -85,7 +92,6 @@ class World:
         for i in range(6, self.ndofs):
             tau[i] = confine(tau[i], -self.maxTorque, self.maxTorque)
 
-        print pydart_api.getSkeletonDofName(self.rid, 0)
         return tau
 
     def step(self):
@@ -122,7 +128,7 @@ class World:
         self.glMove( pydart_api.getSkeletonWorldCOM(self.rid) )
         glColor(1.0, 0.0, 0.0, 0.8)
         glutSolidSphere(0.05, 4, 2)
-        
+
         glPopMatrix()
 
 
@@ -145,6 +151,12 @@ class World:
     def setPositions(self, q):
         pydart_api.setSkeletonPositions(self.rid, q)
 
+    def getCOM(self):
+        return pydart_api.getSkeletonWorldCOM(self.rid)
+
+    def getBodyNodeTransformation(self, name):
+        return pydart_api.getBodyNodeTransformation(self.rid, name)
+        
     def getBodyNodeWorldLinearJacobian(self, name):
         J = np.zeros((3, self.ndofs))
         pydart_api.getBodyNodeWorldLinearJacobian(self.rid, name, J)

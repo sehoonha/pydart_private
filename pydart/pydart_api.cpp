@@ -271,6 +271,21 @@ void getSkeletonWorldCOMVelocity(int skid, double outv3[3]) {
 }
 
 // BodyNode functions
+void getBodyNodeTransformation(int skid, const char* const bname, double outv44[4][4]) {
+    using namespace dart::dynamics;
+    Skeleton* skel = Manager::skeleton(skid);
+    BodyNode* body = skel->getBodyNode(bname);
+    if (!body) {
+        cerr << "cannot find the body : " << bname << endl;
+    }
+    const Eigen::Isometry3d& T = body->getTransform();
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            outv44[i][j] = T(i, j);
+        }
+    }
+}
+
 void getBodyNodeWorldLinearJacobian(int skid, const char* const bname, double* array2, int nrows, int ncols) {
     using namespace dart::dynamics;
     Skeleton* skel = Manager::skeleton(skid);
