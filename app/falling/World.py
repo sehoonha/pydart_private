@@ -10,8 +10,8 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import GLTools
-import PDController
-import JTController
+import control.PDController
+import control.JTController
 
 class World:
     def __init__(self):
@@ -33,10 +33,10 @@ class World:
         self.setPositions(q)
         print 'positions = ', self.getPositions()
 
-        self.pd = PDController.PDController(self.ndofs, 20.0, 1.0)
+        self.pd = control.PDController.PDController(self.ndofs, 20.0, 1.0)
         self.pd.target = q
 
-        self.jt = JTController.JTController(self)
+        self.jt = control.JTController.JTController(self)
         
 
     def control(self):
@@ -51,9 +51,9 @@ class World:
         tau += self.jt.control( "l_foot", f )
         tau += self.jt.control( "r_foot", f )
 
-        w = np.array([1.0, 0.0, 0.0])
-        v = np.cross(w, u)
-        # v = np.array([0.0, -1.0, 0.0])
+        # w = np.array([1.0, 0.0, 0.0])
+        # v = np.cross(w, u)
+        v = np.array([0.0, -1.0, 0.0])
         f_hand = v * 20.0
         tau += self.jt.control( "l_hand", f_hand )
         tau += self.jt.control( "r_hand", f_hand )
@@ -133,3 +133,4 @@ class World:
     def setWorldSimFrame(self, i):
         pydart_api.setWorldSimFrame(i)
         
+
