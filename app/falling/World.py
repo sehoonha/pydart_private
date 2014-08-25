@@ -143,7 +143,7 @@ class World:
 
     def statusString(self):
         status = ""
-        status += "T = %.4f (%d)" % (self.getTime(), pydart_api.getWorldSimFrames())
+        status += "T = %.4f (%d)" % (self.getTime(), self.getSimFrames())
         status += "COM = " + str(["%.3f" % x for x in self.getCOM()]) + " "
         status += "TIP = " + str(["%.3f" % x for x in self.tip.getState()]) + " "
 
@@ -151,6 +151,9 @@ class World:
 
     def getTime(self):
         return pydart_api.getWorldTime()
+
+    def getSimFrames(self):
+        return pydart_api.getWorldSimFrames()
             
     def getPositions(self):
         return pydart_api.getSkeletonPositions(self.rid, self.ndofs)

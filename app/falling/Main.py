@@ -16,12 +16,11 @@ class GLWidget(QGLWidget):
         self.width = 1280
         self.height = 720
         
-        self.frameCount = 0
         self.tb = Trackball.Trackball()
         self.lastPos = None
 
         self.world = None
-        
+        self.captureIndex = 0
         
     def sizeHint(self):
         return QtCore.QSize(self.width, self.height)
@@ -82,6 +81,7 @@ class GLWidget(QGLWidget):
         
     def mousePressEvent(self, event):
         self.lastPos = event.pos()
+        
     def mouseReleaseEvent(self, event):
         self.lastPos = None
         
@@ -96,9 +96,22 @@ class GLWidget(QGLWidget):
         self.lastPos = event.pos()
         self.updateGL()
 
+    def capture(self):
+        img = self.grabFrameBuffer()
+        filename = 'captures/frame.%04d.png' % self.captureIndex
+        img.save(filename)
+        print 'Capture to ', filename
+        self.captureIndex += 1
+
 class MyWindow(QtGui.QMainWindow):
     def __init__(self):
         super(MyWindow, self).__init__()
+
+        # Check and create captures directory
+        if not os.path.isdir('captures'):
+            os.makedirs('captures')
+
+        # Create a world
         self.world = World.World()
 
         self.initUI()
@@ -111,6 +124,7 @@ class MyWindow(QtGui.QMainWindow):
         self.renderTimer.timeout.connect(self.renderTimerEvent)
         self.renderTimer.start(25)
 
+
         
     def initUI(self):               
         # Create actions
@@ -118,12 +132,17 @@ class MyWindow(QtGui.QMainWindow):
         self.playAction.setCheckable(True)
         self.playAction.setShortcut('Space')
 
+        self.captureAction = QtGui.QAction('Capture', self)
+        self.captureAction.setCheckable(True)
+
         self.plotAction = QtGui.QAction('Plot', self)
         self.plotAction.triggered.connect(self.plotEvent)
 
         # Create a toolbar
         self.toolbar = self.addToolBar('Control')
         self.toolbar.addAction(self.playAction)
+        self.toolbar.addSeparator()
+        self.toolbar.addAction(self.captureAction)
         self.toolbar.addAction(self.plotAction)
 
         self.rangeSlider = QtGui.QSlider(QtCore.Qt.Horizontal, self)
@@ -141,6 +160,10 @@ class MyWindow(QtGui.QMainWindow):
         if not self.playAction.isChecked():
             return
         result = self.world.step()
+
+        if self.captureAction.isChecked() and self.world.getSimFrames() % 10 == 1:
+            self.glwidget.capture()
+
         if result:
             self.playAction.setChecked(False)
 
@@ -154,7 +177,6 @@ class MyWindow(QtGui.QMainWindow):
 
     def plotEvent(self):
         self.world.history.plotCOM()
-
         
 glutInit(sys.argv)
 app = QtGui.QApplication(["Falling controller with Pydart"])
