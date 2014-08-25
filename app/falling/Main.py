@@ -10,6 +10,8 @@ from PyQt4.QtOpenGL import *
 import Trackball
 import World
 
+# avconv -r 100 -i ./frame.%04d.png output.mp4
+
 class GLWidget(QGLWidget):
     def __init__(self, parent = None):
         super(GLWidget, self).__init__(parent)
@@ -161,7 +163,7 @@ class MyWindow(QtGui.QMainWindow):
             return
         result = self.world.step()
 
-        if self.captureAction.isChecked() and self.world.getSimFrames() % 10 == 1:
+        if self.captureAction.isChecked() and self.world.getSimFrames() % 20 == 1:
             self.glwidget.capture()
 
         if result:

@@ -7,7 +7,7 @@ from scipy.optimize import minimize
 class ObjTIP:
     def __init__(self, _tip):
         # self.target = [0.15, 0.15, 1.57]
-        self.target = [0.1014, 0.15, 1.57]
+        self.target = [0.1014, 0.15, 1.27]
         self.tip = _tip
 
     def cost(self):

@@ -109,7 +109,7 @@ class World:
         #     print ", %.4f" % LA.norm(C)
 
 
-        if math.fabs(self.getTime() - 0.2500) < 0.0001:
+        if math.fabs(self.getTime() - 1.0000) < 0.0001:
             return True
         return False
 
