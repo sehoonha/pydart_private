@@ -3,6 +3,7 @@ from plotly.graph_objs import *
 
 class History:
     def __init__(self, _world):
+        self.index = -1 # Use the latest
         self.world = _world
         self.histories = []
         self.callbacks = []
@@ -11,11 +12,19 @@ class History:
         data = {}
         data['t'] = self.world.getTime()
         data['C'] = self.world.getCOM()
+        data['Contacts'] = self.world.getWorldContacts()
         self.histories += [data]
         # Push all callback objects
         for cb in self.callbacks:
             cb.push(self)
+        self.index = -1 # Use the latest
 
+    def pop(self, index):
+        self.index = index
+
+    def getFrame(self):
+        return self.histories[self.index]
+        
     def plotCOM(self):
         x = [ data['t'] for data in self.histories ]
         traces = []

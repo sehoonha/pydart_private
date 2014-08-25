@@ -123,7 +123,8 @@ class World:
         # Draw skeleton
         pydart_api.renderSkeleton(self.rid)
 
-        for c in self.getWorldContacts():
+        # for c in self.getWorldContacts():
+        for c in self.history.getFrame()['Contacts']:
             GLTools.renderArrow(c[0:3], c[0:3] - 1.0 * c[3:6])
 
         # Draw chess board
@@ -185,5 +186,5 @@ class World:
 
     def setWorldSimFrame(self, i):
         pydart_api.setWorldSimFrame(i)
-        
+        self.history.pop(i);
 
