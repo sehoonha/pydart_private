@@ -113,12 +113,18 @@ class MyWindow(QtGui.QMainWindow):
 
         
     def initUI(self):               
+        # Create actions
         self.playAction = QtGui.QAction('Play', self)
         self.playAction.setCheckable(True)
         self.playAction.setShortcut('Space')
-        
+
+        self.plotAction = QtGui.QAction('Plot', self)
+        self.plotAction.triggered.connect(self.plotEvent)
+
+        # Create a toolbar
         self.toolbar = self.addToolBar('Control')
         self.toolbar.addAction(self.playAction)
+        self.toolbar.addAction(self.plotAction)
 
         self.rangeSlider = QtGui.QSlider(QtCore.Qt.Horizontal, self)
         self.rangeSlider.valueChanged[int].connect(self.rangeSliderEvent)
@@ -145,6 +151,10 @@ class MyWindow(QtGui.QMainWindow):
 
     def rangeSliderEvent(self, value):
         self.world.setWorldSimFrame( value )
+
+    def plotEvent(self):
+        self.world.history.plotCOM()
+
         
 glutInit(sys.argv)
 app = QtGui.QApplication(["Falling controller with Pydart"])

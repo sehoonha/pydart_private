@@ -10,6 +10,8 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import GLTools
+
+from History import *
 from control.PDController import *
 from control.JTController import *
 from control.COMTracker import *
@@ -20,6 +22,10 @@ def confine(x, lo, hi):
 
 class World:
     def __init__(self):
+        # Record the history
+        self.history = History(self)
+
+        # Init api
         pydart_api.init()
         pydart_api.createWorld(1.0 / 2000.0)
         pydart_api.addSkeleton(Config.DATA_PATH + "sdf/ground.urdf")
@@ -40,28 +46,21 @@ class World:
         self.setPositions(q)
         print 'positions = ', self.getPositions()
 
+        # Control
         self.maxTorque = 0.3 * 1.5
 
         self.pd = PDController(self.ndofs, 20.0, 1.0)
         self.pd.target = q
-
-        self.pd.target[10] += 1.0
-        self.pd.target[12] += 1.0
-        self.pd.target[14] += -3.0
-        self.pd.target[16] += -3.0
-        self.pd.target[18] += 0.5
-        self.pd.target[19] += 0.5
-
         self.jt = JTController(self)
         self.ct = COMTracker(self, Config.DATA_PATH + 'COM.csv')
+        self.history.callbacks += [self.ct]
 
-        # Test IK
+        # IK
         self.ik = IK(self)
-        self.ik.getCOMToBodyPoint().target = 0.12
+        self.ik.getCOMToBodyPoint().target = 0.10
         self.pd.target = self.ik.optimize()
-        # print self.ik.evaluate()
 
-        # self.ik.evaluate( [0.0, 0.0, 0.0, 0.0, 1.0] )
+        self.history.push()
 
     def control(self):
         tau = np.zeros(self.ndofs)
@@ -86,7 +85,6 @@ class World:
 
         # COM Tracker
         tau += self.ct.control( self.getTime(), pydart_api.getSkeletonWorldCOM(self.rid) )
-
         # Erase the first six dof forces
         tau[0:6] = 0
         for i in range(6, self.ndofs):
@@ -97,12 +95,16 @@ class World:
     def step(self):
         pydart_api.setSkeletonForces(self.rid, self.control())
         pydart_api.stepWorld()
+        self.history.push()
+
         # if pydart_api.getWorldSimFrames() % 10 == 0:
         #     C = pydart_api.getSkeletonWorldCOM(self.rid)
         #     Cd = pydart_api.getSkeletonWorldCOMVelocity(self.rid)
         #     print "%.4f, %.4f, %.4f" % (pydart_api.getWorldTime(), Cd[1], math.atan2(C[2], C[1])),
         #     print "".join([", %.4f" % x for x in C]),
         #     print ", %.4f" % LA.norm(C)
+
+
         if math.fabs(self.getTime() - 0.2500) < 0.0001:
             return True
         return False

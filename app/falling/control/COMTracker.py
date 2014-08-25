@@ -18,15 +18,23 @@ class COMTracker:
             self.data += [ [99.9] + self.data[-1][1:3] ] # Put the sentinal row
             self.index = 0
 
+    def getChat(self):
+        return np.array([0.0] + [self.data[self.index][x] for x in [2, 1]] )
+        
     def control(self, t, C):
         if self.data[self.index][0] < t:
             self.index += 1
-        Chat = np.array([0.0] + [self.data[self.index][x] for x in [2, 1]] )
+        Chat = self.getChat()
         self.error += LA.norm(C - Chat)
         f = 0.0 * (C - Chat)
         f[0] = 0
-        print t, C, self.index, Chat, f, self.error
+        # print t, C, self.index, Chat, f, self.error
         return self.world.jt.control( ["l_heel", "r_heel"], f )
+
+    def push(self, history):
+        data = history.histories[-1]
+        data['Chat'] = self.getChat()
+
 
 
         
