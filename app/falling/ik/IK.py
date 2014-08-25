@@ -1,27 +1,19 @@
 import numpy as np
-import numpy.linalg as LA
+from numpy.linalg import norm
 
 from scipy.optimize import minimize
 
-class COMToBodyPoint:
-    def __init__(self, _world, _bodynames, _local):
-        self.world = _world
-        self.target = 0.10
-        self.bodynames = _bodynames
-        self.local = _local
-        
+
+class ObjTIP:
+    def __init__(self, _tip):
+        # self.target = [0.15, 0.15, 1.57]
+        self.target = [0.1014, 0.15, 1.57]
+        self.tip = _tip
+
     def cost(self):
-        C = self.world.getCOM()
-
-        positions = []
-        for bodyname in self.bodynames:
-            T = self.world.getBodyNodeTransformation(bodyname)
-            P = T.dot( np.append(self.local, [1.0]) )
-            positions += [P]
-        avg = (sum(positions) / len(positions))[0:3]
-        diff = (LA.norm(C - avg) - self.target) ** 2
-        return diff
-
+        state = self.tip.getState()
+        return norm(state - self.target) ** 2
+        
 class IK:
     def __init__(self, _world):
         self.world = _world
@@ -31,15 +23,14 @@ class IK:
         self.dim = 5
         self.weights = np.array( [1.0, 1.0, 0.5, 1.0, 0.05] )
 
-        # Objectives
-        self.objs = [ COMToBodyPoint(self.world, ["l_foot", "r_foot"], np.array([-0.05, 0.025, 0.0]) ) ]
+        self.objs = [ ObjTIP(self.world.tip) ]
 
     def expand(self, x):
         q = self.world.getPositions()
         return list(q[0:6]) + [ 0.0, x[0], 0.0, x[0], x[1], 0.0, x[1], 0.0 ] + [ x[2], x[3], x[2], x[3], x[4], x[4], 0.0, 0.0 ]
 
-    def getCOMToBodyPoint(self):
-        return self.objs[0]
+    # def getCOMToBodyPoint(self):
+    #     return self.objs[0]
 
     def evaluate(self, x = None):
         if x is not None:

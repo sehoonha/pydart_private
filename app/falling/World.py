@@ -15,6 +15,7 @@ from History import *
 from control.PDController import *
 from control.JTController import *
 from control.COMTracker import *
+from model.TIP import *
 from ik.IK import *
 
 def confine(x, lo, hi):
@@ -46,6 +47,9 @@ class World:
         self.setPositions(q)
         print 'positions = ', self.getPositions()
 
+        # Simplified model
+        self.tip = TIP(self)
+        
         # Control
         self.maxTorque = 0.3 * 1.5
 
@@ -57,8 +61,8 @@ class World:
 
         # IK
         self.ik = IK(self)
-        self.ik.getCOMToBodyPoint().target = 0.10
-        self.pd.target = self.ik.optimize()
+        # self.ik.getCOMToBodyPoint().target = 0.10
+        self.pd.target = self.ik.optimize(restore = True)
 
         self.history.push()
 
@@ -126,19 +130,23 @@ class World:
         self.glMove([0.0, -0.01, 0.0])
         GLTools.renderChessBoard(10, 20.0)
 
-        # Draw COM
-        self.glMove( pydart_api.getSkeletonWorldCOM(self.rid) )
-        glColor(1.0, 0.0, 0.0, 0.8)
-        glutSolidSphere(0.05, 4, 2)
+        # # Draw COM
+        # self.glMove( pydart_api.getSkeletonWorldCOM(self.rid) )
+        # glColor(1.0, 0.0, 0.0, 0.8)
+        # glutSolidSphere(0.05, 4, 2)
+
+        # Draw TIP
+        self.tip.render()
 
         glPopMatrix()
 
 
     def statusString(self):
         status = ""
-        status += "T = " + str(pydart_api.getWorldTime())
-        status += " (" + str(pydart_api.getWorldSimFrames()) + ") "
-        status += "COM = " + str(["%.3f" % x for x in pydart_api.getSkeletonWorldCOM(self.rid)]) + " "
+        status += "T = %.4f (%d)" % (self.getTime(), pydart_api.getWorldSimFrames())
+        status += "COM = " + str(["%.3f" % x for x in self.getCOM()]) + " "
+        status += "TIP = " + str(["%.3f" % x for x in self.tip.getState()]) + " "
+
         return status
 
     def getTime(self):
