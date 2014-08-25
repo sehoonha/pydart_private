@@ -12,6 +12,7 @@ from OpenGL.GLUT import *
 import GLTools
 
 from History import *
+from Poses import *
 from control.PDController import *
 from control.JTController import *
 from control.COMTracker import *
@@ -36,15 +37,10 @@ class World:
         self.ndofs = pydart_api.getSkeletonNumDofs(self.rid)
         pydart_api.setSkeletonJointDamping(self.rid, 0.15)
         print "robot id = ", self.rid, ' nDofs = ', self.ndofs
-        for i in range(self.ndofs):
-            print i, ':', pydart_api.getSkeletonDofName(self.rid, i)
 
         # Configure the pose
-        q = self.getPositions()
-        q[0] = -0.41 * math.pi
-        q[4] = 0.221
-        q[5] = q[4]
-        self.setPositions(q)
+        self.setPositions(BioloidGPPoses().leanedPose())
+        # self.setPositions(BioloidGPPoses().steppingPose())
         print 'positions = ', self.getPositions()
 
         # Simplified model
@@ -54,7 +50,7 @@ class World:
         self.maxTorque = 0.3 * 1.5
 
         self.pd = PDController(self.ndofs, 20.0, 1.0)
-        self.pd.target = q
+        self.pd.target = self.getPositions()
         self.jt = JTController(self)
         self.ct = COMTracker(self, Config.DATA_PATH + 'COM.csv')
         self.history.callbacks += [self.ct]

@@ -33,8 +33,10 @@ class TIP:
 
     def getP2(self):
         """Returns the End Effector"""
-        (y, z) = (0.11, -0.01)
-        return self.getAverageBodyPositions(["l_hand", "r_hand"], [[0, -y, -z], [0, y, z]] )
+        (y, z) = (0.0, 0.0)
+        return self.getAverageBodyPositions(["l_shin", "r_shin"], [[0, -y, -z], [0, y, z]] )
+        # (y, z) = (0.11, -0.01)
+        # return self.getAverageBodyPositions(["l_hand", "r_hand"], [[0, -y, -z], [0, y, z]] )
 
     def getD01(self):
         """Returns the distance between origin and COM """
@@ -56,17 +58,19 @@ class TIP:
 
     def render(self):
         glLineWidth(3.0)
-        glColor(0.0, 1.0, 0.0, 1.0)
         self.world.glMove( [0.0, 0.0, 0.0] )
         glBegin(GL_LINE_STRIP)
         for p in [self.getP0(), self.getP1(), self.getP2()]:
             glVertex(p)
         glEnd()
+        glColor(0.0, 0.5, 0.0, 1.0)
         self.world.glMove( self.getP0() )
         glutSolidSphere(0.03, 4, 2)
+        glColor(0.0, 0.5, 0.5, 1.0)
         self.world.glMove( self.getP1() )
         glutSolidSphere(0.03, 4, 2)
         self.world.glMove( self.getP2() )
+        glColor(0.0, 0.0, 0.5, 1.0)
         glutSolidSphere(0.03, 4, 2)
         glLineWidth(1.0)
 
