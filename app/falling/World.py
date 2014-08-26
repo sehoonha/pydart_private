@@ -57,7 +57,6 @@ class World:
 
         # IK
         self.ik = IK(self)
-        # self.ik.getCOMToBodyPoint().target = 0.10
         self.pd.target = self.ik.optimize(restore = True)
 
         self.history.push()
@@ -105,7 +104,8 @@ class World:
         #     print ", %.4f" % LA.norm(C)
 
 
-        if math.fabs(self.getTime() - 1.0000) < 0.0001:
+        # if math.fabs(self.getTime() - 1.0000) < 0.0001:
+        if len(set(self.getContactedBodyNames()) - set(['l_foot', 'r_foot'])) > 0:
             return True
         return False
 
@@ -143,6 +143,7 @@ class World:
         status += "T = %.4f (%d)" % (self.getTime(), self.getSimFrames())
         status += "COM = " + str(["%.3f" % x for x in self.getCOM()]) + " "
         status += "TIP = " + str(["%.3f" % x for x in self.tip.getState()]) + " "
+        status += "Contacted = " + str(self.getContactedBodyNames()) + " "
 
         return status
 
@@ -163,6 +164,11 @@ class World:
 
     def getCOM(self):
         return pydart_api.getSkeletonWorldCOM(self.rid)
+
+    def getContactedBodyNames(self):
+        nbodies = pydart_api.getSkeletonNumBodies(self.rid)
+        return [pydart_api.getSkeletonBodyName(self.rid, i) for i in range(nbodies) if pydart_api.getBodyNodeNumContacts(self.rid, i)]
+        
 
     def getBodyNodeTransformation(self, name):
         return pydart_api.getBodyNodeTransformation(self.rid, name)

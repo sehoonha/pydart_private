@@ -8,6 +8,7 @@
 #include "pydart_api.h"
 #include <iostream>
 #include <vector>
+#include <map>
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -271,6 +272,24 @@ void getSkeletonWorldCOMVelocity(int skid, double outv3[3]) {
 }
 
 // BodyNode functions
+int getBodyNodeNumContacts(int skid, int bid) {
+    dart::dynamics::Skeleton* skel = Manager::skeleton(skid);
+    dart::dynamics::BodyNode* bn = skel->getBodyNode(bid);
+
+    dart::simulation::World* world = Manager::world();
+    dart::collision::CollisionDetector* cd =
+        world->getConstraintSolver()->getCollisionDetector();
+    int n = cd->getNumContacts();
+    int cnt = 0;
+    for (size_t i = 0; i < n; i++) {
+        dart::collision::Contact& c = cd->getContact(i);
+        if (c.bodyNode1 == bn || c.bodyNode2 == bn) {
+            cnt++;
+        }
+    }
+    return cnt;
+}
+
 void getBodyNodeTransformation(int skid, const char* const bname, double outv44[4][4]) {
     using namespace dart::dynamics;
     Skeleton* skel = Manager::skeleton(skid);
@@ -310,6 +329,8 @@ void getBodyNodeWorldLinearJacobian(int skid, const char* const bname, double* a
         }
     }
 }
+
+
 
 // World query functions
 int getWorldNumContacts() {

@@ -28,9 +28,11 @@ class History:
     def plotCOM(self):
         x = [ data['t'] for data in self.histories ]
         traces = []
+        xyz = 'xyz'
+        legends = { 'C':'C_FB', 'Chat':'C_TIP'}
         for name, i in [('C', 2), ('C', 1), ('Chat', 2), ('Chat', 1)]:
             y = [ data[name][i] for data in self.histories ]
-            traces += [ Scatter(x=x,y=y,name='%s.%d' % (name, i)) ]
+            traces += [ Scatter(x=x,y=y,name='%s.%s' % (legends[name], xyz[i])) ]
         data = Data(traces)
         py.image.save_as({'data': data}, 'plot.png')
         # unique_url = py.plot(data, filename = 'basic-line')

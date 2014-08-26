@@ -43,6 +43,7 @@ void getSkeletonWorldCOM(int skid, double outv3[3]);
 void getSkeletonWorldCOMVelocity(int skid, double outv3[3]);
 
 // BodyNode functions
+int getBodyNodeNumContacts(int skid, int bid);
 void getBodyNodeTransformation(int skid, const char* const bname, double outv44[4][4]);
 void getBodyNodeWorldLinearJacobian(int skid, const char* const bname, double* array2, int nrows, int ncols);
 
