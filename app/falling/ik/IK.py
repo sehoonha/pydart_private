@@ -24,7 +24,9 @@ class IK:
         self.weights = np.array( [1.0, 1.0, 0.5, 1.0, 0.05] )
 
         self.objs = [ ObjTIP(self.world.tip) ]
-
+        self.objs[0].target = self.world.abstract_tip.commands()
+        print 'objs[0].target = ', self.objs[0].target
+        
     def expand(self, x):
         q = self.world.getPositions()
         return list(q[0:6]) + [ 0.0, x[0], 0.0, x[0], x[1], 0.0, x[1], 0.0 ] + [ x[2], x[3], x[2], x[3], x[4], x[4], 0.0, 0.0 ]

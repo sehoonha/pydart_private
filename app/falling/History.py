@@ -11,7 +11,7 @@ class History:
     def push(self):
         data = {}
         data['t'] = self.world.getTime()
-        data['C'] = self.world.getCOM()
+        # data['C'] = self.world.getCOM()
         data['Contacts'] = self.world.getWorldContacts()
         self.histories += [data]
         # Push all callback objects
@@ -28,13 +28,15 @@ class History:
     def plotCOM(self):
         x = [ data['t'] for data in self.histories ]
         traces = []
-        xyz = 'xyz'
-        legends = { 'C':'C_FB', 'Chat':'C_TIP'}
-        for name, i in [('C', 2), ('C', 1), ('Chat', 2), ('Chat', 1)]:
-            y = [ data[name][i] for data in self.histories ]
-            traces += [ Scatter(x=x,y=y,name='%s.%s' % (legends[name], xyz[i])) ]
+
+        colors = ['red', 'green', 'blue', 'black']
+
+        for i, name in enumerate(['th', 'r', 'C.x', 'C.y']):
+            y = [ data[name] for data in self.histories ]
+            traces += [ Scatter(x=x,y=y,name='FB_%s' % name, line=Line(color=colors[i]))]
+        traces += self.world.abstract_tip.plot(colors)
         data = Data(traces)
-        py.image.save_as({'data': data}, 'plot.png')
-        # unique_url = py.plot(data, filename = 'basic-line')
+        # py.image.save_as({'data': data}, 'plot.png')
+        unique_url = py.plot(data, filename = 'basic-line')
 
         

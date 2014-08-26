@@ -33,10 +33,10 @@ class TIP:
 
     def getP2(self):
         """Returns the End Effector"""
-        (y, z) = (0.0, 0.0)
-        return self.getAverageBodyPositions(["l_shin", "r_shin"], [[0, -y, -z], [0, y, z]] )
-        # (y, z) = (0.11, -0.01)
-        # return self.getAverageBodyPositions(["l_hand", "r_hand"], [[0, -y, -z], [0, y, z]] )
+        # (y, z) = (0.0, 0.0)
+        # return self.getAverageBodyPositions(["l_shin", "r_shin"], [[0, -y, -z], [0, y, z]] )
+        (y, z) = (0.11, -0.01)
+        return self.getAverageBodyPositions(["l_hand", "r_hand"], [[0, -y, -z], [0, y, z]] )
 
     def getD01(self):
         """Returns the distance between origin and COM """
@@ -45,6 +45,10 @@ class TIP:
     def getD12(self):
         """Returns the distance between COM and End Effector """
         return norm( self.getP1() - self.getP2() )
+
+    def getTheta(self):
+        C = self.getP1()
+        return math.atan2(C[2], C[1])
 
     def getAngle(self):
         """Returns the angle between P0-P1-P2"""
@@ -55,6 +59,13 @@ class TIP:
 
     def getState(self):
         return np.array([self.getD01(), self.getD12(), self.getAngle()])
+
+    def push(self, history):
+        data = history.histories[-1]
+        data['C.x'] = self.getP1()[2]
+        data['C.y'] = self.getP1()[1]
+        data['r'] = self.getD01()
+        data['th'] = self.getTheta()
 
     def render(self):
         glLineWidth(3.0)

@@ -18,6 +18,7 @@ from control.JTController import *
 from control.COMTracker import *
 from model.TIP import *
 from ik.IK import *
+import abstract.model
 
 def confine(x, lo, hi):
     return min(max(lo, x), hi)
@@ -45,6 +46,8 @@ class World:
 
         # Simplified model
         self.tip = TIP(self)
+        self.abstract_tip = abstract.model.TIP()
+        self.abstract_tip.load_history(Config.DATA_PATH + 'TIP.csv')
         
         # Control
         self.maxTorque = 0.3 * 1.5
@@ -53,7 +56,8 @@ class World:
         self.pd.target = self.getPositions()
         self.jt = JTController(self)
         self.ct = COMTracker(self, Config.DATA_PATH + 'COM.csv')
-        self.history.callbacks += [self.ct]
+        # self.history.callbacks += [self.ct]
+        self.history.callbacks += [self.tip]
 
         # IK
         self.ik = IK(self)
