@@ -9,7 +9,10 @@ class PDController:
         self.kd = np.array( [_kd] * self.ndofs )
         self.target = None
 
-    def control(self, q, qdot):
+    def control(self):
+        q = self.skel.q
+        qdot = self.skel.qdot
+        
         tau = np.zeros( self.ndofs )
         for i in range(6, self.ndofs):
             tau[i] = -self.kp[i] * (q[i] - self.target[i]) - self.kd[i] * qdot[i]

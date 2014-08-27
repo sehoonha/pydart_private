@@ -1,6 +1,11 @@
 import numpy as np
 
 class JTController:
+    """
+    # Usage
+    self.jt = JTController(self.skel)
+    tau += self.jt.control( ["l_hand", "r_hand"], f )
+    """
     def __init__(self, _skel):
         self.skel = _skel
 

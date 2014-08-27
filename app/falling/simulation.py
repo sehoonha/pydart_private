@@ -38,58 +38,36 @@ class Simulation:
         self.skel.set_joint_damping(0.15)
         self.skel.q = BioloidGPPoses().leaned_pose()
 
-        print self.skel
-
-        print 'positions = ', self.skel.q
+        print 'skel.q = ', self.skel.q
 
         # Record the history
         self.history = History(self)
 
-        # Simplified model
+        # Abstract view of skeleton
         self.tip = TIP(self.skel)
+        self.history.callbacks += [self.tip]
+
+        # Abstract model
         self.abstract_tip = abstract.model.TIP()
         self.abstract_tip.load_history(config.DATA_PATH + 'TIP.csv')
         
         # Control
         self.maxTorque = 0.3 * 1.5
 
-        self.pd = PDController(self.skel, 20.0, 1.0)
+        self.pd = PDController(self.skel, 50.0, 1.0)
         self.pd.target = self.skel.q
-        self.jt = JTController(self.skel)
-        self.ct = COMTracker(self, config.DATA_PATH + 'COM.csv')
-        # self.history.callbacks += [self.ct]
-        self.history.callbacks += [self.tip]
-
 
         # IK
-        self.ik = IK(self)
-        self.pd.target = self.ik.optimize(restore = True)
+        ik = IK(self)
+        self.pd.target = ik.optimize(restore = True)
 
         self.history.push()
 
     def control(self):
         tau = np.zeros(self.skel.ndofs)
         # Track the initial pose
-        tau += self.pd.control( self.skel.q, self.skel.qdot )
+        tau += self.pd.control()
 
-        # # Apply VF to feet and shrink the length
-        # C = pydart_api.getSkeletonWorldCOM(self.rid)
-        # u = C / LA.norm(C)
-        # f = u * 20.0
-        # tau += self.jt.control( ["l_foot", "r_foot"], f )
-
-        # # w = np.array([1.0, 0.0, 0.0])
-        # # v = np.cross(w, u)
-        # v = np.array([0.0, -1.0, 0.0])
-        # f_hand = v * 20.0
-        # tau += self.jt.control( "l_hand", f_hand )
-        # tau += self.jt.control( "r_hand", f_hand )
-        
-        # tau[10] += 2.0
-        # tau[12] += 2.0
-
-        # COM Tracker
-        tau += self.ct.control( self.world.t, self.skel.C )
         # Erase the first six dof forces
         tau[0:6] = 0
         for i in range(6, self.skel.ndofs):
@@ -110,24 +88,23 @@ class Simulation:
 
     def render(self):
         glPushMatrix()
-        # Draw skeleton
-        self.skel.render()
-
-        # for c in self.getWorldContacts():
-        for c in self.history.get_frame()['Contacts']:
-            gltools.render_arrow(c[0:3], c[0:3] - 1.0 * c[3:6])
-
         # Draw chess board
         gltools.glMove([0.0, -0.01, 0.0])
         gltools.render_chessboard(10, 20.0)
 
-        # # Draw COM
-        # gltools.glMove( pydart_api.getSkeletonWorldCOM(self.rid) )
-        # glColor(1.0, 0.0, 0.0, 0.8)
-        # glutSolidSphere(0.05, 4, 2)
+        # Draw skeleton
+        gltools.glMove([0, 0, 0])
+        self.skel.render()
 
         # Draw TIP
         self.tip.render()
+
+        # Draw contacts
+        gltools.glMove([0, 0, 0])
+        glColor(0.7, 0.0, 0.3)
+        for c in self.history.get_frame()['Contacts']:
+            gltools.render_arrow(c[0:3], c[0:3] - 1.0 * c[3:6])
+
 
         glPopMatrix()
 
@@ -136,7 +113,7 @@ class Simulation:
         status = ""
         status += "T = %.4f (%d)" % (self.world.t, self.world.nframes)
         status += "COM = " + str(["%.3f" % x for x in self.skel.C]) + " "
-        status += "TIP = " + str(["%.3f" % x for x in self.tip.getState()]) + " "
+        status += "TIP = " + str(self.tip) + " "
         status += "Contacted = " + str(self.skel.contacted_body_names()) + " "
 
         return status

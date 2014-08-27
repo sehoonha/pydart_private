@@ -12,7 +12,7 @@ class ObjTIP:
         self.tip = _tip
 
     def cost(self):
-        state = self.tip.getState()
+        state = self.tip.get_state()
         return norm( (state - self.target) * [1.0, 1.0, 0.1] ) ** 2
         
 class IK:

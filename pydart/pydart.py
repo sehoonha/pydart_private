@@ -110,7 +110,6 @@ class Skeleton(object):
     def forces(self, _tau):
         pydart_api.setSkeletonForces(self.world.id, self.id, _tau)
         
-
     def contacted_bodies(self):
         return [body for body in self.bodies if body.num_contacts() > 0]
 

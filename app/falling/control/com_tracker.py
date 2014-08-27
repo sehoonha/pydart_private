@@ -4,6 +4,11 @@ import csv
 from operator import itemgetter
 
 class COMTracker:
+    """
+    # Usage
+    self.ct = COMTracker(self, config.DATA_PATH + 'COM.csv')
+    tau += self.ct.control( self.world.t, self.skel.C )
+    """
     def __init__(self, _world, _csvfilename):
         self.world = _world
         self.loadCSV(_csvfilename)
