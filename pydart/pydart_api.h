@@ -8,53 +8,50 @@
 #ifndef PYDART_PYDART_API_H
 #define PYDART_PYDART_API_H
 
+// Init Functions
 void init();
 void destroy();
 
-// World Functions
+// Manipulation Functions
 int createWorld(double timestep);
-void destroyWorld();
-double getWorldTime();
-int getWorldSimFrames();
-void setWorldSimFrame(int playFrame);
+void destroyWorld(int wid);
+int addSkeleton(int wid, const char* const path);
+void setSkeletonJointDamping(int wid, int skid, double damping);
 
-// void setDefaultWorld(int wid = -1);
-// int defaultWorldId();
-// int createDefaultWorld();
+// Simulation Functions
+void stepWorld(int wid);
+void render(int wid);
+void renderSkeleton(int wid, int skid);
 
-int addSkeleton(const char* const path);
+// World Functions
+double getWorldTime(int wid);
+int getWorldSimFrames(int wid);
+void setWorldSimFrame(int wid, int playFrame);
+int getWorldNumContacts(int wid);
+void getWorldContacts(int wid, double* outv, int len);
 
-// Attribute functions
-double getSkeletonMass(int skid);
-int getSkeletonNumBodies(int skid);
-int getSkeletonNumDofs(int skid);
-const char* getSkeletonBodyName(int skid, int bodyid);
-const char* getSkeletonDofName(int skid, int dofid);
-void setSkeletonJointDamping(int skid, double damping);
+// Skeleton Attribute Functions
+double getSkeletonMass(int wid, int skid);
+int getSkeletonNumBodies(int wid, int skid);
+int getSkeletonNumDofs(int wid, int skid);
+const char* getSkeletonBodyName(int wid, int skid, int bodyid);
+const char* getSkeletonDofName(int wid, int skid, int dofid);
 
-// Pose functions
-void getSkeletonPositions(int skid, double* outpose, int ndofs);
-void getSkeletonVelocities(int skid, double* outpose, int ndofs);
-void setSkeletonPositions(int skid, double* inpose, int ndofs);
-void setSkeletonForces(int skid, double* intorque, int ndofs);
+// Skeleton Pose Functions
+void getSkeletonPositions(int wid, int skid, double* outpose, int ndofs);
+void getSkeletonVelocities(int wid, int skid, double* outpose, int ndofs);
+void setSkeletonPositions(int wid, int skid, double* inpose, int ndofs);
+void setSkeletonForces(int wid, int skid, double* intorque, int ndofs);
 
-// Momentum functions
-void getSkeletonWorldCOM(int skid, double outv3[3]);
-void getSkeletonWorldCOMVelocity(int skid, double outv3[3]);
+// Skeleton Momentum Functions
+void getSkeletonWorldCOM(int wid, int skid, double outv3[3]);
+void getSkeletonWorldCOMVelocity(int wid, int skid, double outv3[3]);
 
-// BodyNode functions
-int getBodyNodeNumContacts(int skid, int bid);
-void getBodyNodeTransformation(int skid, const char* const bname, double outv44[4][4]);
-void getBodyNodeWorldLinearJacobian(int skid, const char* const bname, double* array2, int nrows, int ncols);
+// BodyNode Functions
+int getBodyNodeNumContacts(int wid, int skid, int bid);
+void getBodyNodeTransformation(int wid, int skid, int bid, double outv44[4][4]);
+void getBodyNodeWorldLinearJacobian(int wid, int skid, int bid, double* array2, int nrows, int ncols);
 
-// World query functions
-int getWorldNumContacts();
-void getWorldContacts(double* outv, int len);
-
-// World functions
-void stepWorld();
-void render();
-void renderSkeleton(int skid);
 
 #endif // #ifndef PYDART_PYDART_API_H
 

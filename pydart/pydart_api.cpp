@@ -41,6 +41,7 @@ public:
 
     static dart::simulation::World* world(int index = 0);
     static dart::dynamics::Skeleton* skeleton(int index);
+    static dart::dynamics::Skeleton* skeleton(int wid, int skid);
     static int createWorld(double timestep);
     
 protected:
@@ -81,6 +82,11 @@ dart::dynamics::Skeleton* Manager::skeleton(int index) {
     return world()->getSkeleton(index);
 }
 
+dart::dynamics::Skeleton* Manager::skeleton(int wid, int skid) {
+    return world(wid)->getSkeleton(skid);
+}
+
+
 int Manager::createWorld(double timestep) {
     Manager* manager = getInstance();
 
@@ -99,6 +105,8 @@ int Manager::createWorld(double timestep) {
 
 using namespace pydart;
 
+////////////////////////////////////////////////////////////////////////////////
+// Init Functions
 void init() {
     if (Manager::getInstance()) {
         Manager::destroy();
@@ -111,29 +119,84 @@ void destroy() {
 }
 
 
+////////////////////////////////////////////////////////////////////////////////
+// Manipulation Functions
 int createWorld(double timestep) {
     return Manager::createWorld(timestep);
 }
 
-void destroyWorld() {
+void destroyWorld(int wid) {
 }
 
-double getWorldTime() {
+int addSkeleton(int wid, const char* const path) {
     using namespace dart::simulation;
-    World* world = Manager::world();
+    using namespace dart::dynamics;
+    dart::utils::DartLoader urdfLoader;
+    Skeleton* skel = urdfLoader.parseSkeleton(path);
+
+    World* world = Manager::world(wid);
+    int id = world->getNumSkeletons();
+    world->addSkeleton(skel);
+    return id;
+}
+
+void setSkeletonJointDamping(int wid, int skid, double damping) {
+    using namespace dart::dynamics;
+    Skeleton* skel = Manager::skeleton(wid, skid);
+
+    for (int i = 1; i < skel->getNumBodyNodes(); ++i) {
+        dart::dynamics::Joint* joint = skel->getJoint(i);
+        if (joint->getNumDofs() > 0) {
+            for (int j = 0; j < joint->getNumDofs(); ++j) {
+                joint->setDampingCoefficient(j, damping);
+            }
+        }
+    }
+
+}
+////////////////////////////////////////////////////////////////////////////////
+// Simulation Functions
+void stepWorld(int wid) {
+    using namespace dart::simulation;
+    World* world = Manager::world(wid);
+    world->step();
+    world->bake();
+}
+
+void render(int wid) {
+    using namespace dart::simulation;
+    dart::renderer::RenderInterface* ri = Manager::getRI();
+    World* world = Manager::world(wid);
+    
+    for (size_t i = 0; i < world->getNumSkeletons(); i++) {
+        world->getSkeleton(i)->draw(ri);
+    }
+}
+
+void renderSkeleton(int wid, int skid) {
+    using namespace dart::dynamics;
+    dart::renderer::RenderInterface* ri = Manager::getRI();
+    Skeleton* skel = Manager::skeleton(wid, skid);
+    skel->draw(ri);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// World Functions
+double getWorldTime(int wid) {
+    using namespace dart::simulation;
+    World* world = Manager::world(wid);
     return world->getTime();
 }
- 
 
-int getWorldSimFrames() {
+int getWorldSimFrames(int wid) {
     using namespace dart::simulation;
-    World* world = Manager::world();
+    World* world = Manager::world(wid);
     return world->getSimFrames();
 }
 
-void setWorldSimFrame(int playFrame) {
+void setWorldSimFrame(int wid, int playFrame) {
     using namespace dart::simulation;
-    World* world = Manager::world();
+    World* world = Manager::world(wid);
     if (playFrame >= world->getRecording()->getNumFrames()) {
         return;
     }
@@ -147,202 +210,16 @@ void setWorldSimFrame(int playFrame) {
     }
 }
 
-
-int addSkeleton(const char* const path) {
-    using namespace dart::simulation;
-    using namespace dart::dynamics;
-    dart::utils::DartLoader urdfLoader;
-    Skeleton* skel = urdfLoader.parseSkeleton(path);
-
-    World* world = Manager::world();
-    int id = world->getNumSkeletons();
-    world->addSkeleton(skel);
-    return id;
-}
-
-void setSkeletonJointDamping(int skid, double damping) {
-    using namespace dart::dynamics;
-    Skeleton* skel = Manager::skeleton(skid);
-
-    for (int i = 1; i < skel->getNumBodyNodes(); ++i) {
-        dart::dynamics::Joint* joint = skel->getJoint(i);
-        if (joint->getNumDofs() > 0) {
-            for (int j = 0; j < joint->getNumDofs(); ++j) {
-                joint->setDampingCoefficient(j, damping);
-            }
-        }
-    }
-
-}
-
-
-// Attribute functions
-double getSkeletonMass(int skid) {
-    using namespace dart::dynamics;
-    Skeleton* skel = Manager::skeleton(skid);
-    return skel->getMass();
-}
-
-int getSkeletonNumBodies(int skid) {
-    using namespace dart::dynamics;
-    Skeleton* skel = Manager::skeleton(skid);
-    return skel->getNumBodyNodes();
-}
-
-int getSkeletonNumDofs(int skid) {
-    using namespace dart::simulation;
-    using namespace dart::dynamics;
-    World* world = Manager::world();
-    Skeleton* skel = world->getSkeleton(skid);
-    return skel->getNumDofs();
-}
-
-const char* getSkeletonBodyName(int skid, int bodyid) {
-    dart::dynamics::Skeleton* skel = Manager::skeleton(skid);
-    return skel->getBodyNode(bodyid)->getName().c_str();
-}
-
-const char* getSkeletonDofName(int skid, int dofid) {
-    dart::dynamics::Skeleton* skel = Manager::skeleton(skid);
-    return skel->getGenCoordInfo(dofid).joint->getName().c_str();
-}
-
-void getSkeletonPositions(int skid, double* outpose, int ndofs) {
-    using namespace dart::dynamics;
-    Skeleton* skel = Manager::skeleton(skid);
-    
-    Eigen::VectorXd q = skel->getPositions();
-    for (int i = 0; i < q.size(); i++) {
-        outpose[i] = q(i);
-    }
-}
-
-void getSkeletonVelocities(int skid, double* outpose, int ndofs) {
-    using namespace dart::dynamics;
-    Skeleton* skel = Manager::skeleton(skid);
-    
-    Eigen::VectorXd qdot = skel->getVelocities();
-    for (int i = 0; i < qdot.size(); i++) {
-        outpose[i] = qdot(i);
-    }
-}
-
-
-void setSkeletonPositions(int skid, double* inpose, int ndofs) {
-    using namespace dart::dynamics;
-    Skeleton* skel = Manager::skeleton(skid);
-
-    Eigen::VectorXd q(ndofs);
-    for (int i = 0; i < q.size(); i++) {
-        q(i) = inpose[i];
-    }
-    skel->setPositions(q);
-    skel->computeForwardKinematics(true, true, false);
-}
-
-
-void setSkeletonForces(int skid, double* intorque, int ndofs) {
-    using namespace dart::dynamics;
-    Skeleton* skel = Manager::skeleton(skid);
-
-    Eigen::VectorXd tau(ndofs);
-    for (int i = 0; i < tau.size(); i++) {
-        tau(i) = intorque[i];
-    }
-    skel->setForces(tau);
-}
-
-// Momentum functions
-void getSkeletonWorldCOM(int skid, double outv3[3]) {
-    using namespace dart::dynamics;
-    Skeleton* skel = Manager::skeleton(skid);
-    Eigen::Vector3d C = skel->getWorldCOM();
-    for (int i = 0; i < C.size(); i++) {
-        outv3[i] = C(i);
-    }
-}
-
-void getSkeletonWorldCOMVelocity(int skid, double outv3[3]) {
-    using namespace dart::dynamics;
-    Skeleton* skel = Manager::skeleton(skid);
-    Eigen::Vector3d CV = skel->getWorldCOMVelocity();
-    for (int i = 0; i < CV.size(); i++) {
-        outv3[i] = CV(i);
-    }
-}
-
-// BodyNode functions
-int getBodyNodeNumContacts(int skid, int bid) {
-    dart::dynamics::Skeleton* skel = Manager::skeleton(skid);
-    dart::dynamics::BodyNode* bn = skel->getBodyNode(bid);
-
-    dart::simulation::World* world = Manager::world();
-    dart::collision::CollisionDetector* cd =
-        world->getConstraintSolver()->getCollisionDetector();
-    int n = cd->getNumContacts();
-    int cnt = 0;
-    for (size_t i = 0; i < n; i++) {
-        dart::collision::Contact& c = cd->getContact(i);
-        if (c.bodyNode1 == bn || c.bodyNode2 == bn) {
-            cnt++;
-        }
-    }
-    return cnt;
-}
-
-void getBodyNodeTransformation(int skid, const char* const bname, double outv44[4][4]) {
-    using namespace dart::dynamics;
-    Skeleton* skel = Manager::skeleton(skid);
-    BodyNode* body = skel->getBodyNode(bname);
-    if (!body) {
-        cerr << "cannot find the body : " << bname << endl;
-    }
-    const Eigen::Isometry3d& T = body->getTransform();
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            outv44[i][j] = T(i, j);
-        }
-    }
-}
-
-void getBodyNodeWorldLinearJacobian(int skid, const char* const bname, double* array2, int nrows, int ncols) {
-    using namespace dart::dynamics;
-    Skeleton* skel = Manager::skeleton(skid);
-    BodyNode* body = skel->getBodyNode(bname);
-    if (!body) {
-        cerr << "cannot find the body : " << bname << endl;
-    }
-
-    int N = skel->getNumDofs();
-    Eigen::MatrixXd J = body->getWorldLinearJacobian();
-    Eigen::MatrixXd JF = Eigen::MatrixXd::Zero(3, N);
-
-    for (int i = 0; i < J.cols(); i++) {
-        int j = body->getDependentGenCoordIndex(i);
-        JF.col(j) = J.col(i);
-    }
-
-    int ptr = 0;
-    for (int i = 0; i < JF.rows(); i++) {
-        for (int j = 0; j < JF.cols(); j++) {
-            array2[ptr++] = JF(i, j);
-        }
-    }
-}
-
-
-
-// World query functions
-int getWorldNumContacts() {
-    dart::simulation::World* world = Manager::world();
+int getWorldNumContacts(int wid) {
+    dart::simulation::World* world = Manager::world(wid);
     dart::collision::CollisionDetector* cd =
         world->getConstraintSolver()->getCollisionDetector();
     return cd->getNumContacts();
 }
 
 
-void getWorldContacts(double* outv, int len) {
-    dart::simulation::World* world = Manager::world();
+void getWorldContacts(int wid, double* outv, int len) {
+    dart::simulation::World* world = Manager::world(wid);
     dart::collision::CollisionDetector* cd =
         world->getConstraintSolver()->getCollisionDetector();
     int n = cd->getNumContacts();
@@ -365,30 +242,164 @@ void getWorldContacts(double* outv, int len) {
     }    
 }
 
-// World functions
-void stepWorld() {
-    using namespace dart::simulation;
-    World* world = Manager::world();
-    world->step();
-    world->bake();
+////////////////////////////////////////////////////////////////////////////////
+// Skeleton Attribute Functions
+double getSkeletonMass(int wid, int skid) {
+    using namespace dart::dynamics;
+    Skeleton* skel = Manager::skeleton(wid, skid);
+    return skel->getMass();
 }
 
-void render() {
-    using namespace dart::simulation;
-    dart::renderer::RenderInterface* ri = Manager::getRI();
-    World* world = Manager::world();
+int getSkeletonNumDofs(int wid, int skid) {
+    using namespace dart::dynamics;
+    Skeleton* skel = Manager::skeleton(wid, skid);
+    return skel->getNumDofs();
+}
+
+int getSkeletonNumBodies(int wid, int skid) {
+    using namespace dart::dynamics;
+    Skeleton* skel = Manager::skeleton(wid, skid);
+    return skel->getNumBodyNodes();
+}
+
+const char* getSkeletonBodyName(int wid, int skid, int bodyid) {
+    dart::dynamics::Skeleton* skel = Manager::skeleton(wid, skid);
+    return skel->getBodyNode(bodyid)->getName().c_str();
+}
+
+const char* getSkeletonDofName(int wid, int skid, int dofid) {
+    dart::dynamics::Skeleton* skel = Manager::skeleton(wid, skid);
+    return skel->getGenCoordInfo(dofid).joint->getName().c_str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Skeleton Pose Functions
+void getSkeletonPositions(int wid, int skid, double* outpose, int ndofs) {
+    using namespace dart::dynamics;
+    Skeleton* skel = Manager::skeleton(wid, skid);
     
-    for (size_t i = 0; i < world->getNumSkeletons(); i++) {
-        world->getSkeleton(i)->draw(ri);
+    Eigen::VectorXd q = skel->getPositions();
+    for (int i = 0; i < q.size(); i++) {
+        outpose[i] = q(i);
     }
 }
 
-void renderSkeleton(int skid) {
+void getSkeletonVelocities(int wid, int skid, double* outpose, int ndofs) {
     using namespace dart::dynamics;
-    dart::renderer::RenderInterface* ri = Manager::getRI();
-    Skeleton* skel = Manager::skeleton(skid);
-    skel->draw(ri);
+    Skeleton* skel = Manager::skeleton(wid, skid);
+    
+    Eigen::VectorXd qdot = skel->getVelocities();
+    for (int i = 0; i < qdot.size(); i++) {
+        outpose[i] = qdot(i);
+    }
 }
+
+void setSkeletonPositions(int wid, int skid, double* inpose, int ndofs) {
+    using namespace dart::dynamics;
+    Skeleton* skel = Manager::skeleton(wid, skid);
+
+    Eigen::VectorXd q(ndofs);
+    for (int i = 0; i < q.size(); i++) {
+        q(i) = inpose[i];
+    }
+    skel->setPositions(q);
+    skel->computeForwardKinematics(true, true, false);
+}
+
+void setSkeletonForces(int wid, int skid, double* intorque, int ndofs) {
+    using namespace dart::dynamics;
+    Skeleton* skel = Manager::skeleton(wid, skid);
+
+    Eigen::VectorXd tau(ndofs);
+    for (int i = 0; i < tau.size(); i++) {
+        tau(i) = intorque[i];
+    }
+    skel->setForces(tau);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Skeleton Momentum Functions
+void getSkeletonWorldCOM(int wid, int skid, double outv3[3]) {
+    using namespace dart::dynamics;
+    Skeleton* skel = Manager::skeleton(wid, skid);
+    Eigen::Vector3d C = skel->getWorldCOM();
+    for (int i = 0; i < C.size(); i++) {
+        outv3[i] = C(i);
+    }
+}
+
+void getSkeletonWorldCOMVelocity(int wid, int skid, double outv3[3]) {
+    using namespace dart::dynamics;
+    Skeleton* skel = Manager::skeleton(wid, skid);
+    Eigen::Vector3d CV = skel->getWorldCOMVelocity();
+    for (int i = 0; i < CV.size(); i++) {
+        outv3[i] = CV(i);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// BodyNode Functions
+int getBodyNodeNumContacts(int wid, int skid, int bid) {
+    dart::dynamics::Skeleton* skel = Manager::skeleton(wid, skid);
+    dart::dynamics::BodyNode* bn = skel->getBodyNode(bid);
+
+    dart::simulation::World* world = Manager::world(wid);
+    dart::collision::CollisionDetector* cd =
+        world->getConstraintSolver()->getCollisionDetector();
+    int n = cd->getNumContacts();
+    int cnt = 0;
+    for (size_t i = 0; i < n; i++) {
+        dart::collision::Contact& c = cd->getContact(i);
+        if (c.bodyNode1 == bn || c.bodyNode2 == bn) {
+            cnt++;
+        }
+    }
+    return cnt;
+}
+
+void getBodyNodeTransformation(int wid, int skid, int bid, double outv44[4][4]) {
+    using namespace dart::dynamics;
+    Skeleton* skel = Manager::skeleton(wid, skid);
+    BodyNode* body = skel->getBodyNode(bid);
+    if (!body) {
+        cerr << "cannot find the body : " << bid << endl;
+    }
+    const Eigen::Isometry3d& T = body->getTransform();
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            outv44[i][j] = T(i, j);
+        }
+    }
+}
+
+void getBodyNodeWorldLinearJacobian(int wid, int skid, int bid, double* array2, int nrows, int ncols) {
+    using namespace dart::dynamics;
+    Skeleton* skel = Manager::skeleton(wid, skid);
+    BodyNode* body = skel->getBodyNode(bid);
+    if (!body) {
+        cerr << "cannot find the body : " << bid << endl;
+    }
+
+    int N = skel->getNumDofs();
+    Eigen::MatrixXd J = body->getWorldLinearJacobian();
+    Eigen::MatrixXd JF = Eigen::MatrixXd::Zero(3, N);
+
+    for (int i = 0; i < J.cols(); i++) {
+        int j = body->getDependentGenCoordIndex(i);
+        JF.col(j) = J.col(i);
+    }
+
+    int ptr = 0;
+    for (int i = 0; i < JF.rows(); i++) {
+        for (int j = 0; j < JF.cols(); j++) {
+            array2[ptr++] = JF(i, j);
+        }
+    }
+}
+
+
+
+
 
 
 

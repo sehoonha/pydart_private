@@ -60,14 +60,17 @@ endif ()
 # Configure the project
 #### Directories
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/pydart")
+
 include_directories(".")
 include_directories("${CMAKE_SOURCE_DIR}")
 include_directories("${CMAKE_SOURCE_DIR}/pydart")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 #### Projectfiles
+file(GLOB pydart_py "pydart/*.py")
 file(GLOB pydart_srcs "pydart/*.cpp")
 file(GLOB pydart_hdrs "pydart/*.h")
 file(GLOB pydart_interfaces "pydart/pydart_api.i")
+message(STATUS "pydart_py = ${pydart_py}")
 message(STATUS "pydart_hdrs = ${pydart_hdrs}")
 message(STATUS "pydart_srcs = ${pydart_srcs}")
 #### SWIG configurations
@@ -75,7 +78,19 @@ set(CMAKE_SWIG_FLAGS "")
 set_source_files_properties(${pydart_interfaces} PROPERTIES CPLUSPLUS ON)
 set_source_files_properties(${pydart_interfaces} PROPERTIES SWIG_FLAGS "-includeall")
 #### SWIG commands
-swig_add_module(pydart_api python ${pydart_srcs} ${pydart_hdrs} ${pydart_interfaces})
+swig_add_module(pydart_api python ${pydart_py} ${pydart_srcs} ${pydart_hdrs} ${pydart_interfaces})
 # SWIG_ADD_MODULE(pydart python ${pydart_interfaces} ${pydart_srcs})
 swig_link_libraries(pydart_api ${PYTHON_LIBRARIES})
 swig_link_libraries(pydart_api dart4 dart-core4 ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
+
+# ADD_CUSTOM_COMMAND(TARGET _pydart_api
+#   PRE_BUILD 
+#   COMMAND echo 'Copy pydart to build directory'
+#   COMMAND  ${CMAKE_COMMAND} -E copy_if_different
+#   "${CMAKE_SOURCE_DIR}/pydart/pydart.py" "${CMAKE_BINARY_DIR}/")
+
+ADD_CUSTOM_TARGET(pydart
+  COMMAND echo 'Copy pydart.py to build directory if different'
+  COMMAND  ${CMAKE_COMMAND} -E copy_if_different
+  "${CMAKE_SOURCE_DIR}/pydart/pydart.py" "${CMAKE_BINARY_DIR}/")
+ADD_DEPENDENCIES(_pydart_api pydart)
