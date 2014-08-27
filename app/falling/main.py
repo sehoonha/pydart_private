@@ -134,6 +134,9 @@ class MyWindow(QtGui.QMainWindow):
         self.playAction.setCheckable(True)
         self.playAction.setShortcut('Space')
 
+        self.planAction = QtGui.QAction('Plan', self)
+        self.planAction.triggered.connect(self.planEvent)
+
         self.captureAction = QtGui.QAction('Capture', self)
         self.captureAction.setCheckable(True)
 
@@ -143,6 +146,7 @@ class MyWindow(QtGui.QMainWindow):
         # Create a toolbar
         self.toolbar = self.addToolBar('Control')
         self.toolbar.addAction(self.playAction)
+        self.toolbar.addAction(self.planAction)
         self.toolbar.addSeparator()
         self.toolbar.addAction(self.captureAction)
         self.toolbar.addAction(self.plotAction)
@@ -179,6 +183,9 @@ class MyWindow(QtGui.QMainWindow):
 
     def plotEvent(self):
         self.sim.history.plot()
+
+    def planEvent(self):
+        self.sim.plan()
         
 glutInit(sys.argv)
 app = QtGui.QApplication(["Falling controller with Pydart"])

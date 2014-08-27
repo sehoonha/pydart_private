@@ -38,6 +38,8 @@ class Simulation:
         self.skel.set_joint_damping(0.15)
         self.skel.q = BioloidGPPoses().leaned_pose()
 
+        # self.skel.q[1] = 1.0 <-- this doesn't work
+        
         print 'skel.q = ', self.skel.q
 
         # Record the history
@@ -49,7 +51,8 @@ class Simulation:
 
         # Abstract model
         self.abstract_tip = abstract.model.TIP()
-        self.abstract_tip.load_history(config.DATA_PATH + 'TIP.csv')
+        # self.abstract_tip.load_history(config.DATA_PATH + 'TIP.csv')
+        # self.abstract_tip.optimize()
         
         # Control
         self.maxTorque = 0.3 * 1.5
@@ -58,10 +61,13 @@ class Simulation:
         self.pd.target = self.skel.q
 
         # IK
-        ik = IK(self)
-        self.pd.target = ik.optimize(restore = True)
 
         self.history.push()
+
+    def plan(self):
+        self.abstract_tip.optimize()
+        ik = IK(self)
+        self.pd.target = ik.optimize(restore = True)
 
     def control(self):
         tau = np.zeros(self.skel.ndofs)
