@@ -31,11 +31,10 @@ class History:
         traces = []
 
         colors = ['red', 'green', 'blue', 'black']
-
         for i, name in enumerate(['th', 'r', 'C.x', 'C.y']):
             y = [ data[name] for data in self.histories ]
             traces += [ Scatter(x=x,y=y,name='FB_%s' % name, line=Line(color=colors[i]))]
-        traces += self.sim.abstract_tip.plot(colors)
+        # traces += self.sim.abstract_tip.plot(colors)
         data = Data(traces)
         # py.image.save_as({'data': data}, 'plot.png')
         unique_url = py.plot(data, filename = 'Simulation history')

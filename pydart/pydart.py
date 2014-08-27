@@ -44,6 +44,8 @@ class World(object):
     def set_frame(self, i):
         pydart_api.setWorldSimFrame(self.id, i)
 
+    def render(self):
+        pydart_api.render(self.id)
 
     def __repr__(self):
         return "<World.%d at %.4f>" % (self.id, self.t)
