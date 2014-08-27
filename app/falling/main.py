@@ -167,7 +167,7 @@ class MyWindow(QtGui.QMainWindow):
             return
         result = self.sim.step()
 
-        if self.captureAction.isChecked() and self.sim.world.nframes % 20 == 1:
+        if self.captureAction.isChecked() and self.sim.world.nframes % 4 == 1:
             self.glwidget.capture()
 
         if result:

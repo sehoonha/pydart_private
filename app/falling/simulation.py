@@ -51,6 +51,8 @@ class Simulation:
 
         # Abstract model
         self.abstract_tip = abstract.model.TIP()
+        self.abstract_tip.set_x0( self.tip )
+        self.abstract_tip.set_bounds( self.tip )
         # self.abstract_tip.load_history(config.DATA_PATH + 'TIP.csv')
         # self.abstract_tip.optimize()
         

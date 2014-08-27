@@ -36,7 +36,7 @@ class History:
             traces += [ Scatter(x=x,y=y,name='FB_%s' % name, line=Line(color=colors[i]))]
         traces += self.sim.abstract_tip.plot(colors)
         data = Data(traces)
-        # py.image.save_as({'data': data}, 'plot.png')
-        unique_url = py.plot(data, filename = 'Simulation history')
+        py.image.save_as({'data': data}, 'trajectories.png', height=900, width=1200)
+        # unique_url = py.plot(data, filename = 'Simulation history')
 
         

@@ -16,6 +16,7 @@ class TIP:
         self.m = 1.08
         self.g = -9.8
         self.h = 0.0005
+        self.x0 = [0.123, 0, 0.18, 0]
         self.header = ['t', 'th', 'dth', 'r', 'C.x', 'C.y', 'dr', 'alpha', 'l']
         self.index = dict(zip(self.header, range(len(self.header))))
         pass
@@ -53,9 +54,21 @@ class TIP:
 
         Px, Py = (self.m * dx, self.m * dy)
         return (x, y, Px, Py, x2, y2)
+
+    def set_x0(self, tip):
+        self.x0 = [tip.theta(), 0.0, tip.d01(), 0]
+        print 'set abstract.model.TIP.x0 = ', self.x0
+
+    def set_bounds(self, tip):
+        self.lo = np.array([-0.1, tip.angle() - 0.5, tip.d12() - 0.03])
+        self.hi = np.array([ 0.1, tip.angle() + 0.5, tip.d12() + 0.03])
+        print 'set abstract.model.TIP.lo = ', self.lo
+        print 'set abstract.model.TIP.hi = ', self.hi
+
         
     def simulate(self):
-        x0 = [0.123, 0, 0.18, 0] # Last zeromeans state is not terminated
+        # x0 = [0.123, 0, 0.18, 0] # Last zeromeans state is not terminated
+        x0 = self.x0
         time = np.arange(0.0, 5.0, self.h)
         X = odeint(self.deriv, x0, time)
         X = np.array([x for x in X if x[-1] == 0]) 
@@ -79,23 +92,26 @@ class TIP:
         return cost
 
     def optimize(self):
-        lo = np.array([-0.2, 0.0, 0.10])
-        hi = np.array([ 0.2, 3.0, 0.17])
+        # lo = np.array([-0.2, 0.0, 0.10])
+        # hi = np.array([ 0.2, 3.0, 0.17])
+
         opt = {'verb_time':0,  'boundary_handling': 'BoundPenalty', \
-               'bounds': [lo, hi], 'tolfun' : 0.001}
-        self.res = cma.fmin(self.evaluate, 0.5 * (lo + hi), 0.03, opt)
+               'bounds': [self.lo, self.hi], 'tolfun' : 0.001}
+        self.res = cma.fmin(self.evaluate, 0.5 * (self.lo + self.hi), 0.03, opt)
 
         self.control = self.res[0]
         print "== abstract.model.TIP optimize. resultf ==\n ", self.res
         print 'solution = ', self.control
 
+        ## Put simulation result into self.data
         (dr, th2, r2) = tuple(self.control)
         X = self.simulate()
         self.data = []
         for i, x in enumerate(X):
             t = self.h * i
-            (Cx, Cy, Px, Py, x2, y2) = self.quantities(X[-1])
+            (Cx, Cy, Px, Py, x2, y2) = self.quantities(x)
             self.data += [ [t, x[0], x[1], x[2], Cx, Cy, dr, th2, r2] ]
+        self.plotData()
 
     def column(self, name):
         return [self.data[i][self.index[name]] for i in range(len(self.data))]
@@ -114,6 +130,22 @@ class TIP:
             line = Line(dash='dash', color = colors[i])
             traces += [ Scatter(x=x,y=y,name='TIP_%s' % name, line=line) ]
         return traces
+
+    def plotData(self):
+        traces = []
+        for i in [0, len(self.data) - 1]:
+            state = self.data[i][1:4] + [0]
+            print i, state, self.quantities(state)
+            (Cx, Cy, Px, Py, x2, y2) = self.quantities(state)
+            x = [0, Cx, x2]
+            y = [0, Cy, y2]
+            traces += [ Scatter(x=x,y=y,name='Frame%d' % i)]
+        data = Data(traces)
+        layout = Layout(xaxis=XAxis(range=[0.0, 0.3]),  yaxis=YAxis(range=[0.0, 0.3]) )
+
+        py.image.save_as({'data': data, 'layout':layout}, 'abstract_tip.png', height = 900, width = 1000)
+        # unique_url = py.plot({'data': data, 'layout':layout}, filename = 'Abstract TIP')
+
             
 
         
