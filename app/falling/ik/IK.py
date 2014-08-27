@@ -6,13 +6,14 @@ from scipy.optimize import minimize
 
 class ObjTIP:
     def __init__(self, _tip):
-        self.target = [0.15, 0.15, 1.57]
-        # self.target = [0.104, 0.13, 1.27]
+        # self.target = [0.15, 0.15, 1.57]
+        # self.target = [0.091406, 0.08, 2.6367]
+        self.target = [0.17, 0.17, 2.6367]
         self.tip = _tip
 
     def cost(self):
         state = self.tip.getState()
-        return norm(state - self.target) ** 2
+        return norm( (state - self.target) * [1.0, 1.0, 0.1] ) ** 2
         
 class IK:
     def __init__(self, _world):

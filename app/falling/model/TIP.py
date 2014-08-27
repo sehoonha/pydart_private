@@ -55,7 +55,7 @@ class TIP:
         a = self.getP1() - self.getP0()
         b = self.getP1() - self.getP2()
         d = np.cross(a, b)[0]
-        return np.sign(-d) * math.acos( a.dot(b) / (norm(a) * norm(b)) )
+        return math.pi - np.sign(-d) * math.acos( a.dot(b) / (norm(a) * norm(b)) )
 
     def getState(self):
         return np.array([self.getD01(), self.getD12(), self.getAngle()])
