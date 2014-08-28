@@ -117,7 +117,6 @@ class Simulation:
         for c in self.history.get_frame()['Contacts']:
             gltools.render_arrow(c[0:3], c[0:3] - 1.0 * c[3:6])
 
-
         glPopMatrix()
 
 
@@ -173,4 +172,5 @@ class Simulation:
         self.world.set_frame(i)
         # pydart_api.setWorldSimFrame(i)
         self.history.pop(i);
+
 
