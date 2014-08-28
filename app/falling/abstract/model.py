@@ -57,6 +57,7 @@ class TIP:
 
     def set_x0(self, tip):
         self.x0 = [tip.theta(), 0.0, tip.d01(), 0]
+        self.control0 = [0.0, tip.angle(), tip.d12()]
         print 'set abstract.model.TIP.x0 = ', self.x0
 
     def set_bounds(self, tip):
@@ -97,11 +98,14 @@ class TIP:
 
         opt = {'verb_time':0,  'boundary_handling': 'BoundPenalty', \
                'bounds': [self.lo, self.hi], 'tolfun' : 0.001}
+        print "==== abstract.model.TIP optimize...."
+
         self.res = cma.fmin(self.evaluate, 0.5 * (self.lo + self.hi), 0.03, opt)
 
         self.control = self.res[0]
-        print "== abstract.model.TIP optimize. resultf ==\n ", self.res
+        print "==== result\n ", self.res
         print 'solution = ', self.control
+        print "==== abstract.model.TIP optimize.... OK"
 
         ## Put simulation result into self.data
         (dr, th2, r2) = tuple(self.control)
@@ -133,7 +137,8 @@ class TIP:
 
     def plotData(self):
         traces = []
-        for i in [0, len(self.data) - 1]:
+        for i, ctrl in [(0, self.control0), (len(self.data) - 1, self.control)]:
+            self.control = ctrl
             state = self.data[i][1:4] + [0]
             print i, state, self.quantities(state)
             (Cx, Cy, Px, Py, x2, y2) = self.quantities(state)

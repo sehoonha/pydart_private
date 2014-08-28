@@ -37,6 +37,7 @@ class Simulation:
         
         self.skel.set_joint_damping(0.15)
         self.skel.q = BioloidGPPoses().leaned_pose()
+        # self.skel.q = BioloidGPPoses().stepping_pose()
 
         # self.skel.q[1] = 1.0 <-- this doesn't work
         
@@ -63,8 +64,8 @@ class Simulation:
         self.pd.target = self.skel.q
 
         # IK
-
         self.history.push()
+        self.terminated = set()
 
     def plan(self):
         self.abstract_tip.optimize()
@@ -89,7 +90,10 @@ class Simulation:
         self.history.push()
 
         # if math.fabs(self.getTime() - 1.0000) < 0.0001:
-        if len(set(self.skel.contacted_body_names()) - set(['l_foot', 'r_foot'])) > 0:
+        # if len(set(self.skel.contacted_body_names()) - set(['r_foot'])) > 0 \
+        if len(set(self.skel.contacted_body_names()) - set(['l_foot', 'r_foot'])) > 0 \
+           and 'new_contact' not in self.terminated:
+            self.terminated.add('new_contact')
             return True
         return False
 

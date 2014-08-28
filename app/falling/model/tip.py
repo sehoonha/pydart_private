@@ -31,6 +31,7 @@ class TIP:
     def p0(self):
         """Returns the origin """
         return self.average_body_positions(["l_foot", "r_foot"], [-0.05, 0.025, 0.0])
+        # return self.average_body_positions(["r_foot"], [-0.05, 0.025, 0.0])
 
     def p1(self):
         """Returns the COM """
@@ -38,6 +39,8 @@ class TIP:
 
     def p2(self):
         """Returns the End Effector"""
+        # return self.average_body_positions(["l_foot"], [0.05, 0.025, 0.0])
+
         # (y, z) = (0.0, 0.0)
         # return self.average_body_positions(["l_shin", "r_shin"], [[0, -y, -z], [0, y, z]] )
         (y, z) = (0.11, -0.01)

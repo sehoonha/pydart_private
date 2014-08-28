@@ -49,9 +49,12 @@ class IK:
         
         if x0 is None:
             x0 = np.zeros(self.dim)
+
+        print "==== ik.IK optimize...."
         self.res = minimize(lambda x : self.evaluate(x), x0, method='nelder-mead')
 
-        print self.res
+        print "==== result\n", self.res
+        print "==== ik.IK optimize....OK"
         if restore:
             self.sim.skel.q = saved_pose
 
