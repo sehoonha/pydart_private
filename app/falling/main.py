@@ -1,5 +1,12 @@
 print 'Hello Pydart'
 
+import sys
+import signal
+def signal_handler(signal, frame):
+        print 'You pressed Ctrl+C! Bye.'
+        sys.exit(0)
+signal.signal(signal.SIGINT, signal_handler)
+
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
@@ -130,12 +137,15 @@ class MyWindow(QtGui.QMainWindow):
         
     def initUI(self):               
         # Create actions
+        self.planAction = QtGui.QAction('Plan', self)
+        self.planAction.triggered.connect(self.planEvent)
+
         self.playAction = QtGui.QAction('Play', self)
         self.playAction.setCheckable(True)
         self.playAction.setShortcut('Space')
 
-        self.planAction = QtGui.QAction('Plan', self)
-        self.planAction.triggered.connect(self.planEvent)
+        self.animAction = QtGui.QAction('Anim', self)
+        self.animAction.setCheckable(True)
 
         self.captureAction = QtGui.QAction('Capture', self)
         self.captureAction.setCheckable(True)
@@ -145,8 +155,9 @@ class MyWindow(QtGui.QMainWindow):
 
         # Create a toolbar
         self.toolbar = self.addToolBar('Control')
-        self.toolbar.addAction(self.playAction)
         self.toolbar.addAction(self.planAction)
+        self.toolbar.addAction(self.playAction)
+        self.toolbar.addAction(self.animAction)
         self.toolbar.addSeparator()
         self.toolbar.addAction(self.captureAction)
         self.toolbar.addAction(self.plotAction)
@@ -163,15 +174,25 @@ class MyWindow(QtGui.QMainWindow):
         self.glwidget.sim = self.sim
         
     def idleTimerEvent(self):
-        if not self.playAction.isChecked():
-            return
-        result = self.sim.step()
+        doCapture = False
+        # Do animation
+        if self.animAction.isChecked():
+            v = self.rangeSlider.value() + 1
+            if v <= self.rangeSlider.maximum():
+                self.rangeSlider.setValue(v)
+            else:
+                self.animAction.setChecked(False)
+            doCapture = (v % 4 == 1)
+        # Do play
+        elif self.playAction.isChecked():
+            result = self.sim.step()
+            if result:
+                self.playAction.setChecked(False)
+            doCapture = (self.sim.world.nframes % 4 == 1)
 
-        if self.captureAction.isChecked() and self.sim.world.nframes % 4 == 1:
+        if self.captureAction.isChecked() and doCapture:
             self.glwidget.capture()
 
-        if result:
-            self.playAction.setChecked(False)
 
     def renderTimerEvent(self):
         self.glwidget.updateGL()
@@ -186,6 +207,12 @@ class MyWindow(QtGui.QMainWindow):
 
     def planEvent(self):
         self.sim.plan()
+
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Escape:
+            print 'Escape key pressed! Bye.'
+            self.close()
+
         
 glutInit(sys.argv)
 app = QtGui.QApplication(["Falling controller with Pydart"])
