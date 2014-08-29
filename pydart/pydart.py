@@ -38,6 +38,9 @@ class World(object):
         contacts = pydart_api.getWorldContacts(self.id, 6 * n)
         return [contacts[6 * i : 6 * i + 6] for i in range(n)]
 
+    def reset(self):
+        pydart_api.resetWorld(self.id)
+
     def step(self):
         pydart_api.stepWorld(self.id)
 
@@ -90,6 +93,12 @@ class Skeleton(object):
     @property
     def qdot(self):
         return pydart_api.getSkeletonVelocities(self.world.id, self.id, self.ndofs)
+
+    @qdot.setter
+    def qdot(self, _qdot):
+        """ Setter also updates the internal skeleton kinematics """
+        pydart_api.setSkeletonVelocities(self.world.id, self.id, _qdot)
+
 
     def body(self, query):
         if isinstance(query, str):

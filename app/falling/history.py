@@ -8,6 +8,9 @@ class History:
         self.world = self.sim.world
         self.histories = []
         self.callbacks = []
+
+    def clear(self):
+        self.histories = []
         
     def push(self):
         data = {}

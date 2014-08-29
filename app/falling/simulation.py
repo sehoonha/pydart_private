@@ -36,16 +36,16 @@ class Simulation:
         self.skel = self.world.skel # shortcut for the control skeleton
         
         self.skel.set_joint_damping(0.15)
-        self.skel.q = BioloidGPPoses().leaned_pose()
-        # self.skel.q = BioloidGPPoses().stepping_pose()
+        self.history = History(self)
+
+        # Reset to the initial state
+        self.reset()
 
         # self.skel.q[1] = 1.0 <-- this doesn't work
         
         print 'skel.q = ', self.skel.q
 
-        # Record the history
-        self.history = History(self)
-
+        ### Now, configure the controllers
         # Abstract view of skeleton
         self.tip = TIP(self.skel)
         self.history.callbacks += [self.tip]
@@ -59,13 +59,9 @@ class Simulation:
         
         # Control
         self.maxTorque = 0.3 * 1.5
-
         self.pd = PDController(self.skel, 50.0, 1.0)
         self.pd.target = self.skel.q
 
-        # IK
-        self.history.push()
-        self.terminated = set()
 
     def plan(self):
         self.abstract_tip.optimize()
@@ -83,6 +79,18 @@ class Simulation:
             tau[i] = confine(tau[i], -self.maxTorque, self.maxTorque)
 
         return tau
+
+    def reset(self):
+        ### Reset Pydart
+        self.skel.q = BioloidGPPoses().leaned_pose()
+        # self.skel.q = BioloidGPPoses().stepping_pose()
+        self.skel.qdot = np.zeros(self.skel.ndofs)
+        self.world.reset()
+
+        ### Reset inner structures
+        self.history.clear()
+        self.history.push()
+        self.terminated = set()
 
     def step(self):
         self.skel.forces = self.control()

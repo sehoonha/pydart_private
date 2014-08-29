@@ -55,6 +55,9 @@ class MyWindow(QtGui.QMainWindow):
         self.planAction = QtGui.QAction('Plan', self)
         self.planAction.triggered.connect(self.planEvent)
 
+        self.resetAction = QtGui.QAction('Reset', self)
+        self.resetAction.triggered.connect(self.resetEvent)
+
         self.playAction = QtGui.QAction('Play', self)
         self.playAction.setCheckable(True)
         self.playAction.setShortcut('Space')
@@ -75,6 +78,7 @@ class MyWindow(QtGui.QMainWindow):
         self.toolbar = self.addToolBar('Control')
         self.toolbar.addAction(self.planAction)
         self.toolbar.addSeparator()
+        self.toolbar.addAction(self.resetAction)
         self.toolbar.addAction(self.playAction)
         self.toolbar.addAction(self.animAction)
         self.toolbar.addSeparator()
@@ -115,7 +119,6 @@ class MyWindow(QtGui.QMainWindow):
         if self.captureAction.isChecked() and doCapture:
             self.glwidget.capture()
 
-
     def renderTimerEvent(self):
         self.glwidget.updateGL()
         self.statusBar().showMessage( self.sim.status_string() )
@@ -133,11 +136,14 @@ class MyWindow(QtGui.QMainWindow):
         os.system('avconv -r 100 -i ./captures/frame.%04d.png output.mp4')
         os.system('rm ./captures/frame.*.png')
 
-    def plotEvent(self):
-        self.sim.history.plot()
-
     def planEvent(self):
         self.sim.plan()
+
+    def resetEvent(self):
+        self.sim.reset()
+
+    def plotEvent(self):
+        self.sim.history.plot()
 
     def plotCOMEvent(self):
         self.sim.history.plotCOM()

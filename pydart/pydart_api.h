@@ -19,6 +19,7 @@ int addSkeleton(int wid, const char* const path);
 void setSkeletonJointDamping(int wid, int skid, double damping);
 
 // Simulation Functions
+void resetWorld(int wid);
 void stepWorld(int wid);
 void render(int wid);
 void renderSkeleton(int wid, int skid);
@@ -41,6 +42,7 @@ const char* getSkeletonDofName(int wid, int skid, int dofid);
 void getSkeletonPositions(int wid, int skid, double* outpose, int ndofs);
 void getSkeletonVelocities(int wid, int skid, double* outpose, int ndofs);
 void setSkeletonPositions(int wid, int skid, double* inpose, int ndofs);
+void setSkeletonVelocities(int wid, int skid, double* inpose, int ndofs);
 void setSkeletonForces(int wid, int skid, double* intorque, int ndofs);
 
 // Skeleton Momentum Functions

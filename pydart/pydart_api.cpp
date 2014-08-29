@@ -156,6 +156,12 @@ void setSkeletonJointDamping(int wid, int skid, double damping) {
 }
 ////////////////////////////////////////////////////////////////////////////////
 // Simulation Functions
+void resetWorld(int wid) {
+    using namespace dart::simulation;
+    World* world = Manager::world(wid);
+    world->reset();
+}
+
 void stepWorld(int wid) {
     using namespace dart::simulation;
     World* world = Manager::world(wid);
@@ -303,6 +309,18 @@ void setSkeletonPositions(int wid, int skid, double* inpose, int ndofs) {
         q(i) = inpose[i];
     }
     skel->setPositions(q);
+    skel->computeForwardKinematics(true, true, false);
+}
+
+void setSkeletonVelocities(int wid, int skid, double* inpose, int ndofs) {
+    using namespace dart::dynamics;
+    Skeleton* skel = Manager::skeleton(wid, skid);
+
+    Eigen::VectorXd q(ndofs);
+    for (int i = 0; i < q.size(); i++) {
+        q(i) = inpose[i];
+    }
+    skel->setVelocities(q);
     skel->computeForwardKinematics(true, true, false);
 }
 
