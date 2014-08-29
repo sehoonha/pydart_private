@@ -32,7 +32,7 @@ class TIP:
 
     def deriv(self, state, t):
         (th, dth, r, stop) = tuple(state)
-        (x, y, Px, Py, x2, y2) = self.quantities(state)
+        (x, y, Px, Py, x2, y2, dx2, dy2) = self.quantities(state)
 
         if stop > 0 or y2 < 0:
             return [0, 0, 0, 1]
@@ -52,8 +52,11 @@ class TIP:
         x2 = x + r2 * sin(th + th2)
         y2 = y + r2 * cos(th + th2)
 
+        dx2 = dx + r2 * cos(th + th2) * dth;
+        dy2 = dy - r2 * sin(th + th2) * dth;
+
         Px, Py = (self.m * dx, self.m * dy)
-        return (x, y, Px, Py, x2, y2)
+        return (x, y, Px, Py, x2, y2, dx2, dy2)
 
     def set_x0(self, tip):
         self.x0 = [tip.theta(), 0.0, tip.d01(), 0]
@@ -87,8 +90,9 @@ class TIP:
                 
         self.control = x
         X = self.simulate()
-        (x, y, Px, Py, x2, y2) = self.quantities(X[-1])
-        cost = -1.0 * Py
+        (x, y, Px, Py, x2, y2, dx2, dy2) = self.quantities(X[-1])
+        # cost = -1.0 * Py
+        cost = -1.0 * dy2
         # print self.control, 0.0005 * len(X), X[-1], -1.0 * cost
         return cost
 
@@ -113,7 +117,7 @@ class TIP:
         self.data = []
         for i, x in enumerate(X):
             t = self.h * i
-            (Cx, Cy, Px, Py, x2, y2) = self.quantities(x)
+            (Cx, Cy, Px, Py, x2, y2, dx2, dy2) = self.quantities(x)
             self.data += [ [t, x[0], x[1], x[2], Cx, Cy, dr, th2, r2] ]
         self.plotData()
 
@@ -141,15 +145,15 @@ class TIP:
             self.control = ctrl
             state = self.data[i][1:4] + [0]
             print i, state, self.quantities(state)
-            (Cx, Cy, Px, Py, x2, y2) = self.quantities(state)
+            (Cx, Cy, Px, Py, x2, y2, dx2, dy2) = self.quantities(state)
             x = [0, Cx, x2]
             y = [0, Cy, y2]
             traces += [ Scatter(x=x,y=y,name='Frame%d' % i)]
         data = Data(traces)
         layout = Layout(xaxis=XAxis(range=[0.0, 0.3]),  yaxis=YAxis(range=[0.0, 0.3]) )
 
-        py.image.save_as({'data': data, 'layout':layout}, 'abstract_tip.png', height = 900, width = 1000)
-        # unique_url = py.plot({'data': data, 'layout':layout}, filename = 'Abstract TIP')
+        # py.image.save_as({'data': data, 'layout':layout}, 'abstract_tip.png', height = 900, width = 1000)
+        unique_url = py.plot({'data': data, 'layout':layout}, filename = 'Abstract TIP')
 
             
 

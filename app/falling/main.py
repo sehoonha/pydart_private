@@ -74,6 +74,7 @@ class MyWindow(QtGui.QMainWindow):
         # Create a toolbar
         self.toolbar = self.addToolBar('Control')
         self.toolbar.addAction(self.planAction)
+        self.toolbar.addSeparator()
         self.toolbar.addAction(self.playAction)
         self.toolbar.addAction(self.animAction)
         self.toolbar.addSeparator()

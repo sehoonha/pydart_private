@@ -105,6 +105,14 @@ class Skeleton(object):
         return pydart_api.getSkeletonWorldCOM(self.world.id, self.id)
 
     @property
+    def Cdot(self):
+        return pydart_api.getSkeletonWorldCOMVelocity(self.world.id, self.id)
+
+    @property
+    def P(self):
+        return self.Cdot * 1.02
+
+    @property
     def forces(self):
         return self._tau
         
