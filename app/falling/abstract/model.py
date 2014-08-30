@@ -125,7 +125,10 @@ class TIP:
         return [self.data[i][self.index[name]] for i in range(len(self.data))]
         
     def commands(self):
-        return [self.data[-1][self.index[name]] for name in ['r', 'l', 'alpha']]
+        if self.data is None:
+            return [0.0, 0.0,0.0]
+        else:
+            return [self.data[-1][self.index[name]] for name in ['r', 'l', 'alpha']]
                 
     def plot(self, colors):
         if self.data is None:

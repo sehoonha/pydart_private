@@ -64,9 +64,14 @@ class Simulation:
 
 
     def plan(self):
-        self.abstract_tip.optimize()
+        ### Plan with TIP
+        # self.abstract_tip.optimize()
+        # ik = IK(self)
+        # self.pd.target = ik.optimize(restore = True)
+
+        ### Direct planning
         ik = IK(self)
-        self.pd.target = ik.optimize(restore = True)
+        ik.optimize_with_fullbody_motion()
 
     def control(self):
         tau = np.zeros(self.skel.ndofs)
@@ -137,44 +142,6 @@ class Simulation:
 
         return status
 
-    # def getTime(self):
-    #     return pydart_api.getWorldTime()
-
-    # def getSimFrames(self):
-    #     return pydart_api.getWorldSimFrames()
-            
-    # def getPositions(self):
-    #     return pydart_api.getSkeletonPositions(self.rid, self.ndofs)
-
-    # def getVelocities(self):
-    #     return pydart_api.getSkeletonVelocities(self.rid, self.ndofs)
-
-    # def setPositions(self, q):
-    #     pydart_api.setSkeletonPositions(self.rid, q)
-
-    # def getCOM(self):
-    #     return pydart_api.getSkeletonWorldCOM(self.rid)
-
-    # def getContactedBodyNames(self):
-    #     nbodies = pydart_api.getSkeletonNumBodies(self.rid)
-    #     return [pydart_api.getSkeletonBodyName(self.rid, i) for i in range(nbodies) if pydart_api.getBodyNodeNumContacts(self.rid, i)]
-        
-
-    # def getBodyNodeTransformation(self, name):
-    #     return pydart_api.getBodyNodeTransformation(self.rid, name)
-        
-    # def getBodyNodeWorldLinearJacobian(self, name):
-    #     J = np.zeros((3, self.ndofs))
-    #     pydart_api.getBodyNodeWorldLinearJacobian(self.rid, name, J)
-    #     return J
-
-    # def getWorldContacts(self):
-    #     n = pydart_api.getWorldNumContacts()
-    #     contacts = pydart_api.getWorldContacts(6 * n)
-    #     return [contacts[6 * i : 6 * i + 6] for i in range(n)]
-        
-    # def numSimFrames(self):
-    #     return pydart_api.getWorldSimFrames()
 
     def set_world_frame(self, i):
         self.world.set_frame(i)

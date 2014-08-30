@@ -2,7 +2,7 @@ import numpy as np
 from numpy.linalg import norm
 
 from scipy.optimize import minimize
-
+import cma
 
 class ObjTIP:
     def __init__(self, _tip):
@@ -59,4 +59,29 @@ class IK:
             self.sim.skel.q = saved_pose
 
         return self.expand(self.res["x"])
-            
+
+    def evaluate_fullbody(self, x):
+        self.sim.pd.target = self.expand(x)
+        self.sim.reset()
+        while not self.sim.step():
+            pass
+        v = -self.sim.skel.Cdot[1]
+
+        contacts = set(self.sim.skel.contacted_body_names())
+        allowed  = set(['l_foot', 'r_foot', 'l_hand', 'r_hand'])
+        if len(contacts - allowed) > 0:
+            v += 10.0
+        print x, " --> ", v
+        return v 
+
+    def optimize_with_fullbody_motion(self):
+        print self.evaluate_fullbody([ 1., 0.09637636, 0.93696491, -0.92534248, -0.77468035])
+
+        # lo = np.array([-1.0] * 5)
+        # hi = np.array([ 1.0] * 5)
+        # opt = {'verb_time':0,  'boundary_handling': 'BoundPenalty', \
+        #        'bounds': [lo, hi], 'tolfun' : 0.001}
+        # print "==== abstract.model.TIP optimize...."
+        # self.res = cma.fmin(self.evaluate_fullbody, 0.5 * (lo + hi), 1.0, opt)
+
+        # self.control = self.res[0]
