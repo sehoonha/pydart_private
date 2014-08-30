@@ -62,9 +62,13 @@ class Simulation:
         self.pd = PDController(self.skel, 50.0, 1.0)
         self.pd.target = self.skel.q
 
+        # For handle callbacks properly..
+        self.history.clear()
+        self.history.push()
+
 
     def plan(self):
-        ### Plan with TIP
+        # ### Plan with TIP
         # self.abstract_tip.optimize()
         # ik = IK(self)
         # self.pd.target = ik.optimize(restore = True)
@@ -110,7 +114,6 @@ class Simulation:
             return True
         return False
 
-
     def render(self):
         glPushMatrix()
         # Draw chess board
@@ -136,7 +139,8 @@ class Simulation:
     def status_string(self):
         status = ""
         status += "T = %.4f (%d)" % (self.world.t, self.world.nframes)
-        status += "COM = " + str(["%.3f" % x for x in self.skel.C]) + " "
+        status += "C = " + str(["%.3f" % x for x in self.skel.C]) + " "
+        status += "Cdot = " + str(["%.3f" % x for x in self.skel.Cdot]) + " "
         status += "TIP = " + str(self.tip) + " "
         status += "Contacted = " + str(self.skel.contacted_body_names()) + " "
 

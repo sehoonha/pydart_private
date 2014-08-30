@@ -30,6 +30,7 @@ class MyWindow(QtGui.QMainWindow):
         self.sim = Simulation()
 
         self.initUI()
+        self.initActions()
         self.initToolbar()
         self.initMenu()
         
@@ -48,9 +49,8 @@ class MyWindow(QtGui.QMainWindow):
         self.glwidget = GLWidget(self)
         self.glwidget.setGeometry(0, 30, 1280, 720)
         self.glwidget.sim = self.sim
-        
 
-    def initToolbar(self):
+    def initActions(self):
         # Create actions
         self.planAction = QtGui.QAction('Plan', self)
         self.planAction.triggered.connect(self.planEvent)
@@ -71,9 +71,16 @@ class MyWindow(QtGui.QMainWindow):
         self.movieAction = QtGui.QAction('Movie', self)
         self.movieAction.triggered.connect(self.movieEvent)
 
+        self.screenshotAction = QtGui.QAction('Screenshot', self)
+        self.screenshotAction.triggered.connect(self.screenshotEvent)
+
         self.plotAction = QtGui.QAction('Plot', self)
         self.plotAction.triggered.connect(self.plotEvent)
 
+        self.plotCOMAction = QtGui.QAction('&COM', self)
+        self.plotCOMAction.triggered.connect(self.plotCOMEvent)
+
+    def initToolbar(self):
         # Create a toolbar
         self.toolbar = self.addToolBar('Control')
         self.toolbar.addAction(self.planAction)
@@ -93,10 +100,16 @@ class MyWindow(QtGui.QMainWindow):
     def initMenu(self):
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
+
+        #### Recording menu
+        recordingMenu = menubar.addMenu('&Recording')
+        recordingMenu.addAction(self.screenshotAction)
+        recordingMenu.addSeparator()
+        recordingMenu.addAction(self.captureAction)
+        recordingMenu.addAction(self.movieAction)
         #### Plot menu
         plotMenu = menubar.addMenu('&Plot')        
-        self.plotCOMAction = QtGui.QAction('&COM', self)
-        self.plotCOMAction.triggered.connect(self.plotCOMEvent)
+        plotMenu.addAction(self.plotAction)
         plotMenu.addAction(self.plotCOMAction)
 
     def idleTimerEvent(self):
@@ -131,6 +144,9 @@ class MyWindow(QtGui.QMainWindow):
 
     def rangeSliderEvent(self, value):
         self.sim.set_world_frame( value )
+
+    def screenshotEvent(self):
+        self.glwidget.capture()
 
     def movieEvent(self):
         os.system('avconv -r 100 -i ./captures/frame.%04d.png output.mp4')
