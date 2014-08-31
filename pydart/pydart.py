@@ -82,6 +82,10 @@ class Skeleton(object):
         return len(self.bodies)
         
     @property
+    def m(self):
+        return pydart_api.getSkeletonMass(self.world.id, self.id)
+
+    @property
     def q(self):
         return pydart_api.getSkeletonPositions(self.world.id, self.id, self.ndofs)
 
@@ -127,8 +131,30 @@ class Skeleton(object):
         
     @forces.setter
     def forces(self, _tau):
+        self._tau = _tau
         pydart_api.setSkeletonForces(self.world.id, self.id, _tau)
+
+    def approx_inertia(self, axis):
+        """ Calculates the point-masses approximated inertia with respect to the axis """
+        axis = np.array(axis) / np.linalg.norm(axis)
+        I = 0
+        C = self.C
+        for body in self.bodies:
+            d = body.C - C
+            # Subtract the distance along the axis
+            r_sq = np.linalg.norm(d) ** 2 - np.linalg.norm(d.dot(axis)) ** 2 
+            I += body.m * r_sq
+        return I
         
+    def approx_inertia_x(self):
+        return self.approx_inertia([1, 0, 0])
+
+    def approx_inertia_y(self):
+        return self.approx_inertia([1, 0, 0])
+
+    def approx_inertia_z(self):
+        return self.approx_inertia([1, 0, 0])
+
     def contacted_bodies(self):
         return [body for body in self.bodies if body.num_contacts() > 0]
 
@@ -159,8 +185,30 @@ class Body(object):
     def num_contacts(self):
         return pydart_api.getBodyNodeNumContacts(self.wid, self.sid, self.id)
         
+    @property
+    def m(self):
+        return pydart_api.getBodyNodeMass(self.wid, self.sid, self.id)
+
+    @property
+    def I(self):
+        return pydart_api.getBodyNodeInertia(self.wid, self.sid, self.id)
+    
+    def localCOM(self):
+        return pydart_api.getBodyNodeLocalCOM(self.wid, self.sid, self.id)
+
+    def worldCOM(self):
+        return pydart_api.getBodyNodeWorldCOM(self.wid, self.sid, self.id)
+
+    @property
+    def C(self):
+        return self.worldCOM()
+
     def transformation(self):
         return pydart_api.getBodyNodeTransformation(self.wid, self.sid, self.id)
+
+    @property
+    def T(self):
+        return self.transformation()
 
     def world_linear_jacobian(self):
         J = np.zeros((3, self.skel.ndofs))

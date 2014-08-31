@@ -360,6 +360,43 @@ void getSkeletonWorldCOMVelocity(int wid, int skid, double outv3[3]) {
 
 ////////////////////////////////////////////////////////////////////////////////
 // BodyNode Functions
+double getBodyNodeMass(int wid, int skid, int bid) {
+    dart::dynamics::Skeleton* skel = Manager::skeleton(wid, skid);
+    dart::dynamics::BodyNode* bn = skel->getBodyNode(bid);
+    return bn->getMass();
+}
+
+void getBodyNodeInertia(int wid, int skid, int bid, double outv33[3][3]) {
+    dart::dynamics::Skeleton* skel = Manager::skeleton(wid, skid);
+    dart::dynamics::BodyNode* bn = skel->getBodyNode(bid);
+    double Ixx, Iyy, Izz, Ixy, Ixz, Iyz;
+    bn->getMomentOfInertia(Ixx, Iyy, Izz, Ixy, Ixz, Iyz);
+    outv33[0][0] = Ixx;    outv33[1][1] = Iyy;    outv33[2][2] = Izz;
+    outv33[0][1] = Ixy;    outv33[1][0] = Ixy; 
+    outv33[0][2] = Ixz;    outv33[2][0] = Ixz; 
+    outv33[1][2] = Iyz;    outv33[2][1] = Iyz; 
+}
+
+void getBodyNodeLocalCOM(int wid, int skid, int bid, double outv3[3]) {
+    dart::dynamics::Skeleton* skel = Manager::skeleton(wid, skid);
+    dart::dynamics::BodyNode* bn = skel->getBodyNode(bid);
+    const Eigen::Vector3d& x = bn->getLocalCOM();
+    for (int i = 0; i < x.size(); i++) {
+        outv3[i] = x(i);
+    }
+}
+
+
+void getBodyNodeWorldCOM(int wid, int skid, int bid, double outv3[3]) {
+    dart::dynamics::Skeleton* skel = Manager::skeleton(wid, skid);
+    dart::dynamics::BodyNode* bn = skel->getBodyNode(bid);
+    const Eigen::Vector3d& x = bn->getWorldCOM();
+    for (int i = 0; i < x.size(); i++) {
+        outv3[i] = x(i);
+    }
+}
+
+
 int getBodyNodeNumContacts(int wid, int skid, int bid) {
     dart::dynamics::Skeleton* skel = Manager::skeleton(wid, skid);
     dart::dynamics::BodyNode* bn = skel->getBodyNode(bid);

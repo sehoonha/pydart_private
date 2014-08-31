@@ -42,8 +42,11 @@ class Simulation:
         self.reset()
 
         # self.skel.q[1] = 1.0 <-- this doesn't work
-        
+
+        print 'skel.m = ', self.skel.m
+        print 'skel.approx_inertia_x = ', self.skel.approx_inertia_x()
         print 'skel.q = ', self.skel.q
+
 
         ### Now, configure the controllers
         # Abstract view of skeleton
@@ -141,7 +144,9 @@ class Simulation:
         status += "T = %.4f (%d)" % (self.world.t, self.world.nframes)
         status += "C = " + str(["%.3f" % x for x in self.skel.C]) + " "
         status += "Cdot = " + str(["%.3f" % x for x in self.skel.Cdot]) + " "
+        status += "I = %.4f " % self.skel.approx_inertia_x()
         status += "TIP = " + str(self.tip) + " "
+        
         status += "Contacted = " + str(self.skel.contacted_body_names()) + " "
 
         return status
