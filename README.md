@@ -32,6 +32,6 @@ make
 ## Usage
 In build directory, 
 ```
-python ../app/hello_pydart/hello.py
+python ../app/hello_pydart/main.py
 python ../app/falling/main.py
 ```
