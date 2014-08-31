@@ -49,15 +49,20 @@ class History:
         for name in ['C.x', 'C.y', 'P.x', 'P.y']:
             y = [ data[name] for data in self.histories ]
             traces += [ Scatter(x=x,y=y,name=name) ]
-        # # Plot vertical impact
-        # sum_force = 0.0
-        # forces = []
-        # for contacts in [ data['Contacts'] for data in self.histories ]:
-        #     f = sum( [float(c[4]) for c in contacts] ) # Sum the y component of the force
-        #     sum_force += f
-        #     forces += [0.01 * sum_force]
-        # traces += [Scatter(x=x,y=forces,name="F.y(1/100 Scale)")]
-        
         data = Data(traces)
         unique_url = py.plot(data, filename = 'Simulation COM history')
+
+    def plotImpact(self):
+        x = [ data['t'] for data in self.histories ]
+        # Plot vertical impact
+        forces = []
+        for contacts in [ data['Contacts'] for data in self.histories ]:
+            f = sum( [float(c[4]) for c in contacts] ) # Sum the y component of the force
+            sum_force = f
+            forces += [sum_force]
+        traces = [Scatter(x=x,y=forces,name="F.y")]
+        data = Data(traces)
+        unique_url = py.plot(data, filename = 'Simulation Impact history')
+        
+        
         

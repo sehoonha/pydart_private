@@ -71,14 +71,14 @@ class Simulation:
 
 
     def plan(self):
-        # ### Plan with TIP
-        # self.abstract_tip.optimize()
-        # ik = IK(self)
-        # self.pd.target = ik.optimize(restore = True)
-
-        ### Direct planning
+        ### Plan with TIP
+        self.abstract_tip.optimize()
         ik = IK(self)
-        ik.optimize_with_fullbody_motion()
+        self.pd.target = ik.optimize(restore = True)
+
+        # ### Direct planning
+        # ik = IK(self)
+        # ik.optimize_with_fullbody_motion()
 
     def control(self):
         tau = np.zeros(self.skel.ndofs)
@@ -145,6 +145,7 @@ class Simulation:
         status += "C = " + str(["%.3f" % x for x in self.skel.C]) + " "
         status += "Cdot = " + str(["%.3f" % x for x in self.skel.Cdot]) + " "
         status += "I = %.4f " % self.skel.approx_inertia_x()
+        status += "Hand.v = " + str(["%.3f" % x for x in self.skel.body("l_hand").Cdot]) + " "
         status += "TIP = " + str(self.tip) + " "
         
         status += "Contacted = " + str(self.skel.contacted_body_names()) + " "

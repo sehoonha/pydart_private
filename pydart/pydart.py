@@ -246,15 +246,22 @@ class Body(object):
     def I(self):
         return self.inertia()
     
-    def localCOM(self):
+    def local_com(self):
         return pydart_api.getBodyNodeLocalCOM(self.wid, self.sid, self.id)
 
-    def worldCOM(self):
+    def world_com(self):
         return pydart_api.getBodyNodeWorldCOM(self.wid, self.sid, self.id)
 
     @property
     def C(self):
-        return self.worldCOM()
+        return self.world_com()
+
+    def world_com_velocity(self):
+        return pydart_api.getBodyNodeWorldCOMVelocity(self.wid, self.sid, self.id)
+
+    @property
+    def Cdot(self):
+        return self.world_com_velocity()
 
     def transformation(self):
         return pydart_api.getBodyNodeTransformation(self.wid, self.sid, self.id)

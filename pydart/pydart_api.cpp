@@ -396,6 +396,14 @@ void getBodyNodeWorldCOM(int wid, int skid, int bid, double outv3[3]) {
     }
 }
 
+void getBodyNodeWorldCOMVelocity(int wid, int skid, int bid, double outv3[3]) {
+    dart::dynamics::Skeleton* skel = Manager::skeleton(wid, skid);
+    dart::dynamics::BodyNode* bn = skel->getBodyNode(bid);
+    const Eigen::Vector3d& x = bn->getWorldCOMVelocity();
+    for (int i = 0; i < x.size(); i++) {
+        outv3[i] = x(i);
+    }
+}
 
 int getBodyNodeNumContacts(int wid, int skid, int bid) {
     dart::dynamics::Skeleton* skel = Manager::skeleton(wid, skid);

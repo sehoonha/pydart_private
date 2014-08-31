@@ -14,6 +14,7 @@ class TIP:
     def __init__(self):
         self.data = None
         self.m = 1.08
+        self.I = 0.0093
         self.g = -9.8
         self.h = 0.0005
         self.x0 = [0.123, 0, 0.18, 0]
@@ -78,6 +79,16 @@ class TIP:
         X = np.array([x for x in X if x[-1] == 0]) 
         return X
 
+    def estimate_impact(self, x):
+        (th, dth, r, stop) = tuple(x)
+        (dr, th2, r2) = tuple(self.control)
+        (x1, y1, Px, Py, x2, y2, dx2, dy2) = self.quantities(x)
+        m = self.m
+        I = self.I
+        # j = dy2^{-} / ( (1/m) + (1/I) * (x2 - x1)^2 )
+        j = (-dy2) / ( (1/m) + (1/I) * ((x2 - x1) ** 2) )
+        return j
+
     def evaluate(self, x):
         penalty = 0
         for i, (lo, hi) in enumerate([(-0.2, 0.2), (0.0, 3.0), (0.10, 0.17)]):
@@ -93,6 +104,7 @@ class TIP:
         (x, y, Px, Py, x2, y2, dx2, dy2) = self.quantities(X[-1])
         # cost = -1.0 * Py
         cost = -1.0 * dy2
+        cost = self.estimate_impact(X[-1])
         # print self.control, 0.0005 * len(X), X[-1], -1.0 * cost
         return cost
 
@@ -119,6 +131,7 @@ class TIP:
             t = self.h * i
             (Cx, Cy, Px, Py, x2, y2, dx2, dy2) = self.quantities(x)
             self.data += [ [t, x[0], x[1], x[2], Cx, Cy, dr, th2, r2] ]
+        print 'Estimated impact = ', self.estimate_impact(X[-1])
         # self.plotData()
 
     def column(self, name):

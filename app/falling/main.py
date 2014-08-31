@@ -77,8 +77,12 @@ class MyWindow(QtGui.QMainWindow):
         self.plotAction = QtGui.QAction('Plot', self)
         self.plotAction.triggered.connect(self.plotEvent)
 
-        self.plotCOMAction = QtGui.QAction('&COM', self)
+        self.plotCOMAction = QtGui.QAction('COM', self)
         self.plotCOMAction.triggered.connect(self.plotCOMEvent)
+
+        self.plotImpactAction = QtGui.QAction('Impact', self)
+        self.plotImpactAction.triggered.connect(self.plotImpactEvent)
+
 
     def initToolbar(self):
         # Create a toolbar
@@ -111,6 +115,7 @@ class MyWindow(QtGui.QMainWindow):
         plotMenu = menubar.addMenu('&Plot')        
         plotMenu.addAction(self.plotAction)
         plotMenu.addAction(self.plotCOMAction)
+        plotMenu.addAction(self.plotImpactAction)
 
     def idleTimerEvent(self):
         doCapture = False
@@ -163,6 +168,9 @@ class MyWindow(QtGui.QMainWindow):
 
     def plotCOMEvent(self):
         self.sim.history.plotCOM()
+
+    def plotImpactEvent(self):
+        self.sim.history.plotImpact()
 
 glutInit(sys.argv)
 app = QtGui.QApplication(["Falling controller with Pydart"])
