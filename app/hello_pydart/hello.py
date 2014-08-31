@@ -14,6 +14,7 @@ import pydart
 
 # Some api in the chain is translating the keystrokes to this octal string
 # so instead of saying: ESCAPE = 27, we use the following.
+global window
 ESCAPE = '\033'
 window = 0
 world = None
@@ -86,7 +87,6 @@ def drawGL():
 
     global world
     world.render()
-
     #  since this is double buffered, swap the buffers to display what just got drawn. 
     glutSwapBuffers()
 
@@ -99,12 +99,14 @@ def keyPressed(*args):
 def idle():
     global world
     global pd
+    pd.target[7] = math.sin(world.t)
+    pd.target[9] = -math.sin(world.t)
     world.skels[-1].forces = pd.control()
     world.step()
 
 def renderTimer(timer):
     glutPostRedisplay()
-    glutTimerFunc(25, renderTimer, 1)
+    glutTimerFunc(20, renderTimer, 1)
     
 
 ################################################################################
@@ -119,8 +121,9 @@ world.skels[-1].set_joint_damping(0.15)
 
 # Set the skeleton pose. 
 q = np.zeros(world.skels[-1].ndofs)
-q[0] = -0.41 * math.pi
-q[4] = 0.221
+q[0] = -0.45 * math.pi
+# q[4] = 0.221
+q[4] = 0.25
 q[5] = q[4]
 world.skels[-1].q = q
 

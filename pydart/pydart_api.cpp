@@ -37,7 +37,10 @@ public:
     static void init();
     static void destroy();
     static Manager* getInstance() { return g_manager; }
-    static dart::renderer::RenderInterface* getRI() { return g_ri; }
+    static dart::renderer::RenderInterface* getRI() {
+        return g_ri;
+      
+    }
 
     static dart::simulation::World* world(int index = 0);
     static dart::dynamics::Skeleton* skeleton(int index);
@@ -57,7 +60,7 @@ dart::renderer::RenderInterface* Manager::g_ri = NULL;
 void Manager::init() {
     g_manager = new Manager();
     g_ri = new dart::renderer::OpenGLRenderInterface();
-    g_ri->initialize();
+    //   g_ri->initialize();
     cout << "Initialize pydart manager OK" << endl;
 }
 

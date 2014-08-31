@@ -21,8 +21,12 @@ IF(CMAKE_BUILD_TYPE MATCHES "Release")
   ADD_DEFINITIONS(-DBOOST_UBLAS_NDEBUG )
 ENDIF (CMAKE_BUILD_TYPE MATCHES "Release")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-enum-compare")
-message(STATUS "CXX_FLAGS = ${CMAKE_CXX_FLAGS}")
+IF(APPLE)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flat_namespace -undefined suppress")
+ELSEIF(UNIX)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-enum-compare")
+ENDIF()
+MESSAGE(STATUS "CXX_FLAGS = ${CMAKE_CXX_FLAGS}")
 
 ################################################################################
 # Find the required packages
@@ -33,9 +37,15 @@ message(STATUS "SWIG_USE_FILE = ${SWIG_USE_FILE}")
 include(${SWIG_USE_FILE})
 ### PythonLibs
 find_package(PythonLibs REQUIRED)
-message(STATUS "PYTHON_INCLUDE_PATH = ${PYTHON_INCLUDE_PATH}")
-include_directories(${PYTHON_INCLUDE_PATH})
+message(STATUS "PYTHON_INCLUDE_DIR = ${PYTHON_INCLUDE_DIR}")
+include_directories(${PYTHON_INCLUDE_DIR})
 message(STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
+
+### PythonLibs
+find_package(NumPy REQUIRED)
+message(STATUS "NUMPY_INCLUDE_DIRS = ${NUMPY_INCLUDE_DIRS}")
+include_directories(${NUMPY_INCLUDE_DIRS})
+
 ### Eigen
 find_package(Eigen REQUIRED)
 message(STATUS "Eigen_INCLUDE_DIRS = ${Eigen_INCLUDE_DIRS}")
