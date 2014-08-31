@@ -11,6 +11,7 @@ BUILD_PATH = '../build/'
 DATA_PATH = '../data/'
 sys.path.append(BUILD_PATH)
 import pydart
+import trackball
 
 # Some api in the chain is translating the keystrokes to this octal string
 # so instead of saying: ESCAPE = 27, we use the following.
@@ -19,6 +20,8 @@ ESCAPE = '\033'
 window = 0
 world = None
 pd = None
+mouseLastPos = None
+tb = trackball.Trackball()
 
 class PDController:
     def __init__(self, _skel, _kp, _kd):
@@ -83,7 +86,9 @@ def drawGL():
     # Clear The Screen And The Depth Buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()					# Reset The View 
-    glTranslatef(0.0, -0.1, -1.2)
+    glTranslatef(0.0, 0.0, -1.2)
+    global tb
+    glMultMatrixf(tb.matrix)
 
     global world
     world.render()
@@ -95,6 +100,21 @@ def keyPressed(*args):
     if args[0] == ESCAPE:
         glutDestroyWindow(window)
         sys.exit()
+
+def mouseFunc(button, state, x, y):
+    global mouseLastPos
+    if state == 0: # Mouse pressed
+        mouseLastPos = np.array([x, y])
+    elif state == 1:
+        mouseLastPos = None
+
+def motionFunc(x, y):
+    global mouseLastPos
+    global tb
+    dx = x - mouseLastPos[0]
+    dy = y - mouseLastPos[1]
+    tb.drag_to(x, y, dx, -dy)
+    mouseLastPos = np.array([x, y])
 
 def idle():
     global world
@@ -145,6 +165,8 @@ glutDisplayFunc (drawGL)
 glutIdleFunc(idle)
 glutReshapeFunc (resizeGL)
 glutKeyboardFunc (keyPressed)
+glutMouseFunc (mouseFunc)
+glutMotionFunc (motionFunc)
 glutTimerFunc(25, renderTimer, 1)
 initGL(800, 600)
 
