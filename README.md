@@ -22,12 +22,16 @@ Python interface for dart
  + sudo pip install cma
 
 ## Building instruction
+``` cmake
 mkdir build
 cd build
 cmake ..
 make
+```
 
 ## Usage
 In build directory, 
+```
 python ../app/hello_pydart/hello.py
 python ../app/falling/main.py
+```
