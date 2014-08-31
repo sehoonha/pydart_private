@@ -15,7 +15,7 @@ class History:
     def push(self):
         data = {}
         data['t'] = self.world.t
-        data['Contacts'] = self.world.contacts
+        data['Contacts'] = self.world.contacts()
         (data['P.x'], data['P.y']) = (self.world.skel.P[2], self.world.skel.P[1])
         self.histories += [data]
         # Push all callback objects

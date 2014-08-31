@@ -121,7 +121,9 @@ def idle():
     global pd
     pd.target[7] = math.sin(world.t)
     pd.target[9] = -math.sin(world.t)
-    world.skels[-1].forces = pd.control()
+    world.skels[-1].tau = pd.control()
+    # # Alternative:
+    # world.skels[-1].set_forces( pd.control() )
     world.step()
 
 def renderTimer(timer):

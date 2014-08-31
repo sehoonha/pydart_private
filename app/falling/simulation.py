@@ -105,7 +105,7 @@ class Simulation:
         self.terminated = set()
 
     def step(self):
-        self.skel.forces = self.control()
+        self.skel.tau = self.control()
         self.world.step()
         self.history.push()
 

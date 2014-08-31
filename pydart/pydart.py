@@ -1,3 +1,9 @@
+"""
+- Rule for properties
+1. Shortcuts: q, qdot, tau, t, ...
+2. Numbers: ndofs, nframes, ...
+"""
+
 import os.path
 import pydart_api
 import numpy as np
@@ -24,15 +30,20 @@ class World(object):
         """ returns the default control skeleton """
         return self.control_skel
 
-    @property
-    def t(self):
+    def time(self):
         return pydart_api.getWorldTime(self.id)
 
     @property
-    def nframes(self):
+    def t(self):
+        return self.time()
+
+    def num_frames(self):
         return pydart_api.getWorldSimFrames(self.id)
 
     @property
+    def nframes(self):
+        return self.num_frames()
+        
     def contacts(self):
         n = pydart_api.getWorldNumContacts(self.id)
         contacts = pydart_api.getWorldContacts(self.id, 6 * n)
@@ -73,36 +84,56 @@ class Skeleton(object):
     def set_joint_damping(self, _damping):
         pydart_api.setSkeletonJointDamping(self.world.id, self.id, _damping)
 
-    @property
-    def ndofs(self):
+    def num_dofs(self):
         return len(self.dofs)
 
     @property
-    def nbodies(self):
+    def ndofs(self):
+        return self.num_dofs()
+
+    def num_bodies(self):
         return len(self.bodies)
         
     @property
-    def m(self):
-        return pydart_api.getSkeletonMass(self.world.id, self.id)
+    def nbodies(self):
+        return self.num_bodies()
 
+    def mass(self):
+        return pydart_api.getSkeletonMass(self.world.id, self.id)
+        
+    @property
+    def m(self):
+        return self.mass()
+
+    def positions(self):
+        return pydart_api.getSkeletonPositions(self.world.id, self.id, self.ndofs)
+        
     @property
     def q(self):
-        return pydart_api.getSkeletonPositions(self.world.id, self.id, self.ndofs)
+        return self.positions()
 
+    def set_positions(self, _q):
+        pydart_api.setSkeletonPositions(self.world.id, self.id, _q)
+    
     @q.setter
     def q(self, _q):
         """ Setter also updates the internal skeleton kinematics """
-        pydart_api.setSkeletonPositions(self.world.id, self.id, _q)
+        self.set_positions(_q)
+
+    def velocities(self):
+        return pydart_api.getSkeletonVelocities(self.world.id, self.id, self.ndofs)
 
     @property
     def qdot(self):
-        return pydart_api.getSkeletonVelocities(self.world.id, self.id, self.ndofs)
+        return self.velocities()
+
+    def set_velocities(self, _qdot):
+        pydart_api.setSkeletonVelocities(self.world.id, self.id, _qdot)
 
     @qdot.setter
     def qdot(self, _qdot):
         """ Setter also updates the internal skeleton kinematics """
-        pydart_api.setSkeletonVelocities(self.world.id, self.id, _qdot)
-
+        self.set_velocities(_qdot)
 
     def body(self, query):
         if isinstance(query, str):
@@ -113,26 +144,41 @@ class Skeleton(object):
             print 'No find...', query
             return None
 
-    @property
-    def C(self):
+    def world_com(self):
         return pydart_api.getSkeletonWorldCOM(self.world.id, self.id)
 
     @property
-    def Cdot(self):
+    def C(self):
+        return self.world_com()
+
+    def world_com_velocity(self):
         return pydart_api.getSkeletonWorldCOMVelocity(self.world.id, self.id)
 
     @property
-    def P(self):
-        return self.Cdot * 1.02
+    def Cdot(self):
+        return self.world_com_velocity()
+
+    def linear_momentum(self):
+        return self.Cdot * self.m
 
     @property
+    def P(self):
+        return self.linear_momentum()
+
     def forces(self):
         return self._tau
+
+    @property
+    def tau(self):
+        return self.forces()
         
-    @forces.setter
-    def forces(self, _tau):
+    def set_forces(self, _tau):
         self._tau = _tau
         pydart_api.setSkeletonForces(self.world.id, self.id, _tau)
+
+    @tau.setter
+    def tau(self, _tau):
+        self.set_forces(_tau)
 
     def approx_inertia(self, axis):
         """ Calculates the point-masses approximated inertia with respect to the axis """
@@ -185,13 +231,20 @@ class Body(object):
     def num_contacts(self):
         return pydart_api.getBodyNodeNumContacts(self.wid, self.sid, self.id)
         
-    @property
-    def m(self):
+
+    def mass(self):
         return pydart_api.getBodyNodeMass(self.wid, self.sid, self.id)
 
     @property
-    def I(self):
+    def m(self):
+        return self.mass()
+
+    def inertia(self):
         return pydart_api.getBodyNodeInertia(self.wid, self.sid, self.id)
+
+    @property
+    def I(self):
+        return self.inertia()
     
     def localCOM(self):
         return pydart_api.getBodyNodeLocalCOM(self.wid, self.sid, self.id)
@@ -215,6 +268,10 @@ class Body(object):
         pydart_api.getBodyNodeWorldLinearJacobian(self.wid, self.sid, self.id, J)
         return J
     
+    @property
+    def J(self):
+        return self.world_linear_jacobian()
+
     def __repr__(self):
         return '<Body.%s>' % self.name
 
