@@ -1,5 +1,6 @@
 import plotly.plotly as py
 from plotly.graph_objs import *
+import csv
 
 class History:
     def __init__(self, _sim):
@@ -49,6 +50,7 @@ class History:
         unique_url = py.plot(data, filename = 'Simulation history')
 
     def plotCOM(self):
+        return self.plotTwoCsv()
         x = [ data['t'] for data in self.histories ]
         traces = []
 
@@ -69,6 +71,35 @@ class History:
         traces = [Scatter(x=x,y=forces,name="F.y")]
         data = Data(traces)
         unique_url = py.plot(data, filename = 'Simulation Impact history')
-        
+
+    def writeData(self):
+        with open('data.csv', 'w+') as csvfile:
+            wr = csv.writer(csvfile)
+            for data in self.histories:
+                row = [data['t'], data['C.y'], data['P.y']]
+                wr.writerow(row)
+
+    def plotCSV(self, filename, tag):
+        data = []
+        with open(filename, 'r') as csvfile:
+            rd = csv.reader(csvfile)
+            for row in rd:
+                data += [ [float(x) for x in row] ]
+
+        names = ['t', tag + '_C.y', tag + '_P.y']
+        traces = []
+        for i in range(1, 3):
+            x = [ row[0] for row in data ]
+            y = [ row[i] for row in data ]
+            traces += [Scatter(x=x,y=y,name=names[i])]
+        return traces
+
+    def plotTwoCsv(self):
+        traces = []
+        traces += self.plotCSV('data00.csv', 'naive')
+        traces += self.plotCSV('data01.csv', 'control')
+        data = Data(traces)
+        py.image.save_as({'data': data}, 'two_momentums.png', height=900, width=1200)
+        # unique_url = py.plot(data, filename = 'Two Simulation Momentums')
         
         
