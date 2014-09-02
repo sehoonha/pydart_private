@@ -15,8 +15,14 @@ class History:
     def push(self):
         data = {}
         data['t'] = self.world.t
-        data['Contacts'] = self.world.contacts()
+        data['nframes'] = self.world.nframes
+        data['contacts'] = self.world.contacts()
+        data['contactedBodies'] = self.world.skel.contacted_body_names()
+        data['l_hand.v'] = self.world.skel.body("l_hand").Cdot
+        data['P'] = self.world.skel.P
         (data['P.x'], data['P.y']) = (self.world.skel.P[2], self.world.skel.P[1])
+        data['C'] = self.world.skel.C
+        (data['C.x'], data['C.y']) = (self.world.skel.C[2], self.world.skel.C[1])
         self.histories += [data]
         # Push all callback objects
         for cb in self.callbacks:
@@ -56,7 +62,7 @@ class History:
         x = [ data['t'] for data in self.histories ]
         # Plot vertical impact
         forces = []
-        for contacts in [ data['Contacts'] for data in self.histories ]:
+        for contacts in [ data['contacts'] for data in self.histories ]:
             f = sum( [float(c[4]) for c in contacts] ) # Sum the y component of the force
             sum_force = f
             forces += [sum_force]

@@ -70,8 +70,8 @@ class TIP:
 
     def push(self, history):
         data = history.histories[-1]
-        data['C.x'] = self.p1()[2]
-        data['C.y'] = self.p1()[1]
+        data['p1.x'] = self.p1()[2]
+        data['p1.y'] = self.p1()[1]
         data['r'] = self.d01()
         data['th'] = self.theta()
 

@@ -103,8 +103,9 @@ class TIP:
         X = self.simulate()
         (x, y, Px, Py, x2, y2, dx2, dy2) = self.quantities(X[-1])
         # cost = -1.0 * Py
-        cost = -1.0 * dy2
-        cost = self.estimate_impact(X[-1])
+        # cost = -1.0 * dy2
+        # cost = self.estimate_impact(X[-1])
+        cost = -1.0 * y
         # print self.control, 0.0005 * len(X), X[-1], -1.0 * cost
         return cost
 
@@ -132,7 +133,7 @@ class TIP:
             (Cx, Cy, Px, Py, x2, y2, dx2, dy2) = self.quantities(x)
             self.data += [ [t, x[0], x[1], x[2], Cx, Cy, dr, th2, r2] ]
         print 'Estimated impact = ', self.estimate_impact(X[-1])
-        # self.plotData()
+        self.plotData()
 
     def column(self, name):
         return [self.data[i][self.index[name]] for i in range(len(self.data))]
@@ -168,8 +169,8 @@ class TIP:
         data = Data(traces)
         layout = Layout(xaxis=XAxis(range=[0.0, 0.3]),  yaxis=YAxis(range=[0.0, 0.3]) )
 
-        # py.image.save_as({'data': data, 'layout':layout}, 'abstract_tip.png', height = 900, width = 1000)
-        unique_url = py.plot({'data': data, 'layout':layout}, filename = 'Abstract TIP')
+        py.image.save_as({'data': data, 'layout':layout}, 'abstract_tip.png', height = 900, width = 1000)
+        # unique_url = py.plot({'data': data, 'layout':layout}, filename = 'Abstract TIP')
 
             
 

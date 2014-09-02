@@ -240,7 +240,7 @@ void getWorldContacts(int wid, double* outv, int len) {
     int ptr = 0;
     for (size_t i = 0; i < n; i++) {
         Eigen::Vector3d v = cd->getContact(i).point;
-        Eigen::Vector3d f = cd->getContact(i).force / 10.0;
+        Eigen::Vector3d f = cd->getContact(i).force;
         for (int j = 0; j < 3; j++) {
             outv[ptr++] = v(j);
         }

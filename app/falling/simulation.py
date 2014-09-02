@@ -24,6 +24,9 @@ import abstract.model
 def confine(x, lo, hi):
     return min(max(lo, x), hi)
 
+def STR(v):
+    return str(["%.3f" % x for x in v])
+
 class Simulation:
     def __init__(self):
 
@@ -133,22 +136,23 @@ class Simulation:
         # Draw contacts
         gltools.glMove([0, 0, 0])
         glColor(0.7, 0.0, 0.3)
-        for c in self.history.get_frame()['Contacts']:
-            gltools.render_arrow(c[0:3], c[0:3] - 1.0 * c[3:6])
+        for c in self.history.get_frame()['contacts']:
+            gltools.render_arrow(c[0:3], c[0:3] - 0.001 * c[3:6])
 
         glPopMatrix()
 
 
     def status_string(self):
-        status = ""
-        status += "T = %.4f (%d)" % (self.world.t, self.world.nframes)
-        status += "C = " + str(["%.3f" % x for x in self.skel.C]) + " "
-        status += "Cdot = " + str(["%.3f" % x for x in self.skel.Cdot]) + " "
-        status += "I = %.4f " % self.skel.approx_inertia_x()
-        status += "Hand.v = " + str(["%.3f" % x for x in self.skel.body("l_hand").Cdot]) + " "
-        status += "TIP = " + str(self.tip) + " "
+        data = self.history.get_frame()
         
-        status += "Contacted = " + str(self.skel.contacted_body_names()) + " "
+        status = ""
+        status += "T = %.4f (%d) " % (data['t'], data['nframes'])
+        status += "C = %s " % STR(data['C'])
+        status += "P = %s " % STR(data['P'])
+        status += "l_hand.v = %s " % STR(data['l_hand.v'])
+        status += "I = %.4f " % self.skel.approx_inertia_x()
+        status += "TIP = " + str(self.tip) + " "
+        status += "Contacted = %s " % str(data['contactedBodies'])
 
         return status
 
