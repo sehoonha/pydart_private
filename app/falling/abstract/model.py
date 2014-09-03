@@ -102,8 +102,8 @@ class TIP:
         self.control = x
         X = self.simulate()
         (x, y, Px, Py, x2, y2, dx2, dy2) = self.quantities(X[-1])
-        # cost = -1.0 * Py
-        cost = -1.0 * dy2
+        cost = -1.0 * Py
+        # cost = -1.0 * dy2
         # cost = self.estimate_impact(X[-1])
         # cost = -1.0 * y
         # print self.control, 0.0005 * len(X), X[-1], -1.0 * cost

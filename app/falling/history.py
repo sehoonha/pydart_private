@@ -73,8 +73,8 @@ class History:
         data = Data(traces)
         layout = Layout(yaxis=YAxis(range=[-1.5, 0.0]) )
 
-        # unique_url = py.plot(data, filename = 'Simulation Cumulative Impact history')
-        py.image.save_as({'data': data, 'layout' : layout}, 'plot_impact.png', height=900, width=1200)
+        unique_url = py.plot(data, filename = 'Simulation Cumulative Impact history')
+        # py.image.save_as({'data': data, 'layout' : layout}, 'plot_impact.png', height=900, width=1200)
 
     def writeData(self):
         with open('data.csv', 'w+') as csvfile:
