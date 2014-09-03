@@ -74,14 +74,14 @@ class Simulation:
 
 
     def plan(self):
-        ### Plan with TIP
-        self.abstract_tip.optimize()
-        ik = IK(self)
-        self.pd.target = ik.optimize(restore = True)
-
-        # ### Direct planning
+        # ### Plan with TIP
+        # self.abstract_tip.optimize()
         # ik = IK(self)
-        # ik.optimize_with_fullbody_motion()
+        # self.pd.target = ik.optimize(restore = True)
+
+        ### Direct planning
+        ik = IK(self)
+        ik.optimize_with_fullbody_motion()
 
     def control(self):
         tau = np.zeros(self.skel.ndofs)

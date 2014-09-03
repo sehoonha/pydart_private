@@ -65,7 +65,8 @@ class IK:
         self.sim.reset()
         while not self.sim.step():
             pass
-        v = -self.sim.skel.Cdot[1]
+        # v = -self.sim.skel.Cdot[1]
+        v = -self.sim.skel.C[2]
 
         contacts = set(self.sim.skel.contacted_body_names())
         allowed  = set(['l_foot', 'r_foot', 'l_hand', 'r_hand'])
@@ -75,7 +76,9 @@ class IK:
         return v 
 
     def optimize_with_fullbody_motion(self):
-        print self.evaluate_fullbody([ 1., 0.09637636, 0.93696491, -0.92534248, -0.77468035])
+        # print self.evaluate_fullbody([ 1., 0.09637636, 0.93696491, -0.92534248, -0.77468035])
+        # print self.evaluate_fullbody([ 0.80067996,  0.91354763,  0.87398188, -0.5739955,  -0.05695692]) # Min dist touch
+        print self.evaluate_fullbody([0.99941362, -0.63121823, 0.58667322, 0.64432841, -0.79191961])
 
         # lo = np.array([-1.0] * 5)
         # hi = np.array([ 1.0] * 5)
