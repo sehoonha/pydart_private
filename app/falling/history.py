@@ -1,3 +1,4 @@
+import numpy as np
 import plotly.plotly as py
 from plotly.graph_objs import *
 import csv
@@ -65,12 +66,15 @@ class History:
         # Plot vertical impact
         forces = []
         for contacts in [ data['contacts'] for data in self.histories ]:
-            f = sum( [float(c[4]) for c in contacts] ) # Sum the y component of the force
-            sum_force = f
-            forces += [sum_force]
+            f_y = [float(c[4]) for c in contacts if -c[4] > 20.0]
+            forces += [np.sum(f_y)]
+        forces = np.cumsum(forces) * self.world.dt # Make it impulse
         traces = [Scatter(x=x,y=forces,name="F.y")]
         data = Data(traces)
-        unique_url = py.plot(data, filename = 'Simulation Impact history')
+        layout = Layout(yaxis=YAxis(range=[-1.5, 0.0]) )
+
+        # unique_url = py.plot(data, filename = 'Simulation Cumulative Impact history')
+        py.image.save_as({'data': data, 'layout' : layout}, 'plot_impact.png', height=900, width=1200)
 
     def writeData(self):
         with open('data.csv', 'w+') as csvfile:

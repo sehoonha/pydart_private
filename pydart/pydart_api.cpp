@@ -197,6 +197,19 @@ double getWorldTime(int wid) {
     return world->getTime();
 }
 
+double getWorldTimeStep(int wid) {
+    using namespace dart::simulation;
+    World* world = Manager::world(wid);
+    return world->getTimeStep();
+}
+
+void setWorldTimeStep(int wid, double _timeStep) {
+    using namespace dart::simulation;
+    World* world = Manager::world(wid);
+    world->setTimeStep(_timeStep);
+}
+
+
 int getWorldSimFrames(int wid) {
     using namespace dart::simulation;
     World* world = Manager::world(wid);

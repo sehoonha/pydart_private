@@ -37,6 +37,20 @@ class World(object):
     def t(self):
         return self.time()
 
+    def time_step(self):
+        return pydart_api.getWorldTimeStep(self.id)
+
+    @property
+    def dt(self):
+        return self.time_step()
+
+    def set_time_step(self, _time_step):
+        pydart_api.setWorldTimeStep(self.id, _time_step)
+
+    @dt.setter
+    def dt(self, _dt):
+        self.set_time_step(_dt)
+
     def num_frames(self):
         return pydart_api.getWorldSimFrames(self.id)
 

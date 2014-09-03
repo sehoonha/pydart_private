@@ -26,6 +26,8 @@ void renderSkeleton(int wid, int skid);
 
 // World Functions
 double getWorldTime(int wid);
+double getWorldTimeStep(int wid);
+void setWorldTimeStep(int wid, double _timeStep);
 int getWorldSimFrames(int wid);
 void setWorldSimFrame(int wid, int playFrame);
 int getWorldNumContacts(int wid);
