@@ -77,8 +77,8 @@ class IK:
 
     def optimize_with_fullbody_motion(self):
         # print self.evaluate_fullbody([ 1., 0.09637636, 0.93696491, -0.92534248, -0.77468035])
-        # print self.evaluate_fullbody([ 0.80067996,  0.91354763,  0.87398188, -0.5739955,  -0.05695692]) # Min dist touch
-        print self.evaluate_fullbody([0.99941362, -0.63121823, 0.58667322, 0.64432841, -0.79191961])
+        print self.evaluate_fullbody([ 0.80067996,  0.91354763,  0.87398188, -0.5739955,  -0.05695692]) # Min dist touch
+        # print self.evaluate_fullbody([0.99941362, -0.63121823, 0.58667322, 0.64432841, -0.79191961]) # Max dist touch
 
         # lo = np.array([-1.0] * 5)
         # hi = np.array([ 1.0] * 5)
