@@ -25,9 +25,18 @@ class IK:
         self.dim = 5
         self.weights = np.array( [1.0, 1.0, 0.5, 1.0, 0.05] )
 
+        # self.objs = [ ObjTIP(self.sim.tip) ]
+        # self.objs[0].target = self.sim.abstract_tip.commands()
+        # print 'objs[0].target = ', self.objs[0].target
+
         self.objs = [ ObjTIP(self.sim.tip) ]
-        self.objs[0].target = self.sim.abstract_tip.commands()
+        self.objs[0].target = [0.14, 0.08, 2.7]
         print 'objs[0].target = ', self.objs[0].target
+
+        # self.objs += [ ObjTIP(self.sim.tip2) ]
+        # self.objs[1].target = [0.08, 0.17, 1.0]
+        # print 'objs[1].target = ', self.objs[1].target
+
         
     def expand(self, x):
         q = self.sim.skel.q

@@ -53,13 +53,16 @@ class Simulation:
 
         ### Now, configure the controllers
         # Abstract view of skeleton
-        self.tip = TIP(self.skel)
+        self.tip = TIP(self.skel, "rfoot", "lfoot")
         self.history.callbacks += [self.tip]
+        self.tip2 = TIP(self.skel, "lfoot", "hands")
+        self.history.callbacks += [self.tip2]
 
         # Abstract model
         self.abstract_tip = abstract.model.TIP()
         self.abstract_tip.set_x0( self.tip )
         self.abstract_tip.set_bounds( self.tip )
+        print self.tip.get_state()
         # self.abstract_tip.load_history(config.DATA_PATH + 'TIP.csv')
         # self.abstract_tip.optimize()
         
@@ -83,6 +86,11 @@ class Simulation:
         # ik = IK(self)
         # ik.optimize_with_fullbody_motion()
 
+        # ### Plan with Double TIP
+        # ik = IK(self)
+        # self.pd.target = ik.optimize(restore = True)
+
+
     def control(self):
         tau = np.zeros(self.skel.ndofs)
         # Track the initial pose
@@ -97,8 +105,8 @@ class Simulation:
 
     def reset(self):
         ### Reset Pydart
-        self.skel.q = BioloidGPPoses().leaned_pose()
-        # self.skel.q = BioloidGPPoses().stepping_pose()
+        # self.skel.q = BioloidGPPoses().leaned_pose()
+        self.skel.q = BioloidGPPoses().stepping_pose()
         self.skel.qdot = np.zeros(self.skel.ndofs)
         self.world.reset()
 
@@ -132,6 +140,7 @@ class Simulation:
 
         # Draw TIP
         self.tip.render()
+        self.tip2.render()
 
         # Draw contacts
         gltools.glMove([0, 0, 0])

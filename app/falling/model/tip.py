@@ -11,10 +11,12 @@ import gltools
 
 class TIP:
     """ Telescoptic Inverted Pendulum with A Massless End Effector """
-    def __init__(self, _skel):
+    def __init__(self, _skel, _name0, _name2):
         self.skel = _skel
+        self.name0 = _name0
+        self.name2 = _name2
 
-    def average_body_positions(self, bodynames, local):
+    def avg_positions(self, bodynames, local):
         if not isinstance(local[0], list):
             local = [local] * len(bodynames)
 
@@ -27,11 +29,25 @@ class TIP:
         avg = (sum(positions) / len(positions))[0:3]
         return avg
 
+    def p(self, name):
+        if name == 'feet':
+            return self.avg_positions(["l_foot", "r_foot"], [-0.05, 0.025, 0.0])
+        elif name == 'hands':
+            (y, z) = (0.11, -0.01)
+            return self.avg_positions(["l_hand", "r_hand"], [[0, -y, -z], [0, y, z]] )
+        elif name == 'knees':
+            (y, z) = (0.0, 0.0)
+            return self.avg_positions(["l_shin", "r_shin"], [[0, -y, -z], [0, y, z]] )
+        elif name == 'lfoot':
+            return self.avg_positions(["l_foot"], [0.05, 0.025, 0.0])
+        elif name == 'rfoot':
+            return self.avg_positions(["r_foot"], [-0.05, 0.025, 0.0])
+        else:
+            return None
 
     def p0(self):
         """Returns the origin """
-        return self.average_body_positions(["l_foot", "r_foot"], [-0.05, 0.025, 0.0])
-        # return self.average_body_positions(["r_foot"], [-0.05, 0.025, 0.0])
+        return self.p(self.name0)
 
     def p1(self):
         """Returns the COM """
@@ -39,12 +55,7 @@ class TIP:
 
     def p2(self):
         """Returns the End Effector"""
-        # return self.average_body_positions(["l_foot"], [0.05, 0.025, 0.0])
-
-        # (y, z) = (0.0, 0.0)
-        # return self.average_body_positions(["l_shin", "r_shin"], [[0, -y, -z], [0, y, z]] )
-        (y, z) = (0.11, -0.01)
-        return self.average_body_positions(["l_hand", "r_hand"], [[0, -y, -z], [0, y, z]] )
+        return self.p(self.name2)
 
     def d01(self):
         """Returns the distance between origin and COM """
