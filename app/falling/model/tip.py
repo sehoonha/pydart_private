@@ -8,7 +8,6 @@ from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import gltools
 
-
 class TIP:
     """ Telescoptic Inverted Pendulum with A Massless End Effector """
     def __init__(self, _skel, _name0, _name2):
@@ -43,6 +42,7 @@ class TIP:
         elif name == 'rfoot':
             return self.avg_positions(["r_foot"], [-0.05, 0.025, 0.0])
         else:
+            print 'Invalid name: ', name
             return None
 
     def p0(self):

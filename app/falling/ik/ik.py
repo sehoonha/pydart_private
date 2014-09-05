@@ -25,13 +25,13 @@ class IK:
         self.dim = 5
         self.weights = np.array( [1.0, 1.0, 0.5, 1.0, 0.05] )
 
-        # self.objs = [ ObjTIP(self.sim.tip) ]
-        # self.objs[0].target = self.sim.abstract_tip.commands()
-        # print 'objs[0].target = ', self.objs[0].target
-
         self.objs = [ ObjTIP(self.sim.tip) ]
-        self.objs[0].target = [0.14, 0.08, 2.7]
+        self.objs[0].target = self.sim.abstract_tip.commands()
         print 'objs[0].target = ', self.objs[0].target
+
+        # self.objs = [ ObjTIP(self.sim.tip) ]
+        # self.objs[0].target = [0.14, 0.08, 2.7]
+        # print 'objs[0].target = ', self.objs[0].target
 
         # self.objs += [ ObjTIP(self.sim.tip2) ]
         # self.objs[1].target = [0.08, 0.17, 1.0]
@@ -74,26 +74,33 @@ class IK:
         self.sim.reset()
         while not self.sim.step():
             pass
-        # v = -self.sim.skel.Cdot[1]
-        v = -self.sim.skel.C[2]
+
+        data = self.sim.history.get_frame_at(-2)
+
+        # v = -data['P.y']
+        # v = sum(self.sim.history.vertical_impulses())
+        v = -data['C.y']
 
         contacts = set(self.sim.skel.contacted_body_names())
         allowed  = set(['l_foot', 'r_foot', 'l_hand', 'r_hand'])
         if len(contacts - allowed) > 0:
             v += 10.0
-        print x, " --> ", v
+        print repr(x), " --> ", v
         return v 
 
     def optimize_with_fullbody_motion(self):
-        # print self.evaluate_fullbody([ 1., 0.09637636, 0.93696491, -0.92534248, -0.77468035])
-        print self.evaluate_fullbody([ 0.80067996,  0.91354763,  0.87398188, -0.5739955,  -0.05695692]) # Min dist touch
+        # print self.evaluate_fullbody([ 0.98677002,  0.79964316,  0.58797879, -0.63084664, -0.53535414]) # Max P.y
+        # print self.evaluate_fullbody([0.05952294,  0.27164898,  1.        , -0.6327223 , -0.67808456]) # Min Impulse
+
+        # print self.evaluate_fullbody([ 0.80067996,  0.91354763,  0.87398188, -0.5739955,  -0.05695692]) # Min dist touch
         # print self.evaluate_fullbody([0.99941362, -0.63121823, 0.58667322, 0.64432841, -0.79191961]) # Max dist touch
 
-        # lo = np.array([-1.0] * 5)
-        # hi = np.array([ 1.0] * 5)
-        # opt = {'verb_time':0,  'boundary_handling': 'BoundPenalty', \
-        #        'bounds': [lo, hi], 'tolfun' : 0.001}
-        # print "==== abstract.model.TIP optimize...."
-        # self.res = cma.fmin(self.evaluate_fullbody, 0.5 * (lo + hi), 1.0, opt)
 
-        # self.control = self.res[0]
+        lo = np.array([-1.0] * 5)
+        hi = np.array([ 1.0] * 5)
+        opt = {'verb_time':0,  'boundary_handling': 'BoundPenalty', \
+               'bounds': [lo, hi], 'tolfun' : 0.001}
+        print "==== abstract.model.TIP optimize...."
+        self.res = cma.fmin(self.evaluate_fullbody, 0.5 * (lo + hi), 1.0, opt)
+
+        self.control = self.res[0]

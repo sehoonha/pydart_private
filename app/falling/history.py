@@ -36,6 +36,9 @@ class History:
 
     def get_frame(self):
         return self.histories[self.index]
+
+    def get_frame_at(self, index):
+        return self.histories[index]
         
     def plot(self):
         x = [ data['t'] for data in self.histories ]
@@ -61,17 +64,22 @@ class History:
         data = Data(traces)
         unique_url = py.plot(data, filename = 'Simulation COM history')
 
+    def vertical_impulses(self):
+        forces = []
+        for contacts in [ data['contacts'] for data in self.histories ]:
+            f_y = [float(-c[4]) for c in contacts if -c[4] > 5.0]
+            forces += [np.sum(f_y) * self.world.dt]
+        return forces
+        
+        
     def plotImpact(self):
         x = [ data['t'] for data in self.histories ]
         # Plot vertical impact
-        forces = []
-        for contacts in [ data['contacts'] for data in self.histories ]:
-            f_y = [float(c[4]) for c in contacts if -c[4] > 20.0]
-            forces += [np.sum(f_y)]
-        forces = np.cumsum(forces) * self.world.dt # Make it impulse
+        forces = self.vertical_impulses()
+        # forces = np.cumsum(forces)
         traces = [Scatter(x=x,y=forces,name="F.y")]
         data = Data(traces)
-        layout = Layout(yaxis=YAxis(range=[-1.5, 0.0]) )
+        layout = Layout(yaxis=YAxis(range=[0.0, 1.5]) )
 
         unique_url = py.plot(data, filename = 'Simulation Cumulative Impact history')
         # py.image.save_as({'data': data, 'layout' : layout}, 'plot_impact.png', height=900, width=1200)

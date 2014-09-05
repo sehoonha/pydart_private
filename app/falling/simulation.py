@@ -53,10 +53,10 @@ class Simulation:
 
         ### Now, configure the controllers
         # Abstract view of skeleton
-        self.tip = TIP(self.skel, "rfoot", "lfoot")
+        self.tip = TIP(self.skel, 'feet', 'hands')
         self.history.callbacks += [self.tip]
-        self.tip2 = TIP(self.skel, "lfoot", "hands")
-        self.history.callbacks += [self.tip2]
+        # self.tip2 = TIP(self.skel, "lfoot", "hands")
+        # self.history.callbacks += [self.tip2]
 
         # Abstract model
         self.abstract_tip = abstract.model.TIP()
@@ -105,15 +105,15 @@ class Simulation:
 
     def reset(self):
         ### Reset Pydart
-        # self.skel.q = BioloidGPPoses().leaned_pose()
-        self.skel.q = BioloidGPPoses().stepping_pose()
+        self.skel.q = BioloidGPPoses().leaned_pose()
+        # self.skel.q = BioloidGPPoses().stepping_pose()
         self.skel.qdot = np.zeros(self.skel.ndofs)
         self.world.reset()
 
         ### Reset inner structures
         self.history.clear()
         self.history.push()
-        self.terminated = set()
+        self.terminated = dict()
 
     def step(self):
         self.skel.tau = self.control()
@@ -124,8 +124,12 @@ class Simulation:
         # if len(set(self.skel.contacted_body_names()) - set(['r_foot'])) > 0 \
         if len(set(self.skel.contacted_body_names()) - set(['l_foot', 'r_foot'])) > 0 \
            and 'new_contact' not in self.terminated:
-            self.terminated.add('new_contact')
-            return True
+            self.terminated['new_contact'] = 40 # 40 frames = 1/50 sec
+
+        for key in self.terminated:
+            self.terminated[key] -= 1
+            if self.terminated[key] == 0:
+                return True
         return False
 
     def render(self):
@@ -140,7 +144,7 @@ class Simulation:
 
         # Draw TIP
         self.tip.render()
-        self.tip2.render()
+        # self.tip2.render()
 
         # Draw contacts
         gltools.glMove([0, 0, 0])
@@ -158,7 +162,8 @@ class Simulation:
         status += "T = %.4f (%d) " % (data['t'], data['nframes'])
         status += "C = %s " % STR(data['C'])
         status += "P = %s " % STR(data['P'])
-        status += "l_hand.v = %s " % STR(data['l_hand.v'])
+        status += "Impulse = %.4f " % sum(self.history.vertical_impulses())
+        # status += "l_hand.v = %s " % STR(data['l_hand.v'])
         status += "I = %.4f " % self.skel.approx_inertia_x()
         status += "TIP = " + str(self.tip) + " "
         status += "Contacted = %s " % str(data['contactedBodies'])
