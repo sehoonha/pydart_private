@@ -76,7 +76,7 @@ class History:
         x = [ data['t'] for data in self.histories ]
         # Plot vertical impact
         forces = self.vertical_impulses()
-        # forces = np.cumsum(forces)
+        forces = np.cumsum(forces)
         traces = [Scatter(x=x,y=forces,name="F.y")]
         data = Data(traces)
         layout = Layout(yaxis=YAxis(range=[0.0, 1.5]) )

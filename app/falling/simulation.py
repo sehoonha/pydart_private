@@ -80,7 +80,7 @@ class Simulation:
         ### Plan with TIP
         self.abstract_tip.optimize()
         ik = IK(self)
-        self.pd.target = ik.optimize(restore = True)
+        self.pd.target = ik.optimize(restore = False)
 
         # ### Direct planning in FB
         # ik = IK(self)

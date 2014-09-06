@@ -47,6 +47,8 @@ class IK:
 
     def evaluate(self, x = None):
         if x is not None:
+            if np.max(np.fabs(x)) > 1.0:
+                return np.max(np.fabs(x))
             # 0 : shoulders 1 : hips 2: knees 3: hands 4: ankles
             self.sim.skel.q = self.expand(x * self.weights)
                        
@@ -60,7 +62,7 @@ class IK:
             x0 = np.zeros(self.dim)
 
         print "==== ik.IK optimize...."
-        self.res = minimize(lambda x : self.evaluate(x), x0, method='nelder-mead')
+        self.res = minimize(lambda x : self.evaluate(x), x0, method='nelder-mead', tol=0.000001, options={'maxiter':3000})
 
         print "==== result\n", self.res
         print "==== ik.IK optimize....OK"
