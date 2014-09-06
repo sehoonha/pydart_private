@@ -66,7 +66,7 @@ class TIP:
 
     def set_bounds(self, tip):
         self.lo = np.array([-0.1, tip.angle() - 1.5, tip.d12() - 0.03])
-        self.hi = np.array([ 0.1, tip.angle() + 1.5, tip.d12() + 0.03])
+        self.hi = np.array([ 0.1, tip.angle() + 0.5, tip.d12() + 0.03])
         # self.lo = np.array([-0.2, tip.angle() - 1.0, tip.d12() - 0.04])
         # self.hi = np.array([ 0.2, tip.angle() + 1.2, tip.d12() + 0.07])
         print 'set abstract.model.TIP.lo = ', self.lo
@@ -107,8 +107,8 @@ class TIP:
         X = self.simulate()
         (x, y, Px, Py, x2, y2, dx2, dy2) = self.quantities(X[-1])
         (r1, r2, th2) = (X[-1][2], self.control[2], self.control[1])
-        if r1 + r2 > 0.29:
-            return 9.0 + (r1 + r2)
+        # if r1 + r2 > 0.32:
+        #     return 9.0 + (r1 + r2)
 
         # cost = -1.0 * Py
         cost = self.estimate_impact(X[-1])

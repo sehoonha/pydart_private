@@ -37,7 +37,9 @@ class Simulation:
         self.world.add_skeleton(config.DATA_PATH + "urdf/BioloidGP/BioloidGP.URDF")
 
         self.skel = self.world.skel # shortcut for the control skeleton
-        
+        for i, dof in enumerate(self.skel.dofs):
+            print i, dof
+
         self.skel.set_joint_damping(0.15)
         self.history = History(self)
 
@@ -53,10 +55,10 @@ class Simulation:
 
         ### Now, configure the controllers
         # Abstract view of skeleton
-        self.tip = TIP(self.skel, 'feet', 'hands')
+        self.tip = TIP(self.skel, 'rfoot', 'lfoot')
         self.history.callbacks += [self.tip]
-        # self.tip2 = TIP(self.skel, "lfoot", "hands")
-        # self.history.callbacks += [self.tip2]
+        self.tip2 = TIP(self.skel, "lfoot", "hands")
+        self.history.callbacks += [self.tip2]
 
         # Abstract model
         self.abstract_tip = abstract.model.TIP()
@@ -105,8 +107,8 @@ class Simulation:
 
     def reset(self):
         ### Reset Pydart
-        self.skel.q = BioloidGPPoses().leaned_pose()
-        # self.skel.q = BioloidGPPoses().stepping_pose()
+        # self.skel.q = BioloidGPPoses().leaned_pose()
+        self.skel.q = BioloidGPPoses().stepping_pose()
         self.skel.qdot = np.zeros(self.skel.ndofs)
         self.world.reset()
 
@@ -144,7 +146,7 @@ class Simulation:
 
         # Draw TIP
         self.tip.render()
-        # self.tip2.render()
+        self.tip2.render()
 
         # Draw contacts
         gltools.glMove([0, 0, 0])

@@ -22,8 +22,20 @@ class IK:
         self.res = None
 
         # Dimensions and weights
-        self.dim = 5
-        self.weights = np.array( [1.0, 1.0, 0.5, 1.0, 0.05] )
+        # self.weights = np.array( [1.0, 1.0, 0.5, 1.0, 0.05] )
+
+        self.param_desc = [ (0, 'l_shoulder', 1.0),
+                            (0, 'r_shoulder', 1.0),
+                            (1, 'l_hand', 1.0),
+                            (1, 'r_hand', 1.0),
+                            (2, 'l_thigh', 1.0),
+                            (3, 'r_thigh', 1.0),
+                            (4, 'l_shin', 0.5),
+                            (5, 'r_shin', 0.5),
+                            (6, 'l_heel', 0.05),
+                            (7, 'r_heel', 0.05) ]
+                                    
+        self.dim = max([i for i, dof, w in self.param_desc]) + 1
 
         self.objs = [ ObjTIP(self.sim.tip) ]
         self.objs[0].target = self.sim.abstract_tip.commands()
@@ -40,17 +52,16 @@ class IK:
         
     def expand(self, x):
         q = self.sim.skel.q
-        return list(q[0:6]) + [ 0.0, x[0], 0.0, x[0], x[1], 0.0, x[1], 0.0 ] + [ x[2], x[3], x[2], x[3], x[4], x[4], 0.0, 0.0 ]
-
-    # def getCOMToBodyPoint(self):
-    #     return self.objs[0]
+        for x_i, dof_name, w in self.param_desc:
+            dof_i = self.sim.skel.dof_index(dof_name)
+            q[dof_i] = w * x[x_i]
+        return q
 
     def evaluate(self, x = None):
         if x is not None:
             if np.max(np.fabs(x)) > 1.0:
                 return np.max(np.fabs(x))
-            # 0 : shoulders 1 : hips 2: knees 3: hands 4: ankles
-            self.sim.skel.q = self.expand(x * self.weights)
+            self.sim.skel.q = self.expand(x)
                        
         return sum([ obj.cost() for obj in self.objs])
 

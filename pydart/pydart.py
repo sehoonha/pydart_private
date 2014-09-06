@@ -158,6 +158,9 @@ class Skeleton(object):
             print 'No find...', query
             return None
 
+    def dof_index(self, _name):
+        return self.name_to_dof[_name].id
+
     def world_com(self):
         return pydart_api.getSkeletonWorldCOM(self.world.id, self.id)
 
@@ -311,6 +314,6 @@ class Dof(object):
         return self.skel.id
 
     def __repr__(self):
-        return '<Dof.%s>' % self.name
+        return '<Dof.%s at %d>' % (self.name, self.id)
     
         
