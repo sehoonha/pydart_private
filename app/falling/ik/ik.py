@@ -29,11 +29,11 @@ class IK:
                             (1, 'l_hand', 1.0),
                             (1, 'r_hand', 1.0),
                             (2, 'l_thigh', 1.0),
-                            (3, 'r_thigh', 1.0),
-                            (4, 'l_shin', 0.5),
-                            (5, 'r_shin', 0.5),
-                            (6, 'l_heel', 0.05),
-                            (7, 'r_heel', 0.05) ]
+                            (2, 'r_thigh', 1.0),
+                            (3, 'l_shin', 0.5),
+                            (3, 'r_shin', 0.5),
+                            (4, 'l_heel', 0.05),
+                            (4, 'r_heel', 0.05) ]
                                     
         self.dim = max([i for i, dof, w in self.param_desc]) + 1
 

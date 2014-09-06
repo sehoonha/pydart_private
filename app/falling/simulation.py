@@ -55,10 +55,10 @@ class Simulation:
 
         ### Now, configure the controllers
         # Abstract view of skeleton
-        self.tip = TIP(self.skel, 'rfoot', 'lfoot')
+        self.tip = TIP(self.skel, 'feet', 'hands')
         self.history.callbacks += [self.tip]
-        self.tip2 = TIP(self.skel, "lfoot", "hands")
-        self.history.callbacks += [self.tip2]
+        # self.tip2 = TIP(self.skel, "lfoot", "hands")
+        # self.history.callbacks += [self.tip2]
 
         # Abstract model
         self.abstract_tip = abstract.model.TIP()
@@ -107,8 +107,8 @@ class Simulation:
 
     def reset(self):
         ### Reset Pydart
-        # self.skel.q = BioloidGPPoses().leaned_pose()
-        self.skel.q = BioloidGPPoses().stepping_pose()
+        self.skel.q = BioloidGPPoses().leaned_pose()
+        # self.skel.q = BioloidGPPoses().stepping_pose()
         self.skel.qdot = np.zeros(self.skel.ndofs)
         self.world.reset()
 
@@ -146,7 +146,7 @@ class Simulation:
 
         # Draw TIP
         self.tip.render()
-        self.tip2.render()
+        # self.tip2.render()
 
         # Draw contacts
         gltools.glMove([0, 0, 0])
@@ -164,7 +164,7 @@ class Simulation:
         status += "T = %.4f (%d) " % (data['t'], data['nframes'])
         status += "C = %s " % STR(data['C'])
         status += "P = %s " % STR(data['P'])
-        status += "Impulse = %.4f " % sum(self.history.vertical_impulses())
+        status += "Impulse = %.4f " % self.history.max_impulse()
         # status += "l_hand.v = %s " % STR(data['l_hand.v'])
         status += "I = %.4f " % self.skel.approx_inertia_x()
         status += "TIP = " + str(self.tip) + " "

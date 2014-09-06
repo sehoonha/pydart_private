@@ -64,20 +64,49 @@ class History:
         data = Data(traces)
         unique_url = py.plot(data, filename = 'Simulation COM history')
 
-    def vertical_impulses(self):
+    def vertical_impulses(self, window_size = 40):
         forces = []
         for contacts in [ data['contacts'] for data in self.histories ]:
-            f_y = [float(-c[4]) for c in contacts if -c[4] > 5.0]
+            f_y = [float(-c[4]) for c in contacts]
             forces += [np.sum(f_y) * self.world.dt]
+        # [ -data['contacts'][4] for data in self.histories ] * self.world.dt
+
+        operands = np.array(forces)
+        for i in range(window_size - 1):
+            if len(forces) == 1:
+                return forces
+
+            operands = np.delete(operands, 0)
+            forces = np.delete(forces, -1)
+            forces = forces + operands
+        
+        # n = len(self.histories)
+        # window_size = 10
+        # for i in range(n - window_size + 1):
+        #     j = i + window_size
+        #     force
+        # for contacts in [ data['contacts'] for data in self.histories ]:
+        #     f_y = [float(-c[4]) for c in contacts if -c[4] > 5.0]
+        #     forces += [np.sum(f_y) * self.world.dt]
         return forces
         
+    def max_impulse(self):
+        impulses = self.vertical_impulses()
+        return (0 if len(impulses) == 0 else max(impulses) )
+
         
     def plotImpact(self):
         x = [ data['t'] for data in self.histories ]
         # Plot vertical impact
-        forces = self.vertical_impulses()
-        forces = np.cumsum(forces)
-        traces = [Scatter(x=x,y=forces,name="F.y")]
+        raw_impulses = self.vertical_impulses(1)
+        impulses = self.vertical_impulses()
+        max_impulses = np.maximum.accumulate(impulses)
+            
+        traces = []
+        traces += [Scatter(x=x,y=raw_impulses,name="Raw Impulse")]
+        traces += [Scatter(x=x,y=impulses,name="Impulse (Windowed)")]
+        traces += [Scatter(x=x,y=max_impulses,name="Max Impulse")]
+
         data = Data(traces)
         layout = Layout(yaxis=YAxis(range=[0.0, 1.5]) )
 
