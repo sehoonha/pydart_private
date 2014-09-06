@@ -33,9 +33,9 @@ def render_chessboard(n, sz):
             x2 = x + step
             z2 = z + step
             if cnt % 2 == 0:
-                glColor(0.4, 0.4, 0.4)
+                glColor(0.2, 0.2, 0.2)
             else:
-                glColor(0.7, 0.7, 0.7)
+                glColor(0.8, 0.8, 0.8)
                 
             glBegin(GL_POLYGON)
             glVertex([x, 0, z])
