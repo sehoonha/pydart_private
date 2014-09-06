@@ -15,16 +15,18 @@ class History:
         self.histories = []
         
     def push(self):
+        skel = self.world.skel
         data = {}
         data['t'] = self.world.t
         data['nframes'] = self.world.nframes
         data['contacts'] = self.world.contacts()
-        data['contactedBodies'] = self.world.skel.contacted_body_names()
-        data['l_hand.v'] = self.world.skel.body("l_hand").Cdot
-        data['P'] = self.world.skel.P
-        (data['P.x'], data['P.y']) = (self.world.skel.P[2], self.world.skel.P[1])
-        data['C'] = self.world.skel.C
-        (data['C.x'], data['C.y']) = (self.world.skel.C[2], self.world.skel.C[1])
+        data['skelcontacts'] = skel.external_contacts_and_body_id()
+        data['contactedBodies'] = skel.contacted_body_names()
+        data['l_hand.v'] = skel.body("l_hand").Cdot
+        data['P'] = skel.P
+        (data['P.x'], data['P.y']) = (skel.P[2], skel.P[1])
+        data['C'] = skel.C
+        (data['C.x'], data['C.y']) = (skel.C[2], skel.C[1])
         self.histories += [data]
         # Push all callback objects
         for cb in self.callbacks:
@@ -66,10 +68,17 @@ class History:
 
     def vertical_impulses(self, window_size = 40):
         forces = []
-        for contacts in [ data['contacts'] for data in self.histories ]:
-            f_y = [float(-c[4]) for c in contacts]
+        pivot_id = self.world.skel.body_index('r_foot')
+
+        # print 'pivot = ', pivot_id
+        # print self.world.skel.name_to_body
+        # for idx, data in enumerate(self.histories[0:10]):
+        #     print 'frame ', idx, [bid for (c, bid) in data['skelcontacts']]
+
+        for contacts_ids in [ data['skelcontacts'] for data in self.histories ]:
+            f_y = [float(-c[4]) for c, bid in contacts_ids if bid != pivot_id]
             forces += [np.sum(f_y) * self.world.dt]
-        # [ -data['contacts'][4] for data in self.histories ] * self.world.dt
+        # print forces[0:10]
 
         operands = np.array(forces)
         for i in range(window_size - 1):

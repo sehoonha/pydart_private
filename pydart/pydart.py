@@ -60,8 +60,8 @@ class World(object):
         
     def contacts(self):
         n = pydart_api.getWorldNumContacts(self.id)
-        contacts = pydart_api.getWorldContacts(self.id, 6 * n)
-        return [contacts[6 * i : 6 * i + 6] for i in range(n)]
+        contacts = pydart_api.getWorldContacts(self.id, 7 * n)
+        return [contacts[7 * i : 7 * (i + 1)] for i in range(n)]
 
     def reset(self):
         pydart_api.resetWorld(self.id)
@@ -157,6 +157,8 @@ class Skeleton(object):
         else:
             print 'No find...', query
             return None
+    def body_index(self, _name):
+        return self.name_to_body[_name].id
 
     def dof_index(self, _name):
         return self.name_to_dof[_name].id
@@ -218,6 +220,19 @@ class Skeleton(object):
     def approx_inertia_z(self):
         return self.approx_inertia([1, 0, 0])
 
+    def external_contacts_and_body_id(self):
+        cid_cnt = dict()
+        contacts = []
+        for body in self.bodies:
+            for c in body.contacts():
+                contacts += [(c, body.id)]
+                cid = int(c[6])
+                if cid not in cid_cnt:
+                    cid_cnt[cid] = 1
+                else:
+                    cid_cnt[cid] += 1
+        return [(c, bid) for (c, bid) in contacts if cid_cnt[int(c[6])] < 2]
+        
     def contacted_bodies(self):
         return [body for body in self.bodies if body.num_contacts() > 0]
 
@@ -234,8 +249,12 @@ class Skeleton(object):
 class Body(object):
     def __init__(self, _skel, _id):
         self.skel = _skel
-        self.id = _id
+        self._id = _id
         self.name = pydart_api.getSkeletonBodyName(self.wid, self.sid, self.id)
+
+    @property
+    def id(self):
+        return self._id
 
     @property
     def wid(self):
@@ -248,6 +267,10 @@ class Body(object):
     def num_contacts(self):
         return pydart_api.getBodyNodeNumContacts(self.wid, self.sid, self.id)
         
+    def contacts(self):
+        n = self.num_contacts()
+        contacts = pydart_api.getBodyNodeContacts(self.wid, self.sid, self.id, 7 * n)
+        return [contacts[7 * i : 7 * (i + 1)] for i in range(n)]
 
     def mass(self):
         return pydart_api.getBodyNodeMass(self.wid, self.sid, self.id)
@@ -297,7 +320,7 @@ class Body(object):
         return self.world_linear_jacobian()
 
     def __repr__(self):
-        return '<Body.%s>' % self.name
+        return '<Body.%d.%s>' % (self.id, self.name)
 
 class Dof(object):    
     def __init__(self, _skel, _id):

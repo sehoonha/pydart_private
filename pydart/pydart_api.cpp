@@ -239,17 +239,18 @@ int getWorldNumContacts(int wid) {
     return cd->getNumContacts();
 }
 
-
 void getWorldContacts(int wid, double* outv, int len) {
     dart::simulation::World* world = Manager::world(wid);
     dart::collision::CollisionDetector* cd =
         world->getConstraintSolver()->getCollisionDetector();
     int n = cd->getNumContacts();
-    if (6 * n != len) {
-        cerr << "6n is needed for the output vector. n = " << n << ", len =  " << len << endl;
+    if (7 * n != len) {
+        cerr << "getWorldContacts: 7n is needed for the output vector. n = " << n << ", len =  " << len << endl;
         return;
     }
 
+    // ( v.x, v.y, v.z, p.x, p.y, p.z, id )
+    
     int ptr = 0;
     for (size_t i = 0; i < n; i++) {
         Eigen::Vector3d v = cd->getContact(i).point;
@@ -260,6 +261,7 @@ void getWorldContacts(int wid, double* outv, int len) {
         for (int j = 0; j < 3; j++) {
             outv[ptr++] = f(j);
         }
+        outv[ptr++] = i;
 
     }    
 }
@@ -434,6 +436,49 @@ int getBodyNodeNumContacts(int wid, int skid, int bid) {
         }
     }
     return cnt;
+}
+
+void getBodyNodeContacts(int wid, int skid, int bid, double* outv, int len) {
+    dart::dynamics::Skeleton* skel = Manager::skeleton(wid, skid);
+    dart::dynamics::BodyNode* bn = skel->getBodyNode(bid);
+
+    dart::simulation::World* world = Manager::world(wid);
+    dart::collision::CollisionDetector* cd =
+        world->getConstraintSolver()->getCollisionDetector();
+    int n = cd->getNumContacts();
+
+    int m = 0;
+    for (size_t i = 0; i < n; i++) {
+        dart::collision::Contact& c = cd->getContact(i);
+        if (c.bodyNode1 != bn && c.bodyNode2 != bn) {
+            continue;
+        }
+        m++;
+    }
+
+    if (7 * m != len) {
+        cerr << "getBodyNodeContacts: 7m is needed for the output vector. m = " << m
+             << ", n = " << n << ", len =  " << len << endl;
+        return;
+    }
+
+    int ptr = 0;
+    for (size_t i = 0; i < n; i++) {
+        dart::collision::Contact& c = cd->getContact(i);
+        if (c.bodyNode1 != bn && c.bodyNode2 != bn) {
+            continue;
+        }
+        Eigen::Vector3d v = cd->getContact(i).point;
+        Eigen::Vector3d f = cd->getContact(i).force;
+        for (int j = 0; j < 3; j++) {
+            outv[ptr++] = v(j);
+        }
+        for (int j = 0; j < 3; j++) {
+            outv[ptr++] = f(j);
+        }
+        outv[ptr++] = i;
+
+    }
 }
 
 void getBodyNodeTransformation(int wid, int skid, int bid, double outv44[4][4]) {

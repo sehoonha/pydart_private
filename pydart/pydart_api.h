@@ -58,6 +58,7 @@ void getBodyNodeLocalCOM(int wid, int skid, int bid, double outv3[3]);
 void getBodyNodeWorldCOM(int wid, int skid, int bid, double outv3[3]);
 void getBodyNodeWorldCOMVelocity(int wid, int skid, int bid, double outv3[3]);
 int getBodyNodeNumContacts(int wid, int skid, int bid);
+void getBodyNodeContacts(int wid, int skid, int bid, double* outv, int len);
 void getBodyNodeTransformation(int wid, int skid, int bid, double outv44[4][4]);
 void getBodyNodeWorldLinearJacobian(int wid, int skid, int bid, double* array2, int nrows, int ncols);
 

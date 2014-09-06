@@ -55,10 +55,10 @@ class Simulation:
 
         ### Now, configure the controllers
         # Abstract view of skeleton
-        self.tip = TIP(self.skel, 'feet', 'hands')
+        self.tip = TIP(self.skel, 'rfoot', 'lfoot')
         self.history.callbacks += [self.tip]
-        # self.tip2 = TIP(self.skel, "lfoot", "hands")
-        # self.history.callbacks += [self.tip2]
+        self.tip2 = TIP(self.skel, "lfoot", "hands")
+        self.history.callbacks += [self.tip2]
 
         # Abstract model
         self.abstract_tip = abstract.model.TIP()
@@ -107,8 +107,8 @@ class Simulation:
 
     def reset(self):
         ### Reset Pydart
-        self.skel.q = BioloidGPPoses().leaned_pose()
-        # self.skel.q = BioloidGPPoses().stepping_pose()
+        # self.skel.q = BioloidGPPoses().leaned_pose()
+        self.skel.q = BioloidGPPoses().stepping_pose()
         self.skel.qdot = np.zeros(self.skel.ndofs)
         self.world.reset()
 
@@ -128,6 +128,8 @@ class Simulation:
            and 'new_contact' not in self.terminated:
             self.terminated['new_contact'] = 40 # 40 frames = 1/50 sec
 
+        # print self.skel.external_contacts_and_body_id()
+
         for key in self.terminated:
             self.terminated[key] -= 1
             if self.terminated[key] == 0:
@@ -146,7 +148,7 @@ class Simulation:
 
         # Draw TIP
         self.tip.render()
-        # self.tip2.render()
+        self.tip2.render()
 
         # Draw contacts
         gltools.glMove([0, 0, 0])
