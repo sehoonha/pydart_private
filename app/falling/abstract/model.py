@@ -146,7 +146,7 @@ class TIP:
             (Cx, Cy, Px, Py, x2, y2, dx2, dy2) = self.quantities(x)
             self.data += [ [t, x[0], x[1], x[2], Cx, Cy, dr, th2, r2] ]
         print 'Estimated impact = ', self.estimate_impact(X[-1])
-        self.plotData()
+        # self.plotData()
 
     def column(self, name):
         return [self.data[i][self.index[name]] for i in range(len(self.data))]

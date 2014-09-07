@@ -27,7 +27,7 @@ def confine(x, lo, hi):
 def STR(v):
     return str(["%.3f" % x for x in v])
 
-class Simulation:
+class Simulation(object):
     def __init__(self):
 
         # Init api
@@ -43,30 +43,22 @@ class Simulation:
         self.skel.set_joint_damping(0.15)
         self.history = History(self)
 
+        ### Now, configure the controllers
+        # Abstract view of skeleton
+        self.tips = [TIP(self.skel, 'rfoot', 'lfoot'),
+                     TIP(self.skel, "lfoot", "hands")]
+
         # Reset to the initial state
         self.reset()
-
-        # self.skel.q[1] = 1.0 <-- this doesn't work
 
         print 'skel.m = ', self.skel.m
         print 'skel.approx_inertia_x = ', self.skel.approx_inertia_x()
         print 'skel.q = ', self.skel.q
 
-
-        ### Now, configure the controllers
-        # Abstract view of skeleton
-        self.tip = TIP(self.skel, 'rfoot', 'lfoot')
         self.history.callbacks += [self.tip]
-        self.tip2 = TIP(self.skel, "lfoot", "hands")
-        self.history.callbacks += [self.tip2]
 
         # Abstract model
         self.abstract_tip = abstract.model.TIP()
-        self.abstract_tip.set_x0( self.tip )
-        self.abstract_tip.set_bounds( self.tip )
-        print self.tip.get_state()
-        # self.abstract_tip.load_history(config.DATA_PATH + 'TIP.csv')
-        # self.abstract_tip.optimize()
         
         # Control
         self.maxTorque = 0.3 * 1.5
@@ -77,9 +69,14 @@ class Simulation:
         self.history.clear()
         self.history.push()
 
-
+    @property
+    def tip(self):
+        return self.tips[self.tip_index]
+        
     def plan(self):
         ### Plan with TIP
+        self.abstract_tip.set_x0( self.tip )
+        self.abstract_tip.set_bounds( self.tip )
         self.abstract_tip.optimize()
         ik = IK(self)
         self.pd.target = ik.optimize(restore = False)
@@ -91,7 +88,6 @@ class Simulation:
         # ### Plan with Double TIP
         # ik = IK(self)
         # self.pd.target = ik.optimize(restore = True)
-
 
     def control(self):
         tau = np.zeros(self.skel.ndofs)
@@ -113,6 +109,7 @@ class Simulation:
         self.world.reset()
 
         ### Reset inner structures
+        self.tip_index = 0
         self.history.clear()
         self.history.push()
         self.terminated = dict()
@@ -124,9 +121,15 @@ class Simulation:
 
         # if math.fabs(self.getTime() - 1.0000) < 0.0001:
         # if len(set(self.skel.contacted_body_names()) - set(['r_foot'])) > 0 \
-        if len(set(self.skel.contacted_body_names()) - set(['r_foot'])) > 0 \
+        pivot_nodes = []
+        for i in range(self.tip_index + 1):
+            pivot_nodes += self.tips[i].pivot_nodes()
+        if len(set(self.skel.contacted_body_names()) - set(pivot_nodes)) > 0 \
            and 'new_contact' not in self.terminated:
-            self.terminated['new_contact'] = 40 # 40 frames = 1/50 sec
+            if self.tip_index < len(self.tips) - 1:
+                self.tip_index += 1
+            else:
+                self.terminated['new_contact'] = 40 # 40 frames = 1/50 sec
 
         # print self.skel.external_contacts_and_body_id()
 
@@ -147,8 +150,9 @@ class Simulation:
         self.skel.render()
 
         # Draw TIP
-        self.tip.render()
-        self.tip2.render()
+        tip_index = self.history.get_frame()['tip_index']
+        self.tips[tip_index].render()
+        # self.tip2.render()
 
         # Draw contacts
         gltools.glMove([0, 0, 0])

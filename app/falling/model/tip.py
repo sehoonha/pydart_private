@@ -15,6 +15,16 @@ class TIP:
         self.name0 = _name0
         self.name2 = _name2
 
+    def pivot_nodes(self):
+        if self.name0 == 'rfoot':
+            return ['r_foot']
+        elif self.name0 == 'lfoot':
+            return ['l_foot']
+        elif self.name0 == 'feet':
+            return ['l_foot', 'r_foot']
+        else:
+            return []
+
     def avg_positions(self, bodynames, local):
         if not isinstance(local[0], list):
             local = [local] * len(bodynames)
@@ -94,14 +104,14 @@ class TIP:
         for p in [self.p0(), self.p1(), self.p2()]:
             glVertex(p)
         glEnd()
-        glColor(0.0, 0.5, 0.0, 1.0)
+        glColor(0.545, 0.000, 0.000, 1.0)
         gltools.glMove( self.p0() )
         glutSolidSphere(0.03, 4, 2)
-        glColor(0.0, 0.5, 0.5, 1.0)
+        glColor(1.000, 0.843, 0.000, 1.0)
         gltools.glMove( self.p1() )
         glutSolidSphere(0.03, 4, 2)
+        glColor(0.294, 0.000, 0.510, 1.0)
         gltools.glMove( self.p2() )
-        glColor(0.0, 0.0, 0.5, 1.0)
         glutSolidSphere(0.03, 4, 2)
         glLineWidth(1.0)
 

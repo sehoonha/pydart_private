@@ -18,6 +18,8 @@ class History:
         skel = self.world.skel
         data = {}
         data['t'] = self.world.t
+        data['tip_index'] = self.sim.tip_index
+        data['tip_pivot_nodes'] = self.sim.tip.pivot_nodes()
         data['nframes'] = self.world.nframes
         data['contacts'] = self.world.contacts()
         data['skelcontacts'] = skel.external_contacts_and_body_id()
@@ -36,8 +38,8 @@ class History:
 
     def push_impulses(self, data):
         skelcontacts = data['skelcontacts']
-        pivot_id = self.world.skel.body_index('r_foot')
-        vertical_forces = [float(-c[4]) for c, bid in skelcontacts if bid != pivot_id]
+        pivots = [self.world.skel.body_index(p) for p in data['tip_pivot_nodes']]
+        vertical_forces = [float(-c[4]) for c, b in skelcontacts if b not in pivots]
         raw_impulse = np.sum(vertical_forces) * self.world.dt
         data['raw_impulse'] = raw_impulse
 
