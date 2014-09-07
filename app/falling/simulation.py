@@ -79,7 +79,7 @@ class Simulation(object):
         self.abstract_tip.set_bounds( self.tip )
         self.abstract_tip.optimize()
         ik = IK(self)
-        self.pd.target = ik.optimize(restore = False)
+        self.pd.target = ik.optimize(restore = True)
 
         # ### Direct planning in FB
         # ik = IK(self)
@@ -127,7 +127,9 @@ class Simulation(object):
         if len(set(self.skel.contacted_body_names()) - set(pivot_nodes)) > 0 \
            and 'new_contact' not in self.terminated:
             if self.tip_index < len(self.tips) - 1:
+                print '==== Proceed to the next TIP ===='
                 self.tip_index += 1
+                self.plan()
             else:
                 self.terminated['new_contact'] = 40 # 40 frames = 1/50 sec
 

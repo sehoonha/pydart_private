@@ -68,6 +68,7 @@ class IK:
 
     def optimize(self, x0 = None, restore = True):
         saved_pose = self.sim.skel.q
+        saved_vel = self.sim.skel.qdot
         
         if x0 is None:
             x0 = np.zeros(self.dim)
@@ -79,6 +80,7 @@ class IK:
         print "==== ik.IK optimize....OK"
         if restore:
             self.sim.skel.q = saved_pose
+            self.sim.skel.qdot = saved_vel
 
         return self.expand(self.res["x"])
 
