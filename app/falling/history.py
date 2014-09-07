@@ -21,6 +21,7 @@ class History:
         data['nframes'] = self.world.nframes
         data['contacts'] = self.world.contacts()
         data['skelcontacts'] = skel.external_contacts_and_body_id()
+        self.push_impulses(data)
         data['contactedBodies'] = skel.contacted_body_names()
         data['l_hand.v'] = skel.body("l_hand").Cdot
         data['P'] = skel.P
@@ -33,6 +34,20 @@ class History:
             cb.push(self)
         self.index = -1 # Use the latest
 
+    def push_impulses(self, data):
+        skelcontacts = data['skelcontacts']
+        pivot_id = self.world.skel.body_index('r_foot')
+        vertical_forces = [float(-c[4]) for c, bid in skelcontacts if bid != pivot_id]
+        raw_impulse = np.sum(vertical_forces) * self.world.dt
+        data['raw_impulse'] = raw_impulse
+
+        window_size = 40
+        begin_index = max(0, len(self.histories) - window_size)
+        data['impulse'] = sum([d['raw_impulse'] for d in self.histories[begin_index:]])
+
+        last = self.histories[-1]['max_impulse'] if self.histories else None
+        data['max_impulse'] = max(last, data['impulse']) 
+        
     def pop(self, index):
         self.index = index
 
@@ -65,51 +80,13 @@ class History:
             traces += [ Scatter(x=x,y=y,name=name) ]
         data = Data(traces)
         unique_url = py.plot(data, filename = 'Simulation COM history')
-
-    def vertical_impulses(self, window_size = 40):
-        forces = []
-        pivot_id = self.world.skel.body_index('r_foot')
-
-        # print 'pivot = ', pivot_id
-        # print self.world.skel.name_to_body
-        # for idx, data in enumerate(self.histories[0:10]):
-        #     print 'frame ', idx, [bid for (c, bid) in data['skelcontacts']]
-
-        for contacts_ids in [ data['skelcontacts'] for data in self.histories ]:
-            f_y = [float(-c[4]) for c, bid in contacts_ids if bid != pivot_id]
-            forces += [np.sum(f_y) * self.world.dt]
-        # print forces[0:10]
-
-        operands = np.array(forces)
-        for i in range(window_size - 1):
-            if len(forces) == 1:
-                return forces
-
-            operands = np.delete(operands, 0)
-            forces = np.delete(forces, -1)
-            forces = forces + operands
-        
-        # n = len(self.histories)
-        # window_size = 10
-        # for i in range(n - window_size + 1):
-        #     j = i + window_size
-        #     force
-        # for contacts in [ data['contacts'] for data in self.histories ]:
-        #     f_y = [float(-c[4]) for c in contacts if -c[4] > 5.0]
-        #     forces += [np.sum(f_y) * self.world.dt]
-        return forces
-        
-    def max_impulse(self):
-        impulses = self.vertical_impulses()
-        return (0 if len(impulses) == 0 else max(impulses) )
-
         
     def plotImpact(self):
         x = [ data['t'] for data in self.histories ]
         # Plot vertical impact
-        raw_impulses = self.vertical_impulses(1)
-        impulses = self.vertical_impulses()
-        max_impulses = np.maximum.accumulate(impulses)
+        raw_impulses = [ data['raw_impulse'] for data in self.histories ]
+        impulses = [ data['impulse'] for data in self.histories ]
+        max_impulses = [ data['max_impulse'] for data in self.histories ]
             
         traces = []
         traces += [Scatter(x=x,y=raw_impulses,name="Raw Impulse")]

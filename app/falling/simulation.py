@@ -124,7 +124,7 @@ class Simulation:
 
         # if math.fabs(self.getTime() - 1.0000) < 0.0001:
         # if len(set(self.skel.contacted_body_names()) - set(['r_foot'])) > 0 \
-        if len(set(self.skel.contacted_body_names()) - set(['l_foot', 'r_foot'])) > 0 \
+        if len(set(self.skel.contacted_body_names()) - set(['r_foot'])) > 0 \
            and 'new_contact' not in self.terminated:
             self.terminated['new_contact'] = 40 # 40 frames = 1/50 sec
 
@@ -166,7 +166,7 @@ class Simulation:
         status += "T = %.4f (%d) " % (data['t'], data['nframes'])
         status += "C = %s " % STR(data['C'])
         status += "P = %s " % STR(data['P'])
-        status += "Impulse = %.4f " % self.history.max_impulse()
+        status += "Impulse = %.4f (max %.4f)" % (data['impulse'], data['max_impulse'])
         # status += "l_hand.v = %s " % STR(data['l_hand.v'])
         status += "I = %.4f " % self.skel.approx_inertia_x()
         status += "TIP = " + str(self.tip) + " "
