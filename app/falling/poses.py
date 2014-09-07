@@ -19,6 +19,10 @@ class BioloidGPPoses:
         q[0] = -0.44 * math.pi
         q[4] = 0.225
         q[5] = q[4]
+        q[self.dofs['r_hip']] = -0.1
+        q[self.dofs['r_foot']] = 0.1
+        q[self.dofs['l_hip']] = 0.1
+        q[self.dofs['l_foot']] = -0.1
         q[self.dofs['l_thigh']] = 1.3
         
         return q

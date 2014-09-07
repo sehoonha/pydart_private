@@ -60,13 +60,13 @@ class TIP:
         return (x, y, Px, Py, x2, y2, dx2, dy2)
 
     def set_x0(self, tip):
-        self.x0 = [tip.theta(), 0.0, tip.d01(), 0]
+        self.x0 = [tip.theta(), tip.dtheta(), tip.d01(), 0]
         self.control0 = [0.0, tip.angle(), tip.d12()]
         print 'set abstract.model.TIP.x0 = ', self.x0
 
     def set_bounds(self, tip):
         self.lo = np.array([-0.1, tip.angle() - 1.5, tip.d12() - 0.03])
-        self.hi = np.array([ 0.1, tip.angle() + 0.5, tip.d12() + 0.03])
+        self.hi = np.array([ 0.1, tip.angle() + 1.5, tip.d12() + 0.03])
         # self.lo = np.array([-0.2, tip.angle() - 1.0, tip.d12() - 0.04])
         # self.hi = np.array([ 0.2, tip.angle() + 1.2, tip.d12() + 0.07])
         print 'set abstract.model.TIP.lo = ', self.lo
@@ -118,7 +118,8 @@ class TIP:
         # cost = -x2
         # print self.control, 0.0005 * len(X), X[-1], -1.0 * cost
         # print -1.0 * Py, self.estimate_impact(X[-1]), -1.0 * y
-        print 'r1 =', X[-1][2], 'r2 =', self.control[2], 'th2 =', self.control[1]
+        print 'th1 = %.4f dth1 = %.4f' % (X[-1][0], X[-1][1]),
+        print 'r1 = %.4f r2 = %.4f th2 = %.4f' % (X[-1][2], self.control[2], self.control[1])
         print 'P.y =', Py, 'Impact = ', self.estimate_impact(X[-1]), 'C.y = ', y
         return cost
 

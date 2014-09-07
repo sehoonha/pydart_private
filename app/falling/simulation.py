@@ -46,7 +46,9 @@ class Simulation(object):
         ### Now, configure the controllers
         # Abstract view of skeleton
         self.tips = [TIP(self.skel, 'rfoot', 'lfoot'),
-                     TIP(self.skel, "lfoot", "hands")]
+                     TIP(self.skel, "lfoot_f", "hands")]
+        # self.tips = [TIP(self.skel, 'feet', 'hands')]
+
 
         # Reset to the initial state
         self.reset()
@@ -127,8 +129,11 @@ class Simulation(object):
         if len(set(self.skel.contacted_body_names()) - set(pivot_nodes)) > 0 \
            and 'new_contact' not in self.terminated:
             if self.tip_index < len(self.tips) - 1:
+                # self.terminated['new_contact'] = 40 # 40 frames = 1/50 sec
                 print '==== Proceed to the next TIP ===='
+                self.history.callbacks.remove(self.tip)
                 self.tip_index += 1
+                self.history.callbacks += [self.tip]
                 self.plan()
             else:
                 self.terminated['new_contact'] = 40 # 40 frames = 1/50 sec
@@ -151,10 +156,15 @@ class Simulation(object):
         gltools.glMove([0, 0, 0])
         self.skel.render()
 
+        gltools.glMove([0, 0, 0])
+        glColor(1, 0, 0)
+        gltools.render_arrow(self.skel.C, self.skel.C + 0.2 * self.tip.projected_Cdot())
+
         # Draw TIP
         tip_index = self.history.get_frame()['tip_index']
         self.tips[tip_index].render()
         # self.tip2.render()
+
 
         # Draw contacts
         gltools.glMove([0, 0, 0])
@@ -175,7 +185,7 @@ class Simulation(object):
         status += "Impulse = %.4f (max %.4f)" % (data['impulse'], data['max_impulse'])
         # status += "l_hand.v = %s " % STR(data['l_hand.v'])
         status += "I = %.4f " % self.skel.approx_inertia_x()
-        status += "TIP = " + str(self.tip) + " "
+        status += "TIP = " + str(data['tip']) + " "
         status += "Contacted = %s " % str(data['contactedBodies'])
 
         return status

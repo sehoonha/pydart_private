@@ -20,6 +20,8 @@ class TIP:
             return ['r_foot']
         elif self.name0 == 'lfoot':
             return ['l_foot']
+        elif self.name0 == 'lfoot_f':
+            return ['l_foot']
         elif self.name0 == 'feet':
             return ['l_foot', 'r_foot']
         else:
@@ -49,6 +51,8 @@ class TIP:
             return self.avg_positions(["l_shin", "r_shin"], [[0, -y, -z], [0, y, z]] )
         elif name == 'lfoot':
             return self.avg_positions(["l_foot"], [0.05, 0.025, 0.0])
+        elif name == 'lfoot_f':
+            return self.avg_positions(["l_foot"], [-0.05, 0.025, 0.0])
         elif name == 'rfoot':
             return self.avg_positions(["r_foot"], [-0.05, 0.025, 0.0])
         else:
@@ -79,6 +83,21 @@ class TIP:
         C = self.p1()
         return math.atan2(C[2], C[1])
 
+    def projected_Cdot(self):
+        v = self.skel.Cdot
+        v[0] = 0
+        u = self.p1() - self.p0()
+        u[0] = 0
+        u /= norm(u)
+        # print v, u, np.dot(v, u), v - np.dot(v, u) * u
+        return v - np.dot(v, u) * u
+        
+    def dtheta(self):
+        v = norm(self.projected_Cdot())
+        r = self.d01()
+        # |v| = r dtheta
+        return v / r
+
     def angle(self):
         """Returns the angle between P0-P1-P2"""
         a = self.p1() - self.p0()
@@ -91,6 +110,7 @@ class TIP:
 
     def push(self, history):
         data = history.histories[-1]
+        data['tip'] = repr(self)
         data['p1.x'] = self.p1()[2]
         data['p1.y'] = self.p1()[1]
         data['r'] = self.d01()
@@ -116,6 +136,7 @@ class TIP:
         glLineWidth(1.0)
 
     def __repr__(self):
-        return str(["%.3f" % x for x in self.get_state()])
+        values = [self.theta(), self.dtheta(), self.d01(), self.angle(), self.d12()]
+        return str(["%.3f" % x for x in values])
 
         
