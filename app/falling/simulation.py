@@ -46,8 +46,9 @@ class Simulation(object):
         ### Now, configure the controllers
         # Abstract view of skeleton
         self.tips = [TIP(self.skel, 'rfoot', 'lfoot'),
-                     TIP(self.skel, "lfoot_f", "hands")]
-        # self.tips = [TIP(self.skel, 'feet', 'hands')]
+                     TIP(self.skel, 'lfoot', 'hands')]
+        # self.tips = [TIP(self.skel, 'feet', 'hands'),
+        #              TIP(self.skel, 'hands', 'head')]
 
 
         # Reset to the initial state
@@ -134,7 +135,7 @@ class Simulation(object):
                 self.history.callbacks.remove(self.tip)
                 self.tip_index += 1
                 self.history.callbacks += [self.tip]
-                self.plan()
+                # self.plan()
             else:
                 self.terminated['new_contact'] = 40 # 40 frames = 1/50 sec
 
@@ -180,9 +181,9 @@ class Simulation(object):
         
         status = ""
         status += "T = %.4f (%d) " % (data['t'], data['nframes'])
-        status += "C = %s " % STR(data['C'])
-        status += "P = %s " % STR(data['P'])
-        status += "Impulse = %.4f (max %.4f)" % (data['impulse'], data['max_impulse'])
+        status += "C = (%.4f %.4f) " % (data['C.x'], data['C.y'])
+        status += "P = (%.4f %.4f) " % (data['P.x'], data['P.y'])
+        status += "Impulse = %.4f (max %.4f) " % (data['impulse'], data['max_impulse'])
         # status += "l_hand.v = %s " % STR(data['l_hand.v'])
         status += "I = %.4f " % self.skel.approx_inertia_x()
         status += "TIP = " + str(data['tip']) + " "

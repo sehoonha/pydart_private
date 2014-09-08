@@ -65,8 +65,8 @@ class TIP:
         print 'set abstract.model.TIP.x0 = ', self.x0
 
     def set_bounds(self, tip):
-        self.lo = np.array([-0.1, tip.angle() - 1.5, tip.d12() - 0.03])
-        self.hi = np.array([ 0.1, tip.angle() + 1.5, tip.d12() + 0.03])
+        self.lo = np.array([-0.1, tip.angle() - 1.0, tip.d12() - 0.03])
+        self.hi = np.array([ 0.1, tip.angle() + 0.5, tip.d12() + 0.03])
         # self.lo = np.array([-0.2, tip.angle() - 1.0, tip.d12() - 0.04])
         # self.hi = np.array([ 0.2, tip.angle() + 1.2, tip.d12() + 0.07])
         print 'set abstract.model.TIP.lo = ', self.lo
@@ -90,6 +90,14 @@ class TIP:
         # j = dy2^{-} / ( (1/m) + (1/I) * (x2 - x1)^2 )
         j = (-dy2) / ( (1/m) + (1/I) * ((x2 - x1) ** 2) )
         return j
+    def estimate_next_dtheta(self, x):
+        j = self.estimate_impact(x)
+        (th, dth, r, stop) = tuple(x)
+        (x1, y1, Px, Py, x2, y2, dx2, dy2) = self.quantities(x)
+        I = self.I
+        # dth^{+} = dth^{-} - (1/I) (x2 - x1)
+        dth_next = dth - (1 / I) * (x2 - x1) * j
+        return dth_next
 
     def evaluate(self, x):
         self.control = x
@@ -111,16 +119,18 @@ class TIP:
         #     return 9.0 + (r1 + r2)
 
         # cost = -1.0 * Py
-        cost = self.estimate_impact(X[-1])
-        # cost = -1.0 * y
+        # cost = self.estimate_impact(X[-1])
+        cost = -1.0 * y
 
         # cost = -1.0 * dy2
         # cost = -x2
         # print self.control, 0.0005 * len(X), X[-1], -1.0 * cost
         # print -1.0 * Py, self.estimate_impact(X[-1]), -1.0 * y
-        print 'th1 = %.4f dth1 = %.4f' % (X[-1][0], X[-1][1]),
+        print '>> th1 = %.4f dth1 = %.4f' % (X[-1][0], X[-1][1]),
         print 'r1 = %.4f r2 = %.4f th2 = %.4f' % (X[-1][2], self.control[2], self.control[1])
-        print 'P.y =', Py, 'Impact = ', self.estimate_impact(X[-1]), 'C.y = ', y
+        print 'P.y = %.4f Impact = %.4f C.y = %.4f ' % (Py, self.estimate_impact(X[-1]), y),
+        print 'Dtheta_next = %.4f' % (self.estimate_next_dtheta(X[-1]))
+
         return cost
 
     def optimize(self):

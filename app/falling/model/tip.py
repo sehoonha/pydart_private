@@ -24,6 +24,8 @@ class TIP:
             return ['l_foot']
         elif self.name0 == 'feet':
             return ['l_foot', 'r_foot']
+        elif self.name0 == 'hands':
+            return ['l_hand', 'r_hand']
         else:
             return []
 
@@ -55,6 +57,8 @@ class TIP:
             return self.avg_positions(["l_foot"], [-0.05, 0.025, 0.0])
         elif name == 'rfoot':
             return self.avg_positions(["r_foot"], [-0.05, 0.025, 0.0])
+        elif name == 'head':
+            return self.avg_positions(["torso"], [0.0, 0.0, 0.03])
         else:
             print 'Invalid name: ', name
             return None
