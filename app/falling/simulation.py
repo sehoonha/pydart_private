@@ -107,8 +107,11 @@ class Simulation(object):
     def reset(self):
         ### Reset Pydart
         # self.skel.q = BioloidGPPoses().leaned_pose()
-        self.skel.q = BioloidGPPoses().stepping_pose()
-        self.skel.qdot = np.zeros(self.skel.ndofs)
+        # self.skel.q = BioloidGPPoses().stepping_pose()
+        # self.skel.qdot = np.zeros(self.skel.ndofs)
+        self.skel.q = BioloidGPPoses().stepping2_pose()
+        self.skel.qdot = BioloidGPPoses().stepping2_vel()
+
         self.world.reset()
 
         ### Reset inner structures
@@ -118,6 +121,9 @@ class Simulation(object):
         self.terminated = dict()
 
     def step(self):
+        # if self.world.nframes < 10:
+        #     print 'push!!'
+        #     self.skel.body("torso").add_ext_force_at([0, 0, 50], [0, 0, 0.03])
         self.skel.tau = self.control()
         self.world.step()
         self.history.push()

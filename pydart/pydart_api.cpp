@@ -521,7 +521,28 @@ void getBodyNodeWorldLinearJacobian(int wid, int skid, int bid, double* array2, 
     }
 }
 
+void addBodyNodeExtForce(int wid, int skid, int bid, double inv3[3]) {
+    using namespace dart::dynamics;
+    Skeleton* skel = Manager::skeleton(wid, skid);
+    BodyNode* body = skel->getBodyNode(bid);
+    if (!body) {
+        cerr << "cannot find the body : " << bid << endl;
+    }
+    Eigen::Vector3d f(inv3[0], inv3[1], inv3[2]);
+    body->addExtForce(f);
+}
 
+void addBodyNodeExtForceAt(int wid, int skid, int bid, double inv3[3], double inv3_2[3]) {
+    using namespace dart::dynamics;
+    Skeleton* skel = Manager::skeleton(wid, skid);
+    BodyNode* body = skel->getBodyNode(bid);
+    if (!body) {
+        cerr << "cannot find the body : " << bid << endl;
+    }
+    Eigen::Vector3d f(inv3[0], inv3[1], inv3[2]);
+    Eigen::Vector3d offset(inv3_2[0], inv3_2[1], inv3_2[2]);
+    body->addExtForce(f, offset);
+}
 
 
 

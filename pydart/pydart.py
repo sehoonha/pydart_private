@@ -319,8 +319,15 @@ class Body(object):
     def J(self):
         return self.world_linear_jacobian()
 
+    def add_ext_force(self, f):
+        pydart_api.addBodyNodeExtForce(self.wid, self.sid, self.id, f)
+
+    def add_ext_force_at(self, f, offset):
+        pydart_api.addBodyNodeExtForceAt(self.wid, self.sid, self.id, f, offset)
+
     def __repr__(self):
         return '<Body.%d.%s>' % (self.id, self.name)
+
 
 class Dof(object):    
     def __init__(self, _skel, _id):

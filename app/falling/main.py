@@ -68,6 +68,9 @@ class MyWindow(QtGui.QMainWindow):
         self.captureAction = QtGui.QAction('Capture', self)
         self.captureAction.setCheckable(True)
 
+        self.printAction = QtGui.QAction('Print', self)
+        self.printAction.triggered.connect(self.printEvent)
+
         self.movieAction = QtGui.QAction('Movie', self)
         self.movieAction.triggered.connect(self.movieEvent)
 
@@ -108,6 +111,7 @@ class MyWindow(QtGui.QMainWindow):
         #### Recording menu
         recordingMenu = menubar.addMenu('&Recording')
         recordingMenu.addAction(self.screenshotAction)
+        recordingMenu.addAction(self.printAction)
         recordingMenu.addSeparator()
         recordingMenu.addAction(self.captureAction)
         recordingMenu.addAction(self.movieAction)
@@ -156,6 +160,10 @@ class MyWindow(QtGui.QMainWindow):
     def movieEvent(self):
         os.system('avconv -r 100 -i ./captures/frame.%04d.png output.mp4')
         os.system('rm ./captures/frame.*.png')
+
+    def printEvent(self):
+        print repr(self.sim.skel.q)
+        print repr(self.sim.skel.qdot)
 
     def planEvent(self):
         self.sim.plan()
