@@ -133,6 +133,14 @@ class TIP:
 
         return cost
 
+    def bake_states(self, X):
+        (dr, th2, r2) = tuple(self.control)
+        self.data = []
+        for i, x in enumerate(X):
+            t = self.h * i
+            (Cx, Cy, Px, Py, x2, y2, dx2, dy2) = self.quantities(x)
+            self.data += [ [t, x[0], x[1], x[2], Cx, Cy, dr, th2, r2] ]
+        
     def optimize(self):
         # lo = np.array([-0.2, 0.0, 0.10])
         # hi = np.array([ 0.2, 3.0, 0.17])
@@ -151,13 +159,9 @@ class TIP:
         ## Put simulation result into self.data
         (dr, th2, r2) = tuple(self.control)
         X = self.simulate()
-        self.data = []
-        for i, x in enumerate(X):
-            t = self.h * i
-            (Cx, Cy, Px, Py, x2, y2, dx2, dy2) = self.quantities(x)
-            self.data += [ [t, x[0], x[1], x[2], Cx, Cy, dr, th2, r2] ]
+        # self.plot_data()
+        self.bake_states(X)
         print 'Estimated impact = ', self.estimate_impact(X[-1])
-        # self.plotData()
 
     def column(self, name):
         return [self.data[i][self.index[name]] for i in range(len(self.data))]
@@ -167,7 +171,34 @@ class TIP:
             return [0.0, 0.0,0.0]
         else:
             return [self.data[-1][self.index[name]] for name in ['r', 'l', 'alpha']]
-                
+
+    def th1(self, x, u):
+        return x[0]
+
+    def dth1(self, x, u):
+        return x[1]
+
+    def r1(self, x, u):
+        return x[2]
+
+    def dr1(self, x, u):
+        return u[0]
+
+    def th2(self, x, u):
+        return u[1]
+
+    def r2(self, x, u):
+        return u[2]
+
+    def x2(self, x, u):
+        x = x[1:4] + [0]
+        return self.quantities(x)[4]
+
+    def to_str(self, x, u):
+        values = [self.th1(x, u), self.dth1(x, u), self.r1(x, u),
+                  self.th2(x, u), self.r2(x, u)]
+        return str(["%.3f" % x for x in values])
+            
     def plot(self, colors):
         if self.data is None:
             return []
@@ -180,16 +211,18 @@ class TIP:
             traces += [ Scatter(x=x,y=y,name='TIP_%s' % name, line=line) ]
         return traces
 
-    def plotData(self):
+    def plot_poses(self, x_offset = 0.0, return_traces = False):
         traces = []
         for i, ctrl in [(0, self.control0), (len(self.data) - 1, self.control)]:
             self.control = ctrl
             state = self.data[i][1:4] + [0]
             print i, state, self.quantities(state)
             (Cx, Cy, Px, Py, x2, y2, dx2, dy2) = self.quantities(state)
-            x = [0, Cx, x2]
+            x = np.array([0, Cx, x2]) + x_offset
             y = [0, Cy, y2]
             traces += [ Scatter(x=x,y=y,name='Frame%d' % i)]
+        if return_traces:
+            return traces
         data = Data(traces)
         layout = Layout(xaxis=XAxis(range=[0.0, 0.3]),  yaxis=YAxis(range=[0.0, 0.3]) )
 

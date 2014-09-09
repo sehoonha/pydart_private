@@ -19,7 +19,8 @@ from control.jt import *
 from control.com_tracker import *
 from model.tip import *
 from ik.ik import *
-import abstract.model
+import abstract.tip
+import abstract.twotip
 
 def confine(x, lo, hi):
     return min(max(lo, x), hi)
@@ -61,7 +62,11 @@ class Simulation(object):
         self.history.callbacks += [self.tip]
 
         # Abstract model
-        self.abstract_tip = abstract.model.TIP()
+        self.abstract_tip = abstract.tip.TIP()
+        self.abstract_twotip = abstract.twotip.TWOTIP()
+        self.abstract_twotip.set_x0( self.tips )
+        self.abstract_twotip.set_bounds( self.tips )
+        self.abstract_twotip.simulate_random()
         
         # Control
         self.maxTorque = 0.3 * 1.5
@@ -169,7 +174,8 @@ class Simulation(object):
 
         # Draw TIP
         tip_index = self.history.get_frame()['tip_index']
-        self.tips[tip_index].render()
+        for i in range(tip_index, len(self.tips)):
+            self.tips[i].render()
         # self.tip2.render()
 
 
