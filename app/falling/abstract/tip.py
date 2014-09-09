@@ -103,7 +103,8 @@ class TIP:
     def evaluate(self, x):
         self.control = x
         penalty = 0
-        for i, (lo, hi) in enumerate([(-0.2, 0.2), (0.0, 3.0), (0.10, 0.17)]):
+        # for i, (lo, hi) in enumerate([(-0.2, 0.2), (0.0, 3.0), (0.10, 0.17)]):
+        for i, (lo, hi) in enumerate(zip(self.lo, self.hi)):
             if x[i] < lo:
                 penalty += (lo - x[i]) ** 2
             if x[i] > hi:
@@ -119,9 +120,9 @@ class TIP:
         # if r1 + r2 > 0.32:
         #     return 9.0 + (r1 + r2)
 
-        # cost = -1.0 * Py
+        cost = -1.0 * Py
         # cost = self.estimate_impact(X[-1])
-        cost = -1.0 * y
+        # cost = -1.0 * y
 
         # cost = -1.0 * dy2
         # cost = -x2
@@ -150,9 +151,15 @@ class TIP:
                'bounds': [self.lo, self.hi], 'tolfun' : 0.001}
         print "==== abstract.model.TIP optimize...."
 
-        self.res = cma.fmin(self.evaluate, 0.5 * (self.lo + self.hi), 0.03, opt)
+        # self.res = cma.fmin(self.evaluate, 0.5 * (self.lo + self.hi), 0.03, opt)
 
-        self.control = self.res[0]
+        # self.control = self.res[0]
+        # self.res = "Random"
+        # self.control = np.random.rand(3) * (self.hi - self.lo) + self.lo
+        self.res = "Test"
+        self.control = np.array([ 0.00001, 2.645, 0.168])
+        # self.control = np.array([ 0.00046, 2.91, 0.180])
+        print self.evaluate(self.control)
         print "==== result\n ", self.res
         print 'solution = ', self.control
         print "==== abstract.model.TIP optimize.... OK"
@@ -160,9 +167,9 @@ class TIP:
         ## Put simulation result into self.data
         (dr, th2, r2) = tuple(self.control)
         X = self.simulate()
-        # self.plot_data()
         self.bake_states(X)
         print 'Estimated impact = ', self.estimate_impact(X[-1])
+        self.plot_poses()
 
     def column(self, name):
         return [self.data[i][self.index[name]] for i in range(len(self.data))]
@@ -213,6 +220,7 @@ class TIP:
         return traces
 
     def plot_poses(self, x_offset = 0.0, return_traces = False):
+        print '==== plot_poses ...'
         traces = []
         for i, ctrl in [(0, self.control0), (len(self.data) - 1, self.control)]:
             self.control = ctrl
@@ -227,9 +235,9 @@ class TIP:
         data = Data(traces)
         layout = Layout(xaxis=XAxis(range=[0.0, 0.3]),  yaxis=YAxis(range=[0.0, 0.3]) )
 
-        py.image.save_as({'data': data, 'layout':layout}, 'abstract_tip.png', height = 900, width = 1000)
-        # unique_url = py.plot({'data': data, 'layout':layout}, filename = 'Abstract TIP')
-
+        # py.image.save_as({'data': data, 'layout':layout}, 'abstract_tip.png', height = 900, width = 1000)
+        unique_url = py.plot({'data': data, 'layout':layout}, filename = 'Abstract TIP')
+        print '==== plot_poses OK'
             
 
         

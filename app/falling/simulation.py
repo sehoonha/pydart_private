@@ -64,7 +64,7 @@ class Simulation(object):
 
         # Abstract model
         self.abstract_tip = abstract.tip.TIP()
-        self.abstract_twotip = abstract.twotip.TWOTIP()
+        # self.abstract_twotip = abstract.twotip.TWOTIP()
 
         
         # Control
@@ -83,12 +83,12 @@ class Simulation(object):
         return self.tips[self.tip_index]
         
     def plan(self):
-        # ### Plan with TIP
-        # self.abstract_tip.set_x0( self.tip )
-        # self.abstract_tip.set_bounds( self.tip )
-        # self.abstract_tip.optimize()
-        # ik = IK(self)
-        # self.pd.target = ik.optimize(restore = True)
+        ### Plan with TIP
+        self.abstract_tip.set_x0( self.tip )
+        self.abstract_tip.set_bounds( self.tip )
+        self.abstract_tip.optimize()
+        ik = IK(self)
+        self.pd.target = ik.optimize(restore = True)
 
         # ### Direct planning in FB
         # ik = IK(self)
@@ -99,11 +99,11 @@ class Simulation(object):
         # self.pd.target = ik.optimize(restore = True)
 
         # ### Plan with Sequential TIP
-        self.abstract_twotip.set_x0( self.tips )
-        self.abstract_twotip.set_bounds( self.tips )
-        self.abstract_twotip.simulate_random()
-        ik = IK(self)
-        self.pd.target = ik.optimize(restore = False)
+        # self.abstract_twotip.set_x0( self.tips )
+        # self.abstract_twotip.set_bounds( self.tips )
+        # self.abstract_twotip.simulate_random()
+        # ik = IK(self)
+        # self.pd.target = ik.optimize(restore = False)
 
 
     def control(self):
@@ -169,7 +169,8 @@ class Simulation(object):
 
         if len(set(self.skel.contacted_body_names()) - set(pivot_nodes)) > 0:
             if self.tip_index < len(self.tips) - 1:
-                self.event_handler.push("proceed", 40)
+                self.event_handler.push("terminate", 40)
+                # self.event_handler.push("proceed", 40)
             else:
                 self.event_handler.push("terminate", 40)
 
