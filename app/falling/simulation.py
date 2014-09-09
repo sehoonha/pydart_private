@@ -14,6 +14,7 @@ import gltools
 
 from history import *
 from poses import *
+import events
 from control.pd import *
 from control.jt import *
 from control.com_tracker import *
@@ -64,9 +65,7 @@ class Simulation(object):
         # Abstract model
         self.abstract_tip = abstract.tip.TIP()
         self.abstract_twotip = abstract.twotip.TWOTIP()
-        self.abstract_twotip.set_x0( self.tips )
-        self.abstract_twotip.set_bounds( self.tips )
-        self.abstract_twotip.simulate_random()
+
         
         # Control
         self.maxTorque = 0.3 * 1.5
@@ -77,17 +76,19 @@ class Simulation(object):
         self.history.clear()
         self.history.push()
 
+        self.event_handler = events.Handler()
+
     @property
     def tip(self):
         return self.tips[self.tip_index]
         
     def plan(self):
-        ### Plan with TIP
-        self.abstract_tip.set_x0( self.tip )
-        self.abstract_tip.set_bounds( self.tip )
-        self.abstract_tip.optimize()
-        ik = IK(self)
-        self.pd.target = ik.optimize(restore = True)
+        # ### Plan with TIP
+        # self.abstract_tip.set_x0( self.tip )
+        # self.abstract_tip.set_bounds( self.tip )
+        # self.abstract_tip.optimize()
+        # ik = IK(self)
+        # self.pd.target = ik.optimize(restore = True)
 
         # ### Direct planning in FB
         # ik = IK(self)
@@ -96,6 +97,14 @@ class Simulation(object):
         # ### Plan with Double TIP
         # ik = IK(self)
         # self.pd.target = ik.optimize(restore = True)
+
+        # ### Plan with Sequential TIP
+        self.abstract_twotip.set_x0( self.tips )
+        self.abstract_twotip.set_bounds( self.tips )
+        self.abstract_twotip.simulate_random()
+        ik = IK(self)
+        self.pd.target = ik.optimize(restore = False)
+
 
     def control(self):
         tau = np.zeros(self.skel.ndofs)
@@ -138,24 +147,44 @@ class Simulation(object):
         pivot_nodes = []
         for i in range(self.tip_index + 1):
             pivot_nodes += self.tips[i].pivot_nodes()
-        if len(set(self.skel.contacted_body_names()) - set(pivot_nodes)) > 0 \
-           and 'new_contact' not in self.terminated:
+        # if len(set(self.skel.contacted_body_names()) - set(pivot_nodes)) > 0 \
+        #    and 'new_contact' not in self.terminated:
+        #     if self.tip_index < len(self.tips) - 1:
+        #         # self.terminated['new_contact'] = 40 # 40 frames = 1/50 sec
+        #         print '==== Proceed to the next TIP ===='
+        #         self.history.callbacks.remove(self.tip)
+        #         self.tip_index += 1
+        #         self.history.callbacks += [self.tip]
+        #         # self.plan()
+        #     else:
+        #         self.terminated['new_contact'] = 40 # 40 frames = 1/50 sec
+
+        # # print self.skel.external_contacts_and_body_id()
+
+        # for key in self.terminated:
+        #     self.terminated[key] -= 1
+        #     if self.terminated[key] == 0:
+        #         return True
+        # return False
+
+        if len(set(self.skel.contacted_body_names()) - set(pivot_nodes)) > 0:
             if self.tip_index < len(self.tips) - 1:
-                # self.terminated['new_contact'] = 40 # 40 frames = 1/50 sec
-                print '==== Proceed to the next TIP ===='
+                self.event_handler.push("proceed", 40)
+            else:
+                self.event_handler.push("terminate", 40)
+
+        for e in self.event_handler.pop():
+            print 'New Event: ', e.name, 'at', self.world.nframes
+            if e.name == "proceed":
                 self.history.callbacks.remove(self.tip)
                 self.tip_index += 1
                 self.history.callbacks += [self.tip]
-                # self.plan()
-            else:
-                self.terminated['new_contact'] = 40 # 40 frames = 1/50 sec
-
-        # print self.skel.external_contacts_and_body_id()
-
-        for key in self.terminated:
-            self.terminated[key] -= 1
-            if self.terminated[key] == 0:
+            elif e.name == 'terminate':
+                self.event_handler.push("terminate", 9999)
                 return True
+
+        self.event_handler.step()
+        # print self.world.nframes, ':', self.event_handler
         return False
 
     def render(self):

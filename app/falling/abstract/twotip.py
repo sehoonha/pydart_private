@@ -73,7 +73,7 @@ class TWOTIP:
         pass
 
     def commands(self):
-        pass
+        return np.concatenate( (self.first_tip.commands(), self.second_tip.commands()) )
         
     def plot_poses(self):
         traces = []

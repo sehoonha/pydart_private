@@ -14,7 +14,8 @@ class TIP:
     def __init__(self):
         self.data = None
         self.m = 1.08
-        self.I = 0.0093
+        # self.I = 0.0093
+        self.I = 0.0080
         self.g = -9.8
         self.h = 0.0005
         self.x0 = [0.123, 0, 0.18, 0]

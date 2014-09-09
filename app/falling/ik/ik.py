@@ -16,10 +16,10 @@ class ObjTIP:
 class ObjTWOTIP:
     def __init__(self, _tips):
         self.target = None
-        self.tip = _tip
+        self.tips = _tips
 
     def cost(self):
-        state = self.tip.get_state()
+        state = np.concatenate([t.get_state() for t in self.tips])
         return norm( (state - self.target) * [1.0, 1.0, 0.1, 1.0, 1.0, 0.1] ) ** 2
 
         
@@ -45,9 +45,9 @@ class IK:
                                     
         self.dim = max([i for i, dof, w in self.param_desc]) + 1
 
-        self.objs = [ ObjTIP(self.sim.tip) ]
-        self.objs[0].target = self.sim.abstract_tip.commands()
-        print 'objs[0].target = ', self.objs[0].target
+        # self.objs = [ ObjTIP(self.sim.tip) ]
+        # self.objs[0].target = self.sim.abstract_tip.commands()
+        # print 'objs[0].target = ', self.objs[0].target
 
         # self.objs = [ ObjTIP(self.sim.tip) ]
         # self.objs[0].target = [0.14, 0.08, 2.7]
@@ -56,6 +56,11 @@ class IK:
         # self.objs += [ ObjTIP(self.sim.tip2) ]
         # self.objs[1].target = [0.08, 0.17, 1.0]
         # print 'objs[1].target = ', self.objs[1].target
+
+        self.objs = [ ObjTWOTIP(self.sim.tips) ]
+        self.objs[0].target = self.sim.abstract_twotip.commands()
+        print 'objs[0].target = ', self.objs[0].target
+
 
         
     def expand(self, x):
