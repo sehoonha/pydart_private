@@ -52,6 +52,7 @@ class Simulation(object):
         # self.tips = [TIP(self.skel, 'feet', 'hands'),
         #              TIP(self.skel, 'hands', 'head')]
 
+        self.event_handler = events.Handler()
 
         # Reset to the initial state
         self.reset()
@@ -60,11 +61,10 @@ class Simulation(object):
         print 'skel.approx_inertia_x = ', self.skel.approx_inertia_x()
         print 'skel.q = ', self.skel.q
 
-        self.history.callbacks += [self.tip]
 
         # Abstract model
         self.abstract_tip = abstract.tip.TIP()
-        # self.abstract_twotip = abstract.twotip.TWOTIP()
+        self.abstract_twotip = abstract.twotip.TWOTIP()
 
         
         # Control
@@ -76,23 +76,22 @@ class Simulation(object):
         self.history.clear()
         self.history.push()
 
-        self.event_handler = events.Handler()
 
     @property
     def tip(self):
         return self.tips[self.tip_index]
         
     def plan(self):
-        ### Plan with TIP
-        self.abstract_tip.set_x0( self.tip )
-        self.abstract_tip.set_bounds( self.tip )
-        self.abstract_tip.optimize()
-        ik = IK(self)
-        self.pd.target = ik.optimize(restore = True)
-
-        # ### Direct planning in FB
+        # ### Plan with TIP
+        # self.abstract_tip.set_x0( self.tip )
+        # self.abstract_tip.set_bounds( self.tip )
+        # self.abstract_tip.optimize()
         # ik = IK(self)
-        # ik.optimize_with_fullbody_motion()
+        # self.pd.target = ik.optimize(restore = True)
+
+        ### Direct planning in FB
+        ik = IK(self)
+        ik.optimize_with_fullbody_motion()
 
         # ### Plan with Double TIP
         # ik = IK(self)
@@ -102,6 +101,7 @@ class Simulation(object):
         # self.abstract_twotip.set_x0( self.tips )
         # self.abstract_twotip.set_bounds( self.tips )
         # self.abstract_twotip.simulate_random()
+        # # self.abstract_twotip.optimize()
         # ik = IK(self)
         # self.pd.target = ik.optimize(restore = False)
 
@@ -129,57 +129,45 @@ class Simulation(object):
         self.world.reset()
 
         ### Reset inner structures
+        self.event_handler.clear()
         self.tip_index = 0
         self.history.clear()
         self.history.push()
+        self.history.callbacks = [self.tip]
+
         self.terminated = dict()
 
     def step(self):
         # if self.world.nframes < 10:
         #     print 'push!!'
         #     self.skel.body("torso").add_ext_force_at([0, 0, 50], [0, 0, 0.03])
+        # elif self.world.nframes == 10:
+        #     self.event_handler.push("pause", 0)
+            
+
         self.skel.tau = self.control()
         self.world.step()
         self.history.push()
 
-        # if math.fabs(self.getTime() - 1.0000) < 0.0001:
-        # if len(set(self.skel.contacted_body_names()) - set(['r_foot'])) > 0 \
         pivot_nodes = []
         for i in range(self.tip_index + 1):
             pivot_nodes += self.tips[i].pivot_nodes()
-        # if len(set(self.skel.contacted_body_names()) - set(pivot_nodes)) > 0 \
-        #    and 'new_contact' not in self.terminated:
-        #     if self.tip_index < len(self.tips) - 1:
-        #         # self.terminated['new_contact'] = 40 # 40 frames = 1/50 sec
-        #         print '==== Proceed to the next TIP ===='
-        #         self.history.callbacks.remove(self.tip)
-        #         self.tip_index += 1
-        #         self.history.callbacks += [self.tip]
-        #         # self.plan()
-        #     else:
-        #         self.terminated['new_contact'] = 40 # 40 frames = 1/50 sec
-
-        # # print self.skel.external_contacts_and_body_id()
-
-        # for key in self.terminated:
-        #     self.terminated[key] -= 1
-        #     if self.terminated[key] == 0:
-        #         return True
-        # return False
 
         if len(set(self.skel.contacted_body_names()) - set(pivot_nodes)) > 0:
             if self.tip_index < len(self.tips) - 1:
-                self.event_handler.push("terminate", 40)
-                # self.event_handler.push("proceed", 40)
+                # self.event_handler.push("terminate", 40)
+                self.event_handler.push("proceed", 40)
             else:
                 self.event_handler.push("terminate", 40)
 
         for e in self.event_handler.pop():
-            print 'New Event: ', e.name, 'at', self.world.nframes
+            # print 'New Event: ', e.name, 'at', self.world.nframes
             if e.name == "proceed":
                 self.history.callbacks.remove(self.tip)
                 self.tip_index += 1
                 self.history.callbacks += [self.tip]
+            elif e.name == 'pause':
+                return True
             elif e.name == 'terminate':
                 self.event_handler.push("terminate", 9999)
                 return True

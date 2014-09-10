@@ -18,9 +18,13 @@ class ObjTWOTIP:
         self.target = None
         self.tips = _tips
 
+    def state(self):
+        th1= self.tips[0].theta()
+        state = np.concatenate([[th1]] + [t.get_state() for t in self.tips])
+        return state
+        
     def cost(self):
-        state = np.concatenate([t.get_state() for t in self.tips])
-        return norm( (state - self.target) * [1.0, 1.0, 0.1, 1.0, 1.0, 0.1] ) ** 2
+        return norm( (self.state() - self.target) * [10.0, 1.0, 1.0, 0.5, 1.0, 1.0, 0.5] ) ** 2
 
         
 class IK:
@@ -45,9 +49,9 @@ class IK:
                                     
         self.dim = max([i for i, dof, w in self.param_desc]) + 1
 
-        self.objs = [ ObjTIP(self.sim.tip) ]
-        self.objs[0].target = self.sim.abstract_tip.commands()
-        print 'objs[0].target = ', self.objs[0].target
+        # self.objs = [ ObjTIP(self.sim.tip) ]
+        # self.objs[0].target = self.sim.abstract_tip.commands()
+        # print 'objs[0].target = ', self.objs[0].target
 
         # self.objs = [ ObjTIP(self.sim.tip) ]
         # self.objs[0].target = [0.14, 0.08, 2.7]
@@ -60,8 +64,6 @@ class IK:
         # self.objs = [ ObjTWOTIP(self.sim.tips) ]
         # self.objs[0].target = self.sim.abstract_twotip.commands()
         # print 'objs[0].target = ', self.objs[0].target
-
-
         
     def expand(self, x):
         q = self.sim.skel.q
@@ -72,7 +74,7 @@ class IK:
 
     def evaluate(self, x = None):
         if x is not None:
-            if np.max(np.fabs(x)) > 1.0:
+            if np.max(np.fabs(x)) > 1.57:
                 return np.max(np.fabs(x))
             self.sim.skel.q = self.expand(x)
                        
@@ -87,10 +89,13 @@ class IK:
             x0 = np.zeros(self.dim)
 
         print "==== ik.IK optimize...."
-        self.res = minimize(lambda x : self.evaluate(x), x0, method='nelder-mead', tol=0.000001, options={'maxiter':3000})
+
+        self.res = minimize(lambda x : self.evaluate(x), x0, method='nelder-mead', tol=0.000001, options={'maxiter':3000, 'maxfev':3000})
 
         print "==== result\n", self.res
+        print "state = ", self.objs[0].state()
         print "==== ik.IK optimize....OK"
+        
         if restore:
             self.sim.skel.q = saved_pose
             self.sim.skel.qdot = saved_vel
@@ -107,7 +112,8 @@ class IK:
 
         # v = -data['P.y']
         # v = sum(self.sim.history.vertical_impulses())
-        v = -data['C.y']
+        # v = -data['C.y']
+        v = data['max_impulse']
 
         contacts = set(self.sim.skel.contacted_body_names())
         allowed  = set(['l_foot', 'r_foot', 'l_hand', 'r_hand'])
@@ -123,9 +129,11 @@ class IK:
         # print self.evaluate_fullbody([ 0.80067996,  0.91354763,  0.87398188, -0.5739955,  -0.05695692]) # Min dist touch
         # print self.evaluate_fullbody([0.99941362, -0.63121823, 0.58667322, 0.64432841, -0.79191961]) # Max dist touch
 
+        print self.evaluate_fullbody([ 1.51792639, -1.12534319,  0.29779076, -1.49004759, -0.54163184,1.44453204, -1.53363932,  0.48234211])
+        return
 
-        lo = np.array([-1.0] * 5)
-        hi = np.array([ 1.0] * 5)
+        lo = np.array([-1.57] * self.dim)
+        hi = np.array([ 1.57] * self.dim)
         opt = {'verb_time':0,  'boundary_handling': 'BoundPenalty', \
                'bounds': [lo, hi], 'tolfun' : 0.001}
         print "==== abstract.model.TIP optimize...."
