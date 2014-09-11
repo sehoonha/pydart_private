@@ -9,6 +9,9 @@ class ObjTIP:
         self.target = None
         self.tip = _tip
 
+    def state(self):
+        return self.tip.get_state()
+        
     def cost(self):
         state = self.tip.get_state()
         return norm( (state - self.target) * [1.0, 1.0, 0.1] ) ** 2
@@ -41,17 +44,17 @@ class IK:
                             (1, 'l_hand', 1.0),
                             (1, 'r_hand', 1.0),
                             (2, 'l_thigh', 1.0),
-                            (3, 'r_thigh', 1.0),
-                            (4, 'l_shin', 0.5),
-                            (5, 'r_shin', 0.5),
-                            (6, 'l_heel', 0.05),
-                            (7, 'r_heel', 0.05) ]
+                            (2, 'r_thigh', 1.0),
+                            (3, 'l_shin', 0.5),
+                            (3, 'r_shin', 0.5),
+                            (4, 'l_heel', 0.05),
+                            (4, 'r_heel', 0.05) ]
                                     
         self.dim = max([i for i, dof, w in self.param_desc]) + 1
 
-        # self.objs = [ ObjTIP(self.sim.tip) ]
-        # self.objs[0].target = self.sim.abstract_tip.commands()
-        # print 'objs[0].target = ', self.objs[0].target
+        self.objs = [ ObjTIP(self.sim.tip) ]
+        self.objs[0].target = self.sim.abstract_tip.commands()
+        print 'objs[0].target = ', self.objs[0].target
 
         # self.objs = [ ObjTIP(self.sim.tip) ]
         # self.objs[0].target = [0.14, 0.08, 2.7]
@@ -61,9 +64,9 @@ class IK:
         # self.objs[1].target = [0.08, 0.17, 1.0]
         # print 'objs[1].target = ', self.objs[1].target
 
-        self.objs = [ ObjTWOTIP(self.sim.tips) ]
-        self.objs[0].target = self.sim.abstract_twotip.commands()
-        print 'objs[0].target = ', self.objs[0].target
+        # self.objs = [ ObjTWOTIP(self.sim.tips) ]
+        # self.objs[0].target = self.sim.abstract_twotip.commands()
+        # print 'objs[0].target = ', self.objs[0].target
         
     def expand(self, x):
         q = self.sim.skel.q

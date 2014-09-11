@@ -21,6 +21,7 @@ from control.com_tracker import *
 from model.tip import *
 from ik.ik import *
 import abstract.tip
+import abstract.tip_v2
 import abstract.twotip
 
 def confine(x, lo, hi):
@@ -47,9 +48,9 @@ class Simulation(object):
 
         ### Now, configure the controllers
         # Abstract view of skeleton
-        self.tips = [TIP(self.skel, 'rfoot', 'lfoot'),
-                     TIP(self.skel, 'lfoot', 'hands')]
-        # self.tips = [TIP(self.skel, 'feet', 'hands'),
+        # self.tips = [TIP(self.skel, 'rfoot', 'lfoot'),g
+        #              TIP(self.skel, 'lfoot', 'hands')]
+        self.tips = [TIP(self.skel, 'feet', 'hands'),]
         #              TIP(self.skel, 'hands', 'head')]
 
         self.event_handler = events.Handler()
@@ -63,8 +64,9 @@ class Simulation(object):
 
 
         # Abstract model
-        self.abstract_tip = abstract.tip.TIP()
-        self.abstract_twotip = abstract.twotip.TWOTIP()
+        self.abstract_tip = abstract.tip_v2.TIPv2()
+        # self.abstract_tip = abstract.tip.TIP()
+        # self.abstract_twotip = abstract.twotip.TWOTIP()
 
         
         # Control
@@ -82,12 +84,12 @@ class Simulation(object):
         return self.tips[self.tip_index]
         
     def plan(self):
-        # ### Plan with TIP
-        # self.abstract_tip.set_x0( self.tip )
-        # self.abstract_tip.set_bounds( self.tip )
-        # self.abstract_tip.optimize()
-        # ik = IK(self)
-        # self.pd.target = ik.optimize(restore = True)
+        ### Plan with TIP
+        self.abstract_tip.set_x0( self.tip )
+        self.abstract_tip.set_bounds( self.tip )
+        self.abstract_tip.optimize()
+        ik = IK(self)
+        self.pd.target = ik.optimize(restore = False)
 
         # ### Direct planning in FB
         # ik = IK(self)
@@ -97,13 +99,13 @@ class Simulation(object):
         # ik = IK(self)
         # self.pd.target = ik.optimize(restore = True)
 
-        ### Plan with Sequential TIP
-        self.abstract_twotip.set_x0( self.tips )
-        self.abstract_twotip.set_bounds( self.tips )
-        self.abstract_twotip.simulate_random()
-        # self.abstract_twotip.optimize()
-        ik = IK(self)
-        self.pd.target = ik.optimize(restore = False)
+        # ### Plan with Sequential TIP
+        # self.abstract_twotip.set_x0( self.tips )
+        # self.abstract_twotip.set_bounds( self.tips )
+        # self.abstract_twotip.simulate_random()
+        # # self.abstract_twotip.optimize()
+        # ik = IK(self)
+        # self.pd.target = ik.optimize(restore = False)
 
 
     def control(self):
@@ -120,11 +122,11 @@ class Simulation(object):
 
     def reset(self):
         ### Reset Pydart
-        # self.skel.q = BioloidGPPoses().leaned_pose()
+        self.skel.q = BioloidGPPoses().leaned_pose()
         # self.skel.q = BioloidGPPoses().stepping_pose()
-        # self.skel.qdot = np.zeros(self.skel.ndofs)
-        self.skel.q = BioloidGPPoses().stepping2_pose()
-        self.skel.qdot = BioloidGPPoses().stepping2_vel()
+        self.skel.qdot = np.zeros(self.skel.ndofs)
+        # self.skel.q = BioloidGPPoses().stepping2_pose()
+        # self.skel.qdot = BioloidGPPoses().stepping2_vel()
 
         self.world.reset()
 
