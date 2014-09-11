@@ -61,9 +61,9 @@ class IK:
         # self.objs[1].target = [0.08, 0.17, 1.0]
         # print 'objs[1].target = ', self.objs[1].target
 
-        # self.objs = [ ObjTWOTIP(self.sim.tips) ]
-        # self.objs[0].target = self.sim.abstract_twotip.commands()
-        # print 'objs[0].target = ', self.objs[0].target
+        self.objs = [ ObjTWOTIP(self.sim.tips) ]
+        self.objs[0].target = self.sim.abstract_twotip.commands()
+        print 'objs[0].target = ', self.objs[0].target
         
     def expand(self, x):
         q = self.sim.skel.q
@@ -90,7 +90,9 @@ class IK:
 
         print "==== ik.IK optimize...."
 
-        self.res = minimize(lambda x : self.evaluate(x), x0, method='nelder-mead', tol=0.000001, options={'maxiter':3000, 'maxfev':3000})
+        # x = np.array([ 1.35940129, -1.51971236,  1.07272779,  0.0961569 ,  0.17231501, -0.94596972, -0.560066  ,  1.47401052])
+        # self.res = { "x" : x, "value" : self.evaluate(x) }
+        self.res = minimize(lambda x : self.evaluate(x), x0, method='nelder-mead', tol=0.000001, options={'maxiter':10000, 'maxfev':10000, 'xtol':10e-8, 'ftol':10e-8})
 
         print "==== result\n", self.res
         print "state = ", self.objs[0].state()

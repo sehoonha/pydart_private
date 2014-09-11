@@ -89,21 +89,21 @@ class Simulation(object):
         # ik = IK(self)
         # self.pd.target = ik.optimize(restore = True)
 
-        ### Direct planning in FB
-        ik = IK(self)
-        ik.optimize_with_fullbody_motion()
+        # ### Direct planning in FB
+        # ik = IK(self)
+        # ik.optimize_with_fullbody_motion()
 
         # ### Plan with Double TIP
         # ik = IK(self)
         # self.pd.target = ik.optimize(restore = True)
 
-        # ### Plan with Sequential TIP
-        # self.abstract_twotip.set_x0( self.tips )
-        # self.abstract_twotip.set_bounds( self.tips )
-        # self.abstract_twotip.simulate_random()
-        # # self.abstract_twotip.optimize()
-        # ik = IK(self)
-        # self.pd.target = ik.optimize(restore = False)
+        ### Plan with Sequential TIP
+        self.abstract_twotip.set_x0( self.tips )
+        self.abstract_twotip.set_bounds( self.tips )
+        self.abstract_twotip.simulate_random()
+        # self.abstract_twotip.optimize()
+        ik = IK(self)
+        self.pd.target = ik.optimize(restore = False)
 
 
     def control(self):
