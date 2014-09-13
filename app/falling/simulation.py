@@ -1,15 +1,9 @@
-import os, sys
+import sys
 import config
 sys.path.append(config.PYDART_PATH)
 
 import pydart
-import pydart_api
 import numpy as np
-import numpy.linalg as LA
-import math
-from OpenGL.GL import *
-from OpenGL.GLU import *
-from OpenGL.GLUT import *
 import gltools
 
 from history import *
@@ -24,11 +18,14 @@ import abstract.tip
 import abstract.tip_v2
 import abstract.twotip
 
+
 def confine(x, lo, hi):
     return min(max(lo, x), hi)
 
+
 def STR(v):
     return str(["%.3f" % x for x in v])
+
 
 class Simulation(object):
     def __init__(self):
@@ -46,11 +43,11 @@ class Simulation(object):
         self.skel.set_joint_damping(0.15)
         self.history = History(self)
 
-        ### Now, configure the controllers
+        # ### Now, configure the controllers
         # Abstract view of skeleton
         # self.tips = [TIP(self.skel, 'rfoot', 'lfoot'),g
         #              TIP(self.skel, 'lfoot', 'hands')]
-        self.tips = [TIP(self.skel, 'feet', 'hands'),]
+        self.tips = [TIP(self.skel, 'feet', 'hands'), ]
         #              TIP(self.skel, 'hands', 'head')]
 
         self.event_handler = events.Handler()
@@ -62,13 +59,11 @@ class Simulation(object):
         print 'skel.approx_inertia_x = ', self.skel.approx_inertia_x()
         print 'skel.q = ', self.skel.q
 
-
         # Abstract model
         self.abstract_tip = abstract.tip_v2.TIPv2()
         # self.abstract_tip = abstract.tip.TIP()
         # self.abstract_twotip = abstract.twotip.TWOTIP()
 
-        
         # Control
         self.maxTorque = 0.3 * 1.5
         self.pd = PDController(self.skel, 50.0, 1.0)
@@ -78,18 +73,17 @@ class Simulation(object):
         self.history.clear()
         self.history.push()
 
-
     @property
     def tip(self):
         return self.tips[self.tip_index]
-        
+
     def plan(self):
-        ### Plan with TIP
-        self.abstract_tip.set_x0( self.tip )
-        self.abstract_tip.set_bounds( self.tip )
+        # Plan with TIP
+        self.abstract_tip.set_x0(self.tip)
+        self.abstract_tip.set_bounds(self.tip)
         self.abstract_tip.optimize()
         ik = IK(self)
-        self.pd.target = ik.optimize(restore = False)
+        self.pd.target = ik.optimize(restore=False)
 
         # ### Direct planning in FB
         # ik = IK(self)
@@ -107,7 +101,6 @@ class Simulation(object):
         # ik = IK(self)
         # self.pd.target = ik.optimize(restore = False)
 
-
     def control(self):
         tau = np.zeros(self.skel.ndofs)
         # Track the initial pose
@@ -121,7 +114,7 @@ class Simulation(object):
         return tau
 
     def reset(self):
-        ### Reset Pydart
+        # ### Reset Pydart
         self.skel.q = BioloidGPPoses().leaned_pose()
         # self.skel.q = BioloidGPPoses().stepping_pose()
         self.skel.qdot = np.zeros(self.skel.ndofs)
@@ -130,7 +123,7 @@ class Simulation(object):
 
         self.world.reset()
 
-        ### Reset inner structures
+        # ### Reset inner structures
         self.event_handler.clear()
         self.tip_index = 0
         self.history.clear()
@@ -145,7 +138,6 @@ class Simulation(object):
         #     self.skel.body("torso").add_ext_force_at([0, 0, 50], [0, 0, 0.03])
         # elif self.world.nframes == 10:
         #     self.event_handler.push("pause", 0)
-            
 
         self.skel.tau = self.control()
         self.world.step()
@@ -198,7 +190,6 @@ class Simulation(object):
             self.tips[i].render()
         # self.tip2.render()
 
-
         # Draw contacts
         gltools.glMove([0, 0, 0])
         glColor(0.7, 0.0, 0.3)
@@ -207,10 +198,9 @@ class Simulation(object):
 
         glPopMatrix()
 
-
     def status_string(self):
         data = self.history.get_frame()
-        
+
         status = ""
         status += "T = %.4f (%d) " % (data['t'], data['nframes'])
         status += "C = (%.4f %.4f) " % (data['C.x'], data['C.y'])
@@ -223,10 +213,7 @@ class Simulation(object):
 
         return status
 
-
     def set_world_frame(self, i):
         self.world.set_frame(i)
         # pydart_api.setWorldSimFrame(i)
-        self.history.pop(i);
-
-
+        self.history.pop(i)
