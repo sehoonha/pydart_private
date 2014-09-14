@@ -13,7 +13,7 @@ class History:
 
     def clear(self):
         self.histories = []
-        
+
     def push(self):
         skel = self.world.skel
         data = {}
@@ -39,6 +39,7 @@ class History:
     def push_impulses(self, data):
         skelcontacts = data['skelcontacts']
         pivots = [self.world.skel.body_index(p) for p in data['tip_pivot_nodes']]
+        pivots = []
         vertical_forces = [float(-c[4]) for c, b in skelcontacts if b not in pivots]
         raw_impulse = np.sum(vertical_forces) * self.world.dt
         data['raw_impulse'] = raw_impulse
@@ -48,8 +49,8 @@ class History:
         data['impulse'] = sum([d['raw_impulse'] for d in self.histories[begin_index:]])
 
         last = self.histories[-1]['max_impulse'] if self.histories else None
-        data['max_impulse'] = max(last, data['impulse']) 
-        
+        data['max_impulse'] = max(last, data['impulse'])
+
     def pop(self, index):
         self.index = index
 
@@ -58,7 +59,7 @@ class History:
 
     def get_frame_at(self, index):
         return self.histories[index]
-        
+
     def plot(self):
         x = [ data['t'] for data in self.histories ]
         traces = []
@@ -82,14 +83,14 @@ class History:
             traces += [ Scatter(x=x,y=y,name=name) ]
         data = Data(traces)
         unique_url = py.plot(data, filename = 'Simulation COM history')
-        
+
     def plotImpact(self):
         x = [ data['t'] for data in self.histories ]
         # Plot vertical impact
         raw_impulses = [ data['raw_impulse'] for data in self.histories ]
         impulses = [ data['impulse'] for data in self.histories ]
         max_impulses = [ data['max_impulse'] for data in self.histories ]
-            
+
         traces = []
         traces += [Scatter(x=x,y=raw_impulses,name="Raw Impulse")]
         traces += [Scatter(x=x,y=impulses,name="Impulse (Windowed)")]
@@ -130,5 +131,3 @@ class History:
         data = Data(traces)
         py.image.save_as({'data': data}, 'two_momentums.png', height=900, width=1200)
         # unique_url = py.plot(data, filename = 'Two Simulation Momentums')
-        
-        

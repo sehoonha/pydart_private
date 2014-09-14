@@ -115,7 +115,8 @@ class Simulation(object):
 
     def reset(self):
         # ### Reset Pydart
-        self.skel.q = BioloidGPPoses().leaned_pose()
+        self.skel.q = BioloidGPPoses().stand_pose()
+        # self.skel.q = BioloidGPPoses().leaned_pose()
         # self.skel.q = BioloidGPPoses().stepping_pose()
         self.skel.qdot = np.zeros(self.skel.ndofs)
         # self.skel.q = BioloidGPPoses().stepping2_pose()
@@ -203,7 +204,7 @@ class Simulation(object):
 
         status = ""
         status += "T = %.4f (%d) " % (data['t'], data['nframes'])
-        status += "C = (%.4f %.4f) " % (data['C.x'], data['C.y'])
+        status += "C = (%.4f %.4f) " % (data['C.x'], data['C.y'] - 0.1834)
         status += "P = (%.4f %.4f) " % (data['P.x'], data['P.y'])
         status += "Impulse = %.4f (max %.4f) " % (data['impulse'], data['max_impulse'])
         # status += "l_hand.v = %s " % STR(data['l_hand.v'])
