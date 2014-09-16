@@ -4,19 +4,19 @@ sys.path.append(config.PYDART_PATH)
 
 import pydart
 import numpy as np
+from OpenGL.GL import glPushMatrix, glPopMatrix, glColor
 import gltools
 
-from history import *
-from poses import *
+from history import History
+from poses import BioloidGPPoses
 import events
-from control.pd import *
-from control.jt import *
-from control.com_tracker import *
-from model.tip import *
-from ik.ik import *
+from control.pd import PDController
+from model.tip import TIP
+from ik.ik import IK
 import abstract.tip
 import abstract.tip_v2
 import abstract.twotip
+import abstract.dynamic
 
 
 def confine(x, lo, hi):
@@ -33,10 +33,12 @@ class Simulation(object):
         # Init api
         pydart.init()
         self.world = pydart.create_world(1.0 / 2000.0)
-        self.world.add_skeleton(config.DATA_PATH + "sdf/ground.urdf", control = False)
-        self.world.add_skeleton(config.DATA_PATH + "urdf/BioloidGP/BioloidGP.URDF")
+        self.world.add_skeleton(config.DATA_PATH + "sdf/ground.urdf",
+                                control=False)
+        self.world.add_skeleton(config.DATA_PATH +
+                                "urdf/BioloidGP/BioloidGP.URDF")
 
-        self.skel = self.world.skel # shortcut for the control skeleton
+        self.skel = self.world.skel  # shortcut for the control skeleton
         for i, dof in enumerate(self.skel.dofs):
             print i, dof
 
@@ -45,9 +47,9 @@ class Simulation(object):
 
         # ### Now, configure the controllers
         # Abstract view of skeleton
-        # self.tips = [TIP(self.skel, 'rfoot', 'lfoot'),g
-        #              TIP(self.skel, 'lfoot', 'hands')]
-        self.tips = [TIP(self.skel, 'feet', 'hands'), ]
+        self.tips = [TIP(self.skel, 'rfoot', 'lfoot'),
+                     TIP(self.skel, 'lfoot', 'hands')]
+        # self.tips = [TIP(self.skel, 'feet', 'hands'), ]
         #              TIP(self.skel, 'hands', 'head')]
 
         self.event_handler = events.Handler()
@@ -60,9 +62,10 @@ class Simulation(object):
         print 'skel.q = ', self.skel.q
 
         # Abstract model
-        self.abstract_tip = abstract.tip_v2.TIPv2()
+        # self.abstract_tip = abstract.tip_v2.TIPv2()
         # self.abstract_tip = abstract.tip.TIP()
         # self.abstract_twotip = abstract.twotip.TWOTIP()
+        self.abstract_tip = abstract.dynamic.DynamicTIP()
 
         # Control
         self.maxTorque = 0.3 * 1.5
@@ -78,12 +81,12 @@ class Simulation(object):
         return self.tips[self.tip_index]
 
     def plan(self):
-        # Plan with TIP
-        self.abstract_tip.set_x0(self.tip)
-        self.abstract_tip.set_bounds(self.tip)
-        self.abstract_tip.optimize()
-        ik = IK(self)
-        self.pd.target = ik.optimize(restore=False)
+        # # Plan with TIP
+        # self.abstract_tip.set_x0(self.tip)
+        # self.abstract_tip.set_bounds(self.tip)
+        # self.abstract_tip.optimize()
+        # ik = IK(self)
+        # self.pd.target = ik.optimize(restore=False)
 
         # ### Direct planning in FB
         # ik = IK(self)
@@ -101,6 +104,11 @@ class Simulation(object):
         # ik = IK(self)
         # self.pd.target = ik.optimize(restore = False)
 
+        # Plan with Sequential TIP
+        self.abstract_tip.set_x0(self.tips)
+        self.abstract_tip.set_bounds(self.tips)
+        self.abstract_tip.plan_initial()
+
     def control(self):
         tau = np.zeros(self.skel.ndofs)
         # Track the initial pose
@@ -115,12 +123,12 @@ class Simulation(object):
 
     def reset(self):
         # ### Reset Pydart
-        self.skel.q = BioloidGPPoses().stand_pose()
+        # self.skel.q = BioloidGPPoses().stand_pose()
         # self.skel.q = BioloidGPPoses().leaned_pose()
         # self.skel.q = BioloidGPPoses().stepping_pose()
-        self.skel.qdot = np.zeros(self.skel.ndofs)
-        # self.skel.q = BioloidGPPoses().stepping2_pose()
-        # self.skel.qdot = BioloidGPPoses().stepping2_vel()
+        # self.skel.qdot = np.zeros(self.skel.ndofs)
+        self.skel.q = BioloidGPPoses().stepping2_pose()
+        self.skel.qdot = BioloidGPPoses().stepping2_vel()
 
         self.world.reset()
 
@@ -136,7 +144,7 @@ class Simulation(object):
     def step(self):
         # if self.world.nframes < 10:
         #     print 'push!!'
-        #     self.skel.body("torso").add_ext_force_at([0, 0, 50], [0, 0, 0.03])
+        #   self.skel.body("torso").add_ext_force_at([0, 0, 50], [0, 0, 0.03])
         # elif self.world.nframes == 10:
         #     self.event_handler.push("pause", 0)
 
@@ -183,7 +191,8 @@ class Simulation(object):
 
         gltools.glMove([0, 0, 0])
         glColor(1, 0, 0)
-        gltools.render_arrow(self.skel.C, self.skel.C + 0.2 * self.tip.projected_Cdot())
+        gltools.render_arrow(self.skel.C,
+                             self.skel.C + 0.2 * self.tip.projected_Cdot())
 
         # Draw TIP
         tip_index = self.history.get_frame()['tip_index']
@@ -206,7 +215,8 @@ class Simulation(object):
         status += "T = %.4f (%d) " % (data['t'], data['nframes'])
         status += "C = (%.4f %.4f) " % (data['C.x'], data['C.y'] - 0.1834)
         status += "P = (%.4f %.4f) " % (data['P.x'], data['P.y'])
-        status += "Impulse = %.4f (max %.4f) " % (data['impulse'], data['max_impulse'])
+        status += "Impulse = %.4f (max %.4f) " % (data['impulse'],
+                                                  data['max_impulse'])
         # status += "l_hand.v = %s " % STR(data['l_hand.v'])
         status += "I = %.4f " % self.skel.approx_inertia_x()
         status += "TIP = " + str(data['tip']) + " "
