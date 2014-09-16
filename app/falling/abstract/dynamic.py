@@ -1,31 +1,11 @@
 import math
 from math import sin, cos
 import numpy as np
-from collections import namedtuple
+# from collections import namedtuple
 from scipy.integrate import odeint
-
-State = namedtuple('State', ['th1', 'dth1', 'r1', 'dr1', 'c'])
-Control = namedtuple('Control', ['th2', 'r2', 'next_dr1'])
-Points = namedtuple('Points', ['x1', 'y1', 'dx1', 'dy1',
-                               'x2', 'y2', 'dx2', 'dy2'])
+from state_db import State, Control, get_points, StateDB
 
 g_inf = float("inf")
-
-
-def get_points(x, u):
-    (th1, dth1, r1, dr1) = (x.th1, x.dth1, x.r1, x.dr1)
-    (th2, r2) = (u.th2, u.r2)
-
-    x1 = r1 * sin(th1)
-    y1 = r1 * cos(th1)
-    dx1 = dr1 * sin(th1) + r1 * cos(th1) * dth1
-    dy1 = dr1 * cos(th1) - r1 * sin(th1) * dth1
-
-    x2 = x1 + r2 * sin(th1 + th2)
-    y2 = y1 + r2 * cos(th1 + th2)
-    dx2 = dx1 + r2 * cos(th1 + th2) * dth1
-    dy2 = dy1 - r2 * sin(th1 + th2) * dth1
-    return Points(x1, y1, dx1, dy1, x2, y2, dx2, dy2)
 
 
 class DynamicTIP:
@@ -35,6 +15,8 @@ class DynamicTIP:
         self.m = 1.08
         self.I = 0.0080
         self.g = -9.8
+
+        self.db = StateDB()
 
     def set_x0(self, tips):
         t0 = tips[0]
@@ -48,7 +30,7 @@ class DynamicTIP:
 
         for tip in tips:
             self.lo += [Control(tip.angle() - 1.0, tip.d12() - 0.03, -0.1)]
-            self.hi += [Control(tip.angle() + 0.5, tip.d12() + 0.03, 0.1)]
+            self.hi += [Control(tip.angle() + 0.5, tip.d12() + 0.01, 0.1)]
 
             print 'set abstract.DynamicTIP.lo = ', self.lo[-1]
             print 'set abstract.DynamicTIP.hi = ', self.hi[-1]
@@ -117,6 +99,11 @@ class DynamicTIP:
                 x = x_
         print 'best: ', x, ':', j
         print '# evals = ', self.eval_counter
+
+        # path = self.db.trace(x)
+        # for i, (x, v, u) in enumerate(path):
+        #     print i, x, v, u
+        self.db.plot_trace(x)
         return j
 
     def plan(self, x, j):
@@ -131,6 +118,7 @@ class DynamicTIP:
         # Case 1: keep falling
         best_x = self.step(x)
         best_j = self.plan(best_x, j)
+        best_u = None
 
         # Case 2: use all feasible stoppers
         for u in self.stoppers(x):
@@ -139,5 +127,8 @@ class DynamicTIP:
             if j_ < best_j:
                 best_j = j_
                 best_x = x_impact
-        print x, '->', best_j
+                best_u = u
+
+        # print x, '->', best_j
+        self.db.add(x, best_x, best_j, best_u)
         return best_j
