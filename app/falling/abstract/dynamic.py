@@ -5,12 +5,14 @@ import numpy as np
 from scipy.integrate import odeint
 from state_db import State, Control, get_points, StateDB
 
+g_eps = float(10e-3)
 g_inf = float("inf")
 
 
 class DynamicTIP:
     def __init__(self):
         self.eval_counter = 0
+        self.N_GRID = 5
 
         self.m = 1.08
         self.I = 0.0080
@@ -25,15 +27,26 @@ class DynamicTIP:
 
     def set_bounds(self, tips):
         """Bound for control signals: [(dr1, th2, r2), (dr2, th3, r3)]"""
+        (self.lo0, self.hi0) = (-0.01, 0.01)
         self.lo = []
         self.hi = []
 
-        for tip in tips:
-            self.lo += [Control(tip.angle() - 1.0, tip.d12() - 0.03, -0.1)]
-            self.hi += [Control(tip.angle() + 0.5, tip.d12() + 0.01, 0.1)]
+        # (a, b, c) = (2.3284, 0.1522, -0.1000)
+        # (d, e, f) = (1.7107, 0.1108, -0.1000)
+        # self.lo = [Control(a, b - g_eps, c), Control(d, e - g_eps, f)]
+        # self.hi = [Control(a, b + g_eps, c), Control(d, e + g_eps, f)]
 
-            print 'set abstract.DynamicTIP.lo = ', self.lo[-1]
-            print 'set abstract.DynamicTIP.hi = ', self.hi[-1]
+        for i, tip in enumerate(tips):
+            (a, d) = (tip.angle(), tip.d12())
+            if i == 0:
+                self.lo += [Control(a - 1.0, d - 0.02, -0.01)]
+                self.hi += [Control(a + 0.05, d + 0.02, 0.01)]
+            else:
+                self.lo += [Control(a - 1.0, d - 0.02, -0.01)]
+                self.hi += [Control(a + 1.0, d + 0.02, 0.01)]
+
+            print 'set abstract.DynamicTIP.lo = ', self.lo[i]
+            print 'set abstract.DynamicTIP.hi = ', self.hi[i]
 
     def deriv(self, _state, _t):
         x = State(*_state)
@@ -67,7 +80,7 @@ class DynamicTIP:
         n_th1 = x.th1 + u.th2 - math.pi
         n_dth1 = x.dth1 - (1 / I) * (x2 - x1) * j
         n_r1 = u.r2
-        n_dr1 = u.next_dr1
+        n_dr1 = u.n_dr1
         n_c = x.c + 1
         n_x = State(n_th1, n_dth1, n_r1, n_dr1, n_c)
         return (n_x, j)
@@ -78,25 +91,27 @@ class DynamicTIP:
         hi = self.hi[int(x.c)]
         stoppers = []
         # Generate all feasible stoppers
-        for th2 in np.linspace(lo.th2, hi.th2, 11):
+        for th2 in np.linspace(lo.th2, hi.th2, self.N_GRID):
             # Condition  y2 = r1 * cos(th1) + r2 * cos(th1 + th2) = 0
             r2 = r1 * cos(th1) / -cos(th1 + th2)
             if r2 < lo.r2 or hi.r2 < r2:
                 continue
             # If the stopper is feasible
-            for next_dr1 in np.linspace(lo.next_dr1, hi.next_dr1, 11):
-                stoppers += [Control(th2, r2, next_dr1)]
+            for n_dr1 in np.linspace(lo.n_dr1, hi.n_dr1, self.N_GRID):
+                stoppers += [Control(th2, r2, n_dr1)]
+            # stoppers += [Control(th2, r2, 0.0)]
         return stoppers
 
     def plan_initial(self):
+        self.upper_bound = g_inf
         j = g_inf
         x = None
-        for dr1 in np.linspace(-0.1, 0.1, 11):
+        for dr1 in np.linspace(self.lo0, self.hi0, self.N_GRID):
             x_ = State(self.x0.th1, self.x0.dth1, self.x0.r1, dr1, 0)
-            j_ = self.plan(x_, 0)
+            x_, j_ = self.plan(x_, 0)
             if j_ < j:
-                j = j_
-                x = x_
+                (x, j) = (x_, j_)
+            break
         print 'best: ', x, ':', j
         print '# evals = ', self.eval_counter
 
@@ -107,28 +122,45 @@ class DynamicTIP:
         return j
 
     def plan(self, x, j):
-        if self.is_stopped(x):
-            return j
+        # print 'plan()', x, j
+        if self.is_stopped(x):  # If the current state has negative velocity
+            if int(x.c) == 2:  # If this is the second contact
+                return (x, j)
+            else:
+                return (x, g_inf)  # If this is not the second
 
-        if self.is_grounded(x) or int(x.c) == 1:
-            return g_inf
+        if self.is_grounded(x):  # If the rod falls to the ground
+            return (x, g_inf)
 
+        if int(x.c) == 2:  # Exceed the maximum contacts
+            return (x, g_inf)
+
+        if j > self.upper_bound:  # Not promising state
+            return (x, g_inf)
+
+        x_prime, j_prime = self.db.lookup(x)  # Lookup the similar states
+        if x_prime is not None:
+            print x, ' == ', x_prime, ':', j, 'vs. ', j_prime
+            return (x_prime, j_prime)
+
+        if self.eval_counter % 10000 == 0:
+            print 'eval_counter:', self.eval_counter, self.upper_bound
         self.eval_counter += 1
 
         # Case 1: keep falling
-        best_x = self.step(x)
-        best_j = self.plan(best_x, j)
+        (best_x, best_j) = self.plan(self.step(x), j)
         best_u = None
 
         # Case 2: use all feasible stoppers
         for u in self.stoppers(x):
             x_impact, j_impact = self.impact(x, u)
-            j_ = self.plan(x_impact, max(j, j_impact))
+            (x_, j_) = self.plan(x_impact, max(j, j_impact))
             if j_ < best_j:
                 best_j = j_
-                best_x = x_impact
+                best_x = x_
                 best_u = u
 
-        # print x, '->', best_j
+        # print x, '->', best_x, best_j, best_u
+        self.upper_bound = min(self.upper_bound, best_j)
         self.db.add(x, best_x, best_j, best_u)
-        return best_j
+        return (x, best_j)

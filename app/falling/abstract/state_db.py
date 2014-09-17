@@ -12,7 +12,7 @@ class State(namedtuple('State', ['th1', 'dth1', 'r1', 'dr1', 'c'])):
         return 'State(%.4f, %.4f, %.4f, %.4f, %d)' % self
 
 
-class Control(namedtuple('Control', ['th2', 'r2', 'next_dr1'])):
+class Control(namedtuple('Control', ['th2', 'r2', 'n_dr1'])):
     __slots__ = ()
 
     def __str__(self):
@@ -67,29 +67,48 @@ class StateDB(object):
         return [(x, v, u)] + self.trace(next_x)
 
     def lookup(self, x):
-        pass
+        w = np.array([1.0, 0.1, 1.0, 100.0, 100.0])
+        for s, (next_s, v, u) in self.info.iteritems():
+            lhs = np.array(x)
+            rhs = np.array(s)
+            d = w.dot((lhs - rhs) ** 2)
+            if d < 0.01:
+                return (s, v)
+        return (None, None)
+
+    def foo(self):
+        states = [n_x for n_x, v, u in self.info.values() if int(n_x.c) == 1]
+        states.sort()
+        for s in states:
+            print s
+        print '# total %s states' % len(states)
+        exit(0)
 
     def plot_trace(self, x):
+        # self.foo()
         path = self.trace(x)
         traces = []
+        x_offset = 0.0
         for i, (x, v, u) in enumerate(path):
             print i, x, v, u
-            if i == 0:
-                p = get_first_point(x)
-                x = np.array([0.0, p.x1])
-                y = np.array([0.0, p.y1])
-                print 'line: ', x, y
-                traces += [pyg.Scatter(x=x, y=y, name='TIP%d' % i)]
-            elif u is not None:
+            if u is not None:
                 p = get_points(x, u)
-                x = np.array([0.0, p.x1, p.x2])
+                x = np.array([0.0, p.x1, p.x2]) + x_offset
                 y = np.array([0.0, p.y1, p.y2])
-                print 'line: ', x, y
+                print 'line:', zip(x, y)
+                traces += [pyg.Scatter(x=x, y=y, name='TIP%d' % i)]
+                x_offset = x[-1]
+                print 'x_offset:', x_offset
+            elif i == 0 or i == len(path) - 1:
+                p = get_first_point(x)
+                x = np.array([0.0, p.x1]) + x_offset
+                y = np.array([0.0, p.y1])
+                print 'line: ', zip(x, y)
                 traces += [pyg.Scatter(x=x, y=y, name='TIP%d' % i)]
 
         data = pyg.Data(traces)
-        layout = pyg.Layout(xaxis=pyg.XAxis(range=[0.0, 0.3]),
-                            yaxis=pyg.YAxis(range=[0.0, 0.3]))
+        layout = pyg.Layout(xaxis=pyg.XAxis(range=[-0.1, 0.4]),
+                            yaxis=pyg.YAxis(range=[-0.1, 0.4]))
 
         unique_url = py.plot({'data': data, 'layout': layout},
                              filename='Abstract TIP')
