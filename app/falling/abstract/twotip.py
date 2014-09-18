@@ -111,7 +111,7 @@ class TWOTIP:
         if next_dth2 > -0.5:
             print 'cost (bad_final_dth) = ', 5.0 + next_dth2
             return 5.0 + next_dth2
-        
+
         (j1, j2) = self.last_impulse
         cost = max(j1, j2)
         print 'cost = ', cost
@@ -134,7 +134,7 @@ class TWOTIP:
 
     def commands(self):
         return np.concatenate( ([self.x0[0]], self.first_tip.commands(), self.second_tip.commands()) )
-        
+
     def plot_poses(self):
         print '==== plot_poses ...'
         traces = []

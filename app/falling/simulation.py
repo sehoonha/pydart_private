@@ -96,17 +96,18 @@ class Simulation(object):
         # ik = IK(self)
         # self.pd.target = ik.optimize(restore = True)
 
-        # ### Plan with Sequential TIP
-        # self.abstract_twotip.set_x0( self.tips )
-        # self.abstract_twotip.set_bounds( self.tips )
+        # # Plan with Sequential TIP
+        # self.abstract_twotip.set_x0(self.tips)
+        # self.abstract_twotip.set_bounds(self.tips)
         # self.abstract_twotip.simulate_random()
         # # self.abstract_twotip.optimize()
         # ik = IK(self)
-        # self.pd.target = ik.optimize(restore = False)
+        # self.pd.target = ik.optimize(restore=False)
 
-        # Plan with Sequential TIP
+        # Plan with Dynamic TIP
         self.abstract_tip.set_x0(self.tips)
         self.abstract_tip.set_bounds(self.tips)
+        # self.abstract_tip.test_control()
         self.abstract_tip.plan_initial()
 
     def control(self):

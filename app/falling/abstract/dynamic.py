@@ -5,7 +5,6 @@ import numpy as np
 from scipy.integrate import odeint
 from state_db import State, Control, get_points, StateDB
 
-g_eps = float(10e-3)
 g_inf = float("inf")
 
 
@@ -48,6 +47,14 @@ class DynamicTIP:
             print 'set abstract.DynamicTIP.lo = ', self.lo[i]
             print 'set abstract.DynamicTIP.hi = ', self.hi[i]
 
+    def test_control(self):
+        u = np.array([0.0054, 2.255, 0.1576, -0.00997, 1.583, 0.1215])
+        e = 0.01
+        self.N_GRID = 1
+        (self.lo0, self.hi0) = (u[0], u[0])
+        self.lo = [Control(u[1], u[2] - e, u[3]), Control(u[4], u[5] - e, 0.0)]
+        self.hi = [Control(u[1], u[2] + e, u[3]), Control(u[4], u[5] + e, 0.0)]
+
     def deriv(self, _state, _t):
         x = State(*_state)
         (th1, dth1, r1, dr1) = (x.th1, x.dth1, x.r1, x.dr1)
@@ -57,7 +64,8 @@ class DynamicTIP:
         return [dth1, ddth1, dr1, 0, 0]
 
     def step(self, x):
-        time = np.arange(0.0, 0.01, 0.005)
+        # time = np.arange(0.0, 0.01, 0.005)
+        time = np.array([0.0, 0.005])
         x0 = np.array(x)
         X = odeint(self.deriv, x0, time)
         return State(*X[-1])
@@ -94,6 +102,8 @@ class DynamicTIP:
         for th2 in np.linspace(lo.th2, hi.th2, self.N_GRID):
             # Condition  y2 = r1 * cos(th1) + r2 * cos(th1 + th2) = 0
             r2 = r1 * cos(th1) / -cos(th1 + th2)
+            # if int(x.c) == 0:
+            #     print 'check', th2, r2, 'is in', lo.r2, hi.r2, 'for', x
             if r2 < lo.r2 or hi.r2 < r2:
                 continue
             # If the stopper is feasible
@@ -138,10 +148,10 @@ class DynamicTIP:
         if j > self.upper_bound:  # Not promising state
             return (x, g_inf)
 
-        x_prime, j_prime = self.db.lookup(x)  # Lookup the similar states
-        if x_prime is not None:
-            print x, ' == ', x_prime, ':', j, 'vs. ', j_prime
-            return (x_prime, j_prime)
+        # x_prime, j_prime = self.db.lookup(x)  # Lookup the similar states
+        # if x_prime is not None:
+        #     print x, ' == ', x_prime, ':', j, 'vs. ', j_prime
+        #     return (x_prime, j_prime)
 
         if self.eval_counter % 10000 == 0:
             print 'eval_counter:', self.eval_counter, self.upper_bound
