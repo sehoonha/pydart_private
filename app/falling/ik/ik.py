@@ -42,16 +42,29 @@ class IK:
         # Dimensions and weights
         # self.weights = np.array( [1.0, 1.0, 0.5, 1.0, 0.05] )
 
-        self.param_desc = [(0, 'l_shoulder', 1.0),
-                           (0, 'r_shoulder', 1.0),
-                           (1, 'l_hand', 1.0),
-                           (1, 'r_hand', 1.0),
-                           (2, 'l_thigh', 1.0),
-                           (2, 'r_thigh', 1.0),
-                           (3, 'l_shin', 0.5),
-                           (3, 'r_shin', 0.5),
-                           (4, 'l_heel', 0.05),
-                           (4, 'r_heel', 0.05) ]
+        # self.param_desc = [(0, 'l_shoulder', 1.0),
+        #                    (1, 'r_shoulder', 1.0),
+        #                    (2, 'l_hand', 1.0),
+        #                    (3, 'r_hand', 1.0),
+        #                    (4, 'l_thigh', 1.0),
+        #                    (5, 'r_thigh', 1.0),
+        #                    (6, 'l_shin', 0.5),
+        #                    (7, 'r_shin', 0.5),
+        #                    (8, 'l_heel', 0.05),
+        #                    (9, 'r_heel', 0.05) ]
+
+        self.param_desc = [(0, 'l_hip', 1.0),
+                           (1, 'r_hip', 1.0),
+                           (2, 'l_shoulder', 1.0),
+                           (3, 'r_shoulder', 1.0),
+                           (4, 'l_hand', 1.0),
+                           (5, 'r_hand', 1.0),
+                           (6, 'l_thigh', 1.0),
+                           (7, 'r_thigh', 1.0),
+                           (8, 'l_shin', 0.5),
+                           (9, 'r_shin', 0.5),
+                           (10, 'l_heel', 0.05),
+                           (11, 'r_heel', 0.05) ]
 
         self.dim = max([i for i, dof, w in self.param_desc]) + 1
 
@@ -128,8 +141,9 @@ class IK:
         return self.expand(self.res["x"])
 
     def evaluate_fullbody(self, x):
-        self.sim.pd.target = self.expand(x)
         self.sim.reset()
+        self.sim.pd.target = self.expand(x)
+        # self.sim.reset()
         while not self.sim.step():
             pass
 
@@ -140,14 +154,20 @@ class IK:
         # v = -data['C.y']
         v = data['max_impulse']
 
-        contacts = set(self.sim.skel.contacted_body_names())
-        allowed  = set(['l_foot', 'r_foot', 'l_hand', 'r_hand'])
-        if len(contacts - allowed) > 0:
-            v += 10.0
+        # contacts = set(self.sim.skel.contacted_body_names())
+        # allowed  = set(['l_foot', 'r_foot', 'l_hand', 'r_hand'])
+        # if len(contacts - allowed) > 0:
+        #     v += 10.0
         print repr(x), " --> ", v
         return v
 
     def optimize_with_fullbody_motion(self):
+        # x = np.random.rand(self.dim)
+        x = np.array([-0.52563663, -1.57, -1.57, 0.91604437, -0.67324443,
+                      -0.43524684, -0.2820, 0.67682579, -1.199266, -0.864372,
+                      -1.57, 0.79398899])  # 0.476501049002
+        return self.evaluate_fullbody(x)
+
         lo = np.array([-1.57] * self.dim)
         hi = np.array([1.57] * self.dim)
         opt = {'verb_time': 0, 'boundary_handling': 'BoundPenalty',

@@ -88,9 +88,9 @@ class Simulation(object):
         # ik = IK(self)
         # self.pd.target = ik.optimize(restore=False)
 
-        # ### Direct planning in FB
-        # ik = IK(self)
-        # ik.optimize_with_fullbody_motion()
+        # Direct planning in FB
+        ik = IK(self)
+        ik.optimize_with_fullbody_motion()
 
         # ### Plan with Double TIP
         # ik = IK(self)
@@ -104,11 +104,11 @@ class Simulation(object):
         # ik = IK(self)
         # self.pd.target = ik.optimize(restore=False)
 
-        # Plan with Dynamic TIP
-        self.abstract_tip.set_x0(self.tips)
-        self.abstract_tip.set_bounds(self.tips)
-        # self.abstract_tip.test_control()
-        self.abstract_tip.plan_initial()
+        # # Plan with Dynamic TIP
+        # self.abstract_tip.set_x0(self.tips)
+        # self.abstract_tip.set_bounds(self.tips)
+        # # self.abstract_tip.test_control()
+        # self.abstract_tip.plan_initial()
 
     def control(self):
         tau = np.zeros(self.skel.ndofs)
@@ -150,6 +150,8 @@ class Simulation(object):
         self.skel.tau = self.control()
         self.world.step()
         self.history.push()
+
+        return (self.world.t > 1.0)
 
         pivot_nodes = []
         for i in range(self.tip_index + 1):
