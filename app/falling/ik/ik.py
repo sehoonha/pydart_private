@@ -4,6 +4,7 @@ from numpy.linalg import norm
 from scipy.optimize import minimize
 import cma
 
+
 class ObjTIP:
     def __init__(self, _tip):
         self.target = None
@@ -11,10 +12,11 @@ class ObjTIP:
 
     def state(self):
         return self.tip.get_state()
-        
+
     def cost(self):
         state = self.tip.get_state()
-        return norm( (state - self.target) * [1.0, 1.0, 0.1] ) ** 2
+        return norm((state - self.target) * [1.0, 1.0, 0.1] ) ** 2
+
 
 class ObjTWOTIP:
     def __init__(self, _tips):
@@ -22,14 +24,15 @@ class ObjTWOTIP:
         self.tips = _tips
 
     def state(self):
-        th1= self.tips[0].theta()
+        th1 = self.tips[0].theta()
         state = np.concatenate([[th1]] + [t.get_state() for t in self.tips])
         return state
-        
-    def cost(self):
-        return norm( (self.state() - self.target) * [10.0, 1.0, 1.0, 0.5, 1.0, 1.0, 0.5] ) ** 2
 
-        
+    def cost(self):
+        w = [10.0, 1.0, 1.0, 0.5, 1.0, 1.0, 0.5]
+        return norm((self.state() - self.target) * w) ** 2
+
+
 class IK:
     def __init__(self, _sim):
         self.sim = _sim
@@ -39,22 +42,22 @@ class IK:
         # Dimensions and weights
         # self.weights = np.array( [1.0, 1.0, 0.5, 1.0, 0.05] )
 
-        self.param_desc = [ (0, 'l_shoulder', 1.0),
-                            (0, 'r_shoulder', 1.0),
-                            (1, 'l_hand', 1.0),
-                            (1, 'r_hand', 1.0),
-                            (2, 'l_thigh', 1.0),
-                            (2, 'r_thigh', 1.0),
-                            (3, 'l_shin', 0.5),
-                            (3, 'r_shin', 0.5),
-                            (4, 'l_heel', 0.05),
-                            (4, 'r_heel', 0.05) ]
-                                    
+        self.param_desc = [(0, 'l_shoulder', 1.0),
+                           (0, 'r_shoulder', 1.0),
+                           (1, 'l_hand', 1.0),
+                           (1, 'r_hand', 1.0),
+                           (2, 'l_thigh', 1.0),
+                           (2, 'r_thigh', 1.0),
+                           (3, 'l_shin', 0.5),
+                           (3, 'r_shin', 0.5),
+                           (4, 'l_heel', 0.05),
+                           (4, 'r_heel', 0.05) ]
+
         self.dim = max([i for i, dof, w in self.param_desc]) + 1
 
-        self.objs = [ ObjTIP(self.sim.tip) ]
-        self.objs[0].target = self.sim.abstract_tip.commands()
-        print 'objs[0].target = ', self.objs[0].target
+        # self.objs = [ObjTIP(self.sim.tip)]
+        # self.objs[0].target = self.sim.abstract_tip.commands()
+        # print 'objs[0].target = ', self.objs[0].target
 
         # self.objs = [ ObjTIP(self.sim.tip) ]
         # self.objs[0].target = [0.14, 0.08, 2.7]
@@ -67,7 +70,7 @@ class IK:
         # self.objs = [ ObjTWOTIP(self.sim.tips) ]
         # self.objs[0].target = self.sim.abstract_twotip.commands()
         # print 'objs[0].target = ', self.objs[0].target
-        
+
     def expand(self, x):
         q = self.sim.skel.q
         for x_i, dof_name, w in self.param_desc:
@@ -75,32 +78,49 @@ class IK:
             q[dof_i] = w * x[x_i]
         return q
 
-    def evaluate(self, x = None):
+    def evaluate_orientation(self, x=None):
+        q = self.sim.skel.q
+        q[0:3] = x
+        self.sim.skel.q = q
+        lhs = self.sim.skel.body("torso").T
+        lhs[0][3] = lhs[1][3] = lhs[2][3] = 0.0
+        rhs = np.array([[1, 0, 0, 0],
+                        [0, 0, 1, 0],
+                        [0, 1, 0, 0],
+                        [0, 0, 0, 1]])
+        return norm(lhs - rhs)
+
+    def evaluate(self, x=None):
         if x is not None:
             if np.max(np.fabs(x)) > 1.57:
                 return np.max(np.fabs(x))
             self.sim.skel.q = self.expand(x)
-                       
-        return sum([ obj.cost() for obj in self.objs])
 
+        return sum([obj.cost() for obj in self.objs])
 
-    def optimize(self, x0 = None, restore = True):
+    def optimize(self, x0=None, restore=True):
         saved_pose = self.sim.skel.q
         saved_vel = self.sim.skel.qdot
-        
+
+        self.dim = 3
+
         if x0 is None:
-            x0 = np.zeros(self.dim)
+            # x0 = np.zeros(self.dim)
+            x0 = np.random.rand(self.dim)
 
         print "==== ik.IK optimize...."
 
-        # x = np.array([ 1.35940129, -1.51971236,  1.07272779,  0.0961569 ,  0.17231501, -0.94596972, -0.560066  ,  1.47401052])
         # self.res = { "x" : x, "value" : self.evaluate(x) }
-        self.res = minimize(lambda x : self.evaluate(x), x0, method='nelder-mead', tol=0.000001, options={'maxiter':10000, 'maxfev':10000, 'xtol':10e-8, 'ftol':10e-8})
+        # self.res = minimize(lambda x: self.evaluate_orientation(x), x0,
+        self.res = minimize(lambda x: self.evaluate(x), x0,
+                            method='nelder-mead', tol=0.000001,
+                            options={'maxiter': 10000, 'maxfev': 10000,
+                                     'xtol': 10e-8, 'ftol': 10e-8})
 
         print "==== result\n", self.res
         print "state = ", self.objs[0].state()
         print "==== ik.IK optimize....OK"
-        
+
         if restore:
             self.sim.skel.q = saved_pose
             self.sim.skel.qdot = saved_vel
@@ -125,22 +145,13 @@ class IK:
         if len(contacts - allowed) > 0:
             v += 10.0
         print repr(x), " --> ", v
-        return v 
+        return v
 
     def optimize_with_fullbody_motion(self):
-        # print self.evaluate_fullbody([ 0.98677002,  0.79964316,  0.58797879, -0.63084664, -0.53535414]) # Max P.y
-        # print self.evaluate_fullbody([0.05952294,  0.27164898,  1.        , -0.6327223 , -0.67808456]) # Min Impulse
-
-        # print self.evaluate_fullbody([ 0.80067996,  0.91354763,  0.87398188, -0.5739955,  -0.05695692]) # Min dist touch
-        # print self.evaluate_fullbody([0.99941362, -0.63121823, 0.58667322, 0.64432841, -0.79191961]) # Max dist touch
-
-        print self.evaluate_fullbody([ 1.51792639, -1.12534319,  0.29779076, -1.49004759, -0.54163184,1.44453204, -1.53363932,  0.48234211])
-        return
-
         lo = np.array([-1.57] * self.dim)
-        hi = np.array([ 1.57] * self.dim)
-        opt = {'verb_time':0,  'boundary_handling': 'BoundPenalty', \
-               'bounds': [lo, hi], 'tolfun' : 0.001}
+        hi = np.array([1.57] * self.dim)
+        opt = {'verb_time': 0, 'boundary_handling': 'BoundPenalty',
+               'bounds': [lo, hi], 'tolfun': 0.001}
         print "==== abstract.model.TIP optimize...."
         self.res = cma.fmin(self.evaluate_fullbody, 0.5 * (lo + hi), 1.0, opt)
 

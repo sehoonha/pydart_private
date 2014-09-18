@@ -152,6 +152,21 @@ class Skeleton(object):
         """ Setter also updates the internal skeleton kinematics """
         self.set_velocities(_qdot)
 
+    def states(self):
+        return np.concatenate((self.positions(), self.velocities()))
+
+    @property
+    def x(self):
+        return np.concatenate((self.positions(), self.velocities()))
+
+    def set_states(self, _x):
+        self.set_positions(_x[:self.ndofs])
+        self.set_velocities(_x[self.ndofs:])
+
+    @x.setter
+    def x(self, _x):
+        self.set_states(_x)
+
     def body(self, query):
         if isinstance(query, str):
             return self.name_to_body[query]

@@ -2,6 +2,8 @@ print 'Hello Pydart'
 
 import sys
 import signal
+
+
 def signal_handler(signal, frame):
     print 'You pressed Ctrl+C! Bye.'
     sys.exit(0)
@@ -15,8 +17,8 @@ from PyQt4 import QtCore
 from PyQt4.QtOpenGL import *
 from glwidget import GLWidget
 
-import trackball
 from simulation import Simulation
+
 
 class MyWindow(QtGui.QMainWindow):
     def __init__(self):
@@ -33,7 +35,7 @@ class MyWindow(QtGui.QMainWindow):
         self.initActions()
         self.initToolbar()
         self.initMenu()
-        
+
         self.idleTimer = QtCore.QTimer()
         self.idleTimer.timeout.connect(self.idleTimerEvent)
         self.idleTimer.start(0)
@@ -42,7 +44,7 @@ class MyWindow(QtGui.QMainWindow):
         self.renderTimer.timeout.connect(self.renderTimerEvent)
         self.renderTimer.start(25)
 
-    def initUI(self):               
+    def initUI(self):
         self.setGeometry(0, 0, 1280, 720)
         # self.setWindowTitle('Toolbar')
 
@@ -86,7 +88,6 @@ class MyWindow(QtGui.QMainWindow):
         self.plotImpactAction = QtGui.QAction('Impact', self)
         self.plotImpactAction.triggered.connect(self.plotImpactEvent)
 
-
     def initToolbar(self):
         # Create a toolbar
         self.toolbar = self.addToolBar('Control')
@@ -103,20 +104,21 @@ class MyWindow(QtGui.QMainWindow):
         self.rangeSlider = QtGui.QSlider(QtCore.Qt.Horizontal, self)
         self.rangeSlider.valueChanged[int].connect(self.rangeSliderEvent)
         self.toolbar.addWidget(self.rangeSlider)
-        
+
     def initMenu(self):
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
+        fileMenu.addSeparator()
 
-        #### Recording menu
+        # Recording menu
         recordingMenu = menubar.addMenu('&Recording')
         recordingMenu.addAction(self.screenshotAction)
         recordingMenu.addAction(self.printAction)
         recordingMenu.addSeparator()
         recordingMenu.addAction(self.captureAction)
         recordingMenu.addAction(self.movieAction)
-        #### Plot menu
-        plotMenu = menubar.addMenu('&Plot')        
+        # Plot menu
+        plotMenu = menubar.addMenu('&Plot')
         plotMenu.addAction(self.plotAction)
         plotMenu.addAction(self.plotCOMAction)
         plotMenu.addAction(self.plotImpactAction)
@@ -143,7 +145,7 @@ class MyWindow(QtGui.QMainWindow):
 
     def renderTimerEvent(self):
         self.glwidget.updateGL()
-        self.statusBar().showMessage( self.sim.status_string() )
+        self.statusBar().showMessage(self.sim.status_string())
         self.rangeSlider.setRange(0, self.sim.world.nframes - 1)
 
     def keyPressEvent(self, event):
@@ -152,7 +154,7 @@ class MyWindow(QtGui.QMainWindow):
             self.close()
 
     def rangeSliderEvent(self, value):
-        self.sim.set_world_frame( value )
+        self.sim.set_world_frame(value)
 
     def screenshotEvent(self):
         self.glwidget.capture()
@@ -162,8 +164,7 @@ class MyWindow(QtGui.QMainWindow):
         os.system('rm ./captures/frame.*.png')
 
     def printEvent(self):
-        print repr(self.sim.skel.q)
-        print repr(self.sim.skel.qdot)
+        print repr(self.sim.skel.x)
 
     def planEvent(self):
         self.sim.plan()
@@ -187,4 +188,3 @@ app = QtGui.QApplication(["Falling controller with Pydart"])
 w = MyWindow()
 w.show()
 app.exec_()
-

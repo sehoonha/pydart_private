@@ -123,13 +123,10 @@ class Simulation(object):
         return tau
 
     def reset(self):
-        # ### Reset Pydart
-        # self.skel.q = BioloidGPPoses().stand_pose()
-        # self.skel.q = BioloidGPPoses().leaned_pose()
-        # self.skel.q = BioloidGPPoses().stepping_pose()
-        # self.skel.qdot = np.zeros(self.skel.ndofs)
-        self.skel.q = BioloidGPPoses().stepping2_pose()
-        self.skel.qdot = BioloidGPPoses().stepping2_vel()
+        # Reset Pydart
+        # self.skel.x = BioloidGPPoses().stand()
+        # self.skel.x = BioloidGPPoses().stepping()
+        self.skel.x = BioloidGPPoses().side()
 
         self.world.reset()
 
@@ -145,7 +142,8 @@ class Simulation(object):
     def step(self):
         # if self.world.nframes < 10:
         #     print 'push!!'
-        #   self.skel.body("torso").add_ext_force_at([0, 0, 50], [0, 0, 0.03])
+        #     torso = self.skel.body("torso")
+        #     torso.add_ext_force_at([-99, 0, 0], [0, 0, 0.03])
         # elif self.world.nframes == 10:
         #     self.event_handler.push("pause", 0)
 
