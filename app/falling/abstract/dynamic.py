@@ -11,7 +11,7 @@ g_inf = float("inf")
 class DynamicTIP:
     def __init__(self):
         self.eval_counter = 0
-        self.N_GRID = 5
+        self.N_GRID = 11
 
         self.m = 1.08
         self.I = 0.0080
@@ -112,6 +112,13 @@ class DynamicTIP:
             # stoppers += [Control(th2, r2, 0.0)]
         return stoppers
 
+    def commands(self):
+        return [0.2064,
+                0.19116964009964868, 0.18624620237610856, 2.1633800444288918]
+        # return [0.2064,
+        #         0.1908196400996486, 0.15032234957068108, 2.2683800444288917,
+        #         0.15032234957068108, 0.12082146452513869, 1.6606811609717798]
+
     def plan_initial(self):
         self.upper_bound = g_inf
         j = g_inf
@@ -134,7 +141,7 @@ class DynamicTIP:
     def plan(self, x, j):
         # print 'plan()', x, j
         if self.is_stopped(x):  # If the current state has negative velocity
-            if int(x.c) == 2:  # If this is the second contact
+            if int(x.c) == 1:  # If this is the second contact
                 return (x, j)
             else:
                 return (x, g_inf)  # If this is not the second
@@ -142,16 +149,16 @@ class DynamicTIP:
         if self.is_grounded(x):  # If the rod falls to the ground
             return (x, g_inf)
 
-        if int(x.c) == 2:  # Exceed the maximum contacts
+        if int(x.c) == 1:  # Exceed the maximum contacts
             return (x, g_inf)
 
         if j > self.upper_bound:  # Not promising state
             return (x, g_inf)
 
-        # x_prime, j_prime = self.db.lookup(x)  # Lookup the similar states
-        # if x_prime is not None:
-        #     print x, ' == ', x_prime, ':', j, 'vs. ', j_prime
-        #     return (x_prime, j_prime)
+        x_prime, j_prime = self.db.lookup(x)  # Lookup the similar states
+        if x_prime is not None:
+            # print x, ' == ', x_prime, ':', j, 'vs. ', j_prime
+            return (x_prime, j_prime)
 
         if self.eval_counter % 10000 == 0:
             print 'eval_counter:', self.eval_counter, self.upper_bound

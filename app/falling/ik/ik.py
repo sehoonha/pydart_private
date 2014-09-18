@@ -11,11 +11,12 @@ class ObjTIP:
         self.tip = _tip
 
     def state(self):
-        return self.tip.get_state()
+        th1 = self.tip.theta()
+        return np.concatenate([[th1], self.tip.get_state()])
 
     def cost(self):
-        state = self.tip.get_state()
-        return norm((state - self.target) * [1.0, 1.0, 0.1] ) ** 2
+        state = self.state()
+        return norm((state - self.target) * [10.0, 1.0, 1.0, 0.1] ) ** 2
 
 
 class ObjTWOTIP:
@@ -29,7 +30,7 @@ class ObjTWOTIP:
         return state
 
     def cost(self):
-        w = [10.0, 1.0, 1.0, 0.5, 1.0, 1.0, 0.5]
+        w = np.array([10.0, 1.0, 1.0, 0.5, 1.0, 1.0, 0.5])
         return norm((self.state() - self.target) * w) ** 2
 
 
@@ -42,35 +43,22 @@ class IK:
         # Dimensions and weights
         # self.weights = np.array( [1.0, 1.0, 0.5, 1.0, 0.05] )
 
-        # self.param_desc = [(0, 'l_shoulder', 1.0),
-        #                    (1, 'r_shoulder', 1.0),
-        #                    (2, 'l_hand', 1.0),
-        #                    (3, 'r_hand', 1.0),
-        #                    (4, 'l_thigh', 1.0),
-        #                    (5, 'r_thigh', 1.0),
-        #                    (6, 'l_shin', 0.5),
-        #                    (7, 'r_shin', 0.5),
-        #                    (8, 'l_heel', 0.05),
-        #                    (9, 'r_heel', 0.05) ]
-
-        self.param_desc = [(0, 'l_hip', 1.0),
-                           (1, 'r_hip', 1.0),
-                           (2, 'l_shoulder', 1.0),
-                           (3, 'r_shoulder', 1.0),
-                           (4, 'l_hand', 1.0),
-                           (5, 'r_hand', 1.0),
-                           (6, 'l_thigh', 1.0),
-                           (7, 'r_thigh', 1.0),
-                           (8, 'l_shin', 0.5),
-                           (9, 'r_shin', 0.5),
-                           (10, 'l_heel', 0.05),
-                           (11, 'r_heel', 0.05) ]
+        self.param_desc = [(0, 'l_shoulder', 1.0),
+                           (0, 'r_shoulder', 1.0),
+                           (1, 'l_hand', 1.0),
+                           (1, 'r_hand', 1.0),
+                           (2, 'l_thigh', 1.0),
+                           (3, 'r_thigh', 1.0),
+                           (4, 'l_shin', 0.5),
+                           (5, 'r_shin', 0.5),
+                           (6, 'l_heel', 0.05),
+                           (7, 'r_heel', 0.05) ]
 
         self.dim = max([i for i, dof, w in self.param_desc]) + 1
 
-        # self.objs = [ObjTIP(self.sim.tip)]
-        # self.objs[0].target = self.sim.abstract_tip.commands()
-        # print 'objs[0].target = ', self.objs[0].target
+        self.objs = [ObjTIP(self.sim.tip)]
+        self.objs[0].target = self.sim.abstract_tip.commands()
+        print 'objs[0].target = ', self.objs[0].target
 
         # self.objs = [ ObjTIP(self.sim.tip) ]
         # self.objs[0].target = [0.14, 0.08, 2.7]
@@ -80,8 +68,8 @@ class IK:
         # self.objs[1].target = [0.08, 0.17, 1.0]
         # print 'objs[1].target = ', self.objs[1].target
 
-        # self.objs = [ ObjTWOTIP(self.sim.tips) ]
-        # self.objs[0].target = self.sim.abstract_twotip.commands()
+        # self.objs = [ObjTWOTIP(self.sim.tips)]
+        # self.objs[0].target = self.sim.abstract_tip.commands()
         # print 'objs[0].target = ', self.objs[0].target
 
     def expand(self, x):
@@ -114,8 +102,6 @@ class IK:
     def optimize(self, x0=None, restore=True):
         saved_pose = self.sim.skel.q
         saved_vel = self.sim.skel.qdot
-
-        self.dim = 3
 
         if x0 is None:
             # x0 = np.zeros(self.dim)

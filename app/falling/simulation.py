@@ -88,9 +88,9 @@ class Simulation(object):
         # ik = IK(self)
         # self.pd.target = ik.optimize(restore=False)
 
-        # Direct planning in FB
-        ik = IK(self)
-        ik.optimize_with_fullbody_motion()
+        # # Direct planning in FB
+        # ik = IK(self)
+        # ik.optimize_with_fullbody_motion()
 
         # ### Plan with Double TIP
         # ik = IK(self)
@@ -104,11 +104,13 @@ class Simulation(object):
         # ik = IK(self)
         # self.pd.target = ik.optimize(restore=False)
 
-        # # Plan with Dynamic TIP
-        # self.abstract_tip.set_x0(self.tips)
-        # self.abstract_tip.set_bounds(self.tips)
-        # # self.abstract_tip.test_control()
+        # Plan with Dynamic TIP
+        self.abstract_tip.set_x0(self.tips)
+        self.abstract_tip.set_bounds(self.tips)
+        # self.abstract_tip.test_control()
         # self.abstract_tip.plan_initial()
+        ik = IK(self)
+        self.pd.target = ik.optimize(restore=False)
 
     def control(self):
         tau = np.zeros(self.skel.ndofs)
@@ -125,8 +127,8 @@ class Simulation(object):
     def reset(self):
         # Reset Pydart
         # self.skel.x = BioloidGPPoses().stand()
-        # self.skel.x = BioloidGPPoses().stepping()
-        self.skel.x = BioloidGPPoses().side()
+        self.skel.x = BioloidGPPoses().stepping()
+        # self.skel.x = BioloidGPPoses().side()
 
         self.world.reset()
 
@@ -214,7 +216,7 @@ class Simulation(object):
 
         status = ""
         status += "T = %.4f (%d) " % (data['t'], data['nframes'])
-        status += "C = (%.4f %.4f) " % (data['C.x'], data['C.y'] - 0.1834)
+        status += "C = (%.4f %.4f) " % (data['C.x'], data['C.y'])
         status += "P = (%.4f %.4f) " % (data['P.x'], data['P.y'])
         status += "Impulse = %.4f (max %.4f) " % (data['impulse'],
                                                   data['max_impulse'])

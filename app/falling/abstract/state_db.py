@@ -1,5 +1,5 @@
 from collections import namedtuple
-from math import sin, cos
+from math import sin, cos, sqrt
 import numpy as np
 import plotly.plotly as py
 import plotly.graph_objs as pyg
@@ -89,6 +89,7 @@ class StateDB(object):
         path = self.trace(x)
         traces = []
         x_offset = 0.0
+        cmds = []
         for i, (x, v, u) in enumerate(path):
             print i, x, v, u
             if u is not None:
@@ -99,6 +100,11 @@ class StateDB(object):
                 traces += [pyg.Scatter(x=x, y=y, name='TIP%d' % i)]
                 x_offset = x[-1]
                 print 'x_offset:', x_offset
+
+                r1 = sqrt(p.x1 ** 2 + p.y1 ** 2)
+                r2 = sqrt((p.x1 - p.x2) ** 2 + (p.y1 - p.y2) ** 2)
+                th2 = u.th2
+                cmds += [r1, r2, th2]
             elif i == 0 or i == len(path) - 1:
                 p = get_first_point(x)
                 x = np.array([0.0, p.x1]) + x_offset
@@ -113,3 +119,4 @@ class StateDB(object):
         unique_url = py.plot({'data': data, 'layout': layout},
                              filename='Abstract TIP')
         print '==== plot_trace OK : ', unique_url
+        print 'collected commands = ', cmds
