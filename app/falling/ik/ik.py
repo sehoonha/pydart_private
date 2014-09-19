@@ -56,9 +56,9 @@ class IK:
 
         self.dim = max([i for i, dof, w in self.param_desc]) + 1
 
-        self.objs = [ObjTIP(self.sim.tip)]
-        self.objs[0].target = self.sim.abstract_tip.commands()
-        print 'objs[0].target = ', self.objs[0].target
+        # self.objs = [ObjTIP(self.sim.tip)]
+        # self.objs[0].target = self.sim.abstract_tip.commands()
+        # print 'objs[0].target = ', self.objs[0].target
 
         # self.objs = [ ObjTIP(self.sim.tip) ]
         # self.objs[0].target = [0.14, 0.08, 2.7]
@@ -68,9 +68,9 @@ class IK:
         # self.objs[1].target = [0.08, 0.17, 1.0]
         # print 'objs[1].target = ', self.objs[1].target
 
-        # self.objs = [ObjTWOTIP(self.sim.tips)]
-        # self.objs[0].target = self.sim.abstract_tip.commands()
-        # print 'objs[0].target = ', self.objs[0].target
+        self.objs = [ObjTWOTIP(self.sim.tips)]
+        self.objs[0].target = self.sim.abstract_tip.commands()
+        print 'objs[0].target = ', self.objs[0].target
 
     def expand(self, x):
         q = self.sim.skel.q
@@ -104,8 +104,8 @@ class IK:
         saved_vel = self.sim.skel.qdot
 
         if x0 is None:
-            # x0 = np.zeros(self.dim)
-            x0 = np.random.rand(self.dim)
+            x0 = np.zeros(self.dim)
+            # x0 = np.random.rand(self.dim)
 
         print "==== ik.IK optimize...."
 

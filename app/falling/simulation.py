@@ -12,6 +12,7 @@ from poses import BioloidGPPoses
 import events
 from control.pd import PDController
 from model.tip import TIP
+from model.contact import Contact
 from ik.ik import IK
 import abstract.tip
 import abstract.tip_v2
@@ -75,6 +76,19 @@ class Simulation(object):
         # For handle callbacks properly..
         self.history.clear()
         self.history.push()
+
+        # Start to test more contact candidates
+        defs = [
+            # ("feet", ["l_foot", "r_foot"], [[-0.05, 0.025, 0]] * 2),
+            ("hands", ["l_hand", "r_hand"],
+             [[0, -0.11, 0.01], [0, 0.11, -0.01]]),
+            ("knees", ["l_shin", "r_shin"], [[0, 0, 0], [0, 0, 0]]),
+            ("l_heel", ["l_foot"], [[0.05, 0.025, 0.0]]),
+            ("l_toe", ["l_foot"], [[-0.05, 0.025, 0.0]]),
+            ("r_toe", ["r_foot"], [[-0.05, 0.025, 0.0]]),
+            ("head", ["torso"], [[0.0, 0.0, 0.03]]),
+        ]
+        self.contacts = [Contact(self.skel, n, b, p) for n, b, p in defs]
 
     @property
     def tip(self):
@@ -197,17 +211,19 @@ class Simulation(object):
         gltools.render_arrow(self.skel.C,
                              self.skel.C + 0.2 * self.tip.projected_Cdot())
 
-        # Draw TIP
-        tip_index = self.history.get_frame()['tip_index']
-        for i in range(tip_index, len(self.tips)):
-            self.tips[i].render()
-        # self.tip2.render()
+        # # Draw TIP
+        # tip_index = self.history.get_frame()['tip_index']
+        # for i in range(tip_index, len(self.tips)):
+        #     self.tips[i].render()
 
         # Draw contacts
         gltools.glMove([0, 0, 0])
         glColor(0.7, 0.0, 0.3)
         for c in self.history.get_frame()['contacts']:
             gltools.render_arrow(c[0:3], c[0:3] - 0.001 * c[3:6])
+
+        for c in self.contacts:
+            c.render()
 
         glPopMatrix()
 

@@ -1,12 +1,12 @@
 import math
 import numpy as np
-import numpy.linalg as LA
 from numpy.linalg import norm
 
-from OpenGL.GL import *
-from OpenGL.GLU import *
-from OpenGL.GLUT import *
+from OpenGL.GL import glLineWidth, glColor, glBegin, glEnd, glVertex, \
+    GL_LINE_STRIP
+from OpenGL.GLUT import glutSolidSphere
 import gltools
+
 
 class TIP:
     """ Telescoptic Inverted Pendulum with A Massless End Effector """
@@ -37,20 +37,22 @@ class TIP:
         for i in range(len(bodynames)):
             # T = self.skel.getBodyNodeTransformation(bodynames[i])
             T = self.skel.body(bodynames[i]).transformation()
-            positions += [ T.dot( np.append(local[i], [1.0]) ) ]
+            positions += [T.dot(np.append(local[i], [1.0]))]
 
         avg = (sum(positions) / len(positions))[0:3]
         return avg
 
     def p(self, name):
         if name == 'feet':
-            return self.avg_positions(["l_foot", "r_foot"], [-0.05, 0.025, 0.0])
+            return self.avg_positions(["l_foot", "r_foot"], [-0.05, 0.025, 0])
         elif name == 'hands':
             (y, z) = (0.11, -0.01)
-            return self.avg_positions(["l_hand", "r_hand"], [[0, -y, -z], [0, y, z]] )
+            return self.avg_positions(["l_hand", "r_hand"],
+                                      [[0, -y, -z], [0, y, z]] )
         elif name == 'knees':
             (y, z) = (0.0, 0.0)
-            return self.avg_positions(["l_shin", "r_shin"], [[0, -y, -z], [0, y, z]] )
+            return self.avg_positions(["l_shin", "r_shin"],
+                                      [[0, -y, -z], [0, y, z]])
         elif name == 'lfoot':
             return self.avg_positions(["l_foot"], [0.05, 0.025, 0.0])
         elif name == 'lfoot_f':
@@ -77,11 +79,11 @@ class TIP:
 
     def d01(self):
         """Returns the distance between origin and COM """
-        return norm( self.p0() - self.p1() )
+        return norm(self.p0() - self.p1())
 
     def d12(self):
         """Returns the distance between COM and End Effector """
-        return norm( self.p1() - self.p2() )
+        return norm(self.p1() - self.p2())
 
     def theta(self):
         C = self.p1()
@@ -95,7 +97,7 @@ class TIP:
         u /= norm(u)
         # print v, u, np.dot(v, u), v - np.dot(v, u) * u
         return v - np.dot(v, u) * u
-        
+
     def dtheta(self):
         v = norm(self.projected_Cdot())
         r = self.d01()
@@ -107,7 +109,8 @@ class TIP:
         a = self.p1() - self.p0()
         b = self.p1() - self.p2()
         d = np.cross(a, b)[0]
-        return math.pi - np.sign(-d) * math.acos( a.dot(b) / (norm(a) * norm(b)) )
+        pi = math.pi
+        return pi - np.sign(-d) * math.acos(a.dot(b) / (norm(a) * norm(b)))
 
     def get_state(self):
         return np.array([self.d01(), self.d12(), self.angle()])
@@ -123,24 +126,23 @@ class TIP:
     def render(self):
         glLineWidth(3.0)
         glColor(0.7, 0.0, 0.0, 1.0)
-        gltools.glMove( [0.0, 0.0, 0.0] )
+        gltools.glMove([0.0, 0.0, 0.0])
         glBegin(GL_LINE_STRIP)
         for p in [self.p0(), self.p1(), self.p2()]:
             glVertex(p)
         glEnd()
         glColor(0.545, 0.000, 0.000, 1.0)
-        gltools.glMove( self.p0() )
+        gltools.glMove(self.p0())
         glutSolidSphere(0.03, 4, 2)
         glColor(1.000, 0.843, 0.000, 1.0)
-        gltools.glMove( self.p1() )
+        gltools.glMove(self.p1())
         glutSolidSphere(0.03, 4, 2)
         glColor(0.294, 0.000, 0.510, 1.0)
-        gltools.glMove( self.p2() )
+        gltools.glMove(self.p2())
         glutSolidSphere(0.03, 4, 2)
         glLineWidth(1.0)
 
     def __repr__(self):
-        values = [self.theta(), self.dtheta(), self.d01(), self.angle(), self.d12()]
+        values = [self.theta(), self.dtheta(), self.d01(),
+                  self.angle(), self.d12()]
         return str(["%.3f" % x for x in values])
-
-        
