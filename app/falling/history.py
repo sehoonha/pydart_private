@@ -3,9 +3,10 @@ import plotly.plotly as py
 from plotly.graph_objs import *
 import csv
 
+
 class History:
     def __init__(self, _sim):
-        self.index = -1 # Use the latest
+        self.index = -1  # Use the latest
         self.sim = _sim
         self.world = self.sim.world
         self.histories = []
@@ -34,7 +35,7 @@ class History:
         # Push all callback objects
         for cb in self.callbacks:
             cb.push(self)
-        self.index = -1 # Use the latest
+        self.index = -1  # Use the latest
 
     def push_impulses(self, data):
         skelcontacts = data['skelcontacts']

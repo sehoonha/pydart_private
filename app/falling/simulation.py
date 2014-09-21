@@ -1,6 +1,9 @@
 import sys
 import config
 sys.path.append(config.PYDART_PATH)
+import os
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(ROOT_DIR)
 
 import pydart
 import numpy as np
@@ -11,9 +14,10 @@ from history import History
 import events
 from control.pd import PDController
 from model.tip import TIP
-from model.contact import Contact
 from ik.ik import IK
 import scene.config
+import scene.range_checker
+import problem
 import abstract.tip
 import abstract.tip_v2
 import abstract.twotip
@@ -48,14 +52,16 @@ class Simulation(object):
         # Configure the scene
         self.cfg = scene.config.Config(self)
         print 'conditions = ', self.cfg.conditions
+        self.prob = problem.Problem(self)
         self.history = History(self)
 
-        # ### Now, configure the controllers
-        # Abstract view of skeleton
-        self.tips = [TIP(self.skel, 'rfoot', 'lfoot'),
-                     TIP(self.skel, 'lfoot', 'hands')]
-        # self.tips = [TIP(self.skel, 'feet', 'hands'), ]
-        #              TIP(self.skel, 'hands', 'head')]
+        # # ### Now, configure the controllers
+        # # Abstract view of skeleton
+        self.tips = self.prob.tips[5:6]
+        # self.tips = [TIP(self.skel, 'rfoot', 'lfoot'),
+        #              TIP(self.skel, 'lfoot', 'hands')]
+        # # self.tips = [TIP(self.skel, 'feet', 'hands'), ]
+        # #              TIP(self.skel, 'hands', 'head')]
 
         self.event_handler = events.Handler()
 
@@ -81,18 +87,8 @@ class Simulation(object):
         self.history.clear()
         self.history.push()
 
-        # Start to test more contact candidates
-        defs = [
-            # ("feet", ["l_foot", "r_foot"], [[-0.05, 0.025, 0]] * 2),
-            ("hands", ["l_hand", "r_hand"],
-             [[0, -0.11, 0.01], [0, 0.11, -0.01]]),
-            ("knees", ["l_shin", "r_shin"], [[0, 0, 0], [0, 0, 0]]),
-            ("l_heel", ["l_foot"], [[0.05, 0.025, 0.0]]),
-            ("l_toe", ["l_foot"], [[-0.05, 0.025, 0.0]]),
-            ("r_toe", ["r_foot"], [[-0.05, 0.025, 0.0]]),
-            ("head", ["torso"], [[0.0, 0.0, 0.03]]),
-        ]
-        self.contacts = [Contact(self.skel, n, b, p) for n, b, p in defs]
+        # rc = scene.range_checker.RangeChecker(self)
+        # rc.check_all()
 
     @property
     def tip(self):
@@ -235,10 +231,10 @@ class Simulation(object):
         gltools.render_arrow(self.skel.C,
                              self.skel.C + 0.2 * self.tip.projected_Cdot())
 
-        # # Draw TIP
-        # tip_index = self.history.get_frame()['tip_index']
-        # for i in range(tip_index, len(self.tips)):
-        #     self.tips[i].render()
+        # Draw TIP
+        tip_index = self.history.get_frame()['tip_index']
+        for i in range(tip_index, len(self.tips)):
+            self.tips[i].render()
 
         # Draw contacts
         gltools.glMove([0, 0, 0])
@@ -246,7 +242,7 @@ class Simulation(object):
         for c in self.history.get_frame()['contacts']:
             gltools.render_arrow(c[0:3], c[0:3] - 0.001 * c[3:6])
 
-        for c in self.contacts:
+        for c in self.prob.contacts:
             c.render()
 
         glPopMatrix()
