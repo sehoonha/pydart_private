@@ -8,12 +8,12 @@ from OpenGL.GL import glPushMatrix, glPopMatrix, glColor
 import gltools
 
 from history import History
-from poses import BioloidGPPoses
 import events
 from control.pd import PDController
 from model.tip import TIP
 from model.contact import Contact
 from ik.ik import IK
+import scene.config
 import abstract.tip
 import abstract.tip_v2
 import abstract.twotip
@@ -44,6 +44,10 @@ class Simulation(object):
             print i, dof
 
         self.skel.set_joint_damping(0.15)
+
+        # Configure the scene
+        self.cfg = scene.config.Config(self)
+        print 'conditions = ', self.cfg.conditions
         self.history = History(self)
 
         # ### Now, configure the controllers
@@ -139,10 +143,16 @@ class Simulation(object):
         return tau
 
     def reset(self):
+        # Reset the configure
+        if self.cfg.conditions:
+            cond = self.cfg.conditions[0]
+            self.cfg.config(*cond)
+
         # Reset Pydart
         # self.skel.x = BioloidGPPoses().stand()
-        self.skel.x = BioloidGPPoses().stepping()
+        # self.skel.x = BioloidGPPoses().stepping()
         # self.skel.x = BioloidGPPoses().side()
+        self.skel.x = self.cfg.init_state
 
         self.world.reset()
 
@@ -155,19 +165,33 @@ class Simulation(object):
 
         self.terminated = dict()
 
+    def generate_initial_states(self):
+        if self.cfg.ext_force is not None:
+            if self.world.nframes < 10:
+                print 'push!!'
+                (b, f, p) = self.cfg.ext_force
+                body = self.skel.body(b)
+                body.add_ext_force_at(f, p)
+            elif self.world.nframes == 10:
+                cond = self.conditions[0]
+                state = self.skel.x
+                self.cond_states[cond] = state
+                self.conditions.pop(0)
+                if self.conditions:
+                    print 'self.reset()'
+                    print self.skel.x
+                    self.reset()
+                else:
+                    print repr(self.cond_states)
+                    self.event_handler.push("pause", 0)
+
     def step(self):
-        # if self.world.nframes < 10:
-        #     print 'push!!'
-        #     torso = self.skel.body("torso")
-        #     torso.add_ext_force_at([-99, 0, 0], [0, 0, 0.03])
-        # elif self.world.nframes == 10:
-        #     self.event_handler.push("pause", 0)
+        if self.cfg.conditions:
+            self.generate_initial_states()
 
         self.skel.tau = self.control()
         self.world.step()
         self.history.push()
-
-        return (self.world.t > 1.0)
 
         pivot_nodes = []
         for i in range(self.tip_index + 1):
