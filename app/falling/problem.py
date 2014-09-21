@@ -24,6 +24,14 @@ class Problem(object):
     def skel(self):
         return self.sim.skel
 
+    @property
+    def n(self):
+        return len(self.vertices)
+
+    @property
+    def m(self):
+        return len(self.edges)
+
     def define_contacts(self):
         # Start to test more contact candidates
         defs = [

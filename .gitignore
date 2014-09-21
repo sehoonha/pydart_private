@@ -21,6 +21,9 @@
 *.out
 *.app
 
+# Flymake
+*_flymake.py
+
 # CMakeFiles
 CMakeCache.txt
 CMakeFiles

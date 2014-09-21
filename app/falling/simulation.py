@@ -87,8 +87,8 @@ class Simulation(object):
         self.history.clear()
         self.history.push()
 
-        # rc = scene.range_checker.RangeChecker(self)
-        # rc.check_all()
+        rc = scene.range_checker.RangeChecker(self)
+        rc.check_all()
 
     @property
     def tip(self):

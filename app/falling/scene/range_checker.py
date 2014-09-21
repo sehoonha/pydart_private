@@ -1,4 +1,39 @@
+import math
 import numpy as np
+from numpy.linalg import norm
+
+
+def is_similar(lhs, rhs):
+    """ lhs and rhs are poses as np.array """
+    return (norm(lhs - rhs) < 0.05)
+
+
+class StopperSet(object):
+    def __init__(self, _states=None):
+        self.states = []
+        if _states is not None:
+            self.states = _states
+        self.w = np.array([1.0, 0.1, 1.0])
+
+    def insert(self, x):
+        self.states.append(np.array(x))
+
+    def is_new(self, lhs):
+        for rhs in self.states:
+            if is_similar(lhs, rhs):
+                return False
+        return True
+
+    def insert_if_new(self, x):
+        x = x * self.w
+        if self.is_new(x):
+            self.insert(x)
+
+    def __len__(self):
+        return len(self.states)
+
+    def __repr__(self):
+        return 'StopperSet(%r)' % self.states
 
 
 class RangeChecker(object):
@@ -14,8 +49,39 @@ class RangeChecker(object):
         return self.sim.prob
 
     def check_all(self):
-        for i in range(10):
+        print '==== start the range check ===='
+        self.check_init_angle()
+        # self.check_kinematic()
+        self.check_kinematic_cached()
+        for tip, ss in zip(self.prob.tips, self.stop_sets):
+            print 'TIP ', str(tip),
+            print ' sampled set is', len(ss), id(ss)
+
+    def check_init_angle(self):
+        self.init_angles = [tip.th2 for tip in self.prob.tips]
+        print self.init_angles
+
+    def check_kinematic(self):
+        # Each edge has a set of stoppers
+        self.stop_sets = [StopperSet() for _ in range(self.prob.m)]
+
+        for i in range(1000):
             self.set_random_pose()
+            for tip, ss in zip(self.prob.tips, self.stop_sets):
+                x = tip.pose()
+                if x[-1] > math.pi:
+                    continue
+                ss.insert_if_new(x)
+
+        fp = open('cached_stopper_sets.py', 'w+')
+        fp.write('from range_checker import StopperSet\n')
+        fp.write('from numpy import array\n')
+        fp.write('cached_sets=%s' % repr(self.stop_sets))
+        fp.close()
+
+    def check_kinematic_cached(self):
+        import cached_stopper_sets
+        self.stop_sets = cached_stopper_sets.cached_sets
 
     def set_random_pose(self):
         param_desc = [(0, 'l_shoulder', 1.0),
