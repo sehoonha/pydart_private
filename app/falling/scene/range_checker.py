@@ -85,8 +85,8 @@ class RangeChecker(object):
     def check_all(self):
         print '==== start the range check ===='
         self.check_init_angle()
-        # self.check_kinematic()
-        self.check_kinematic_cached()
+        self.check_kinematic()
+        # self.check_kinematic_cached()
         for tip, ss in zip(self.prob.tips, self.stop_sets):
             print 'TIP ', str(tip),
             print ' sampled set is', len(ss), id(ss), ss.time_counter
@@ -121,7 +121,7 @@ class RangeChecker(object):
     def query_dynamics(self, t, c1, c2, th2):
         e = self.prob.next_e[c1][c2]
         th2_0 = self.init_angles[e]
-        vel = 1.0  # maximum velocity of the th2
+        vel = 1.57  # maximum velocity of the th2
         lo, hi = (th2_0 - t * vel, th2_0 + t * vel)
         return (lo < th2) and (th2 < hi)
 

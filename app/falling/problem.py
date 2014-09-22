@@ -43,7 +43,7 @@ class Problem(object):
             ("l_toe", ["l_foot"], [[-0.05, 0.025, 0.0]]),
             ("hands", ["l_hand", "r_hand"],
              [[0, -0.11, 0.01], [0, 0.11, -0.01]]),
-            # ("knees", ["l_shin", "r_shin"], [[0, 0, 0], [0, 0, 0]]),
+            ("knees", ["l_shin", "r_shin"], [[0, 0, 0], [0, 0, 0]]),
             ("head", ["torso"], [[0.0, 0.0, 0.03]]),
         ]
         self.vertices = [i for i in range(len(defs))]

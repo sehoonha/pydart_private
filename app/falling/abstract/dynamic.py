@@ -74,8 +74,8 @@ class DynamicTIP:
         return State(*X[-1])
 
     def is_stopped(self, x):
-        return (x.c1 != 0)
-        # return (x.dth1 < 0)
+        # return (x.c1 != 0)
+        return (x.dth1 < 0)
 
     def is_grounded(self, x):
         return (x.th1 > 0.5 * math.pi)
@@ -103,15 +103,15 @@ class DynamicTIP:
         stoppers = []
         # Generate all feasible stoppers
         # For all possible next contact
-        print '-- check :', x
+        # print '-- check :', x
         for c2 in self.prob.next_v[c1]:
-            if c2 != 1:
-                continue
+            # if c2 != 1:
+            #     continue
             e = self.prob.next_e[c1][c2]
             ss = self.rng.stop_sets[e]
-            th2_0 = self.rng.init_angles[e]
             (min_th2, max_th2) = ss.th2_range
-            print c1, c2, 'edge ', e, 'range', min_th2, max_th2, 'init', th2_0
+            # th2_0 = self.rng.init_angles[e]
+            # print c1, c2, 'e', e, 'rng', min_th2, max_th2, 'th2', th2_0
             for th2 in np.linspace(min_th2, max_th2, self.N_GRID):
                 # Condition  y2 = r1 * cos(th1) + r2 * cos(th1 + th2) = 0
                 r2 = r1 * cos(th1) / -cos(th1 + th2)
@@ -124,7 +124,7 @@ class DynamicTIP:
                 if ss.is_new(query, 0.02):
                     # print 'reject the unseen query:', query, ss.min_d(query)
                     continue
-                print 'accept the seen query:', query
+                # print 'accept the seen query:', query
                 # If the stopper is feasible
                 for n_dr1 in np.linspace(self.lo_dr, self.hi_dr, self.N_GRID):
                     stoppers += [Control(th2, r2, n_dr1, c2)]
@@ -134,7 +134,10 @@ class DynamicTIP:
 
     def commands(self):
         return [0.2064,
-                0.19116964009964868, 0.18624620237610856, 2.1633800444288918]
+                0.19075830724994544, 0.1891832551480506, 2.4385504527676996,
+                0.18858325514805063, 0.23220104451557058, 2.7650949499671214]
+        # return [0.2064,
+        #         0.19116964009964868, 0.18624620237610856, 2.1633800444288918]
         # return [0.2064,
         #         0.1908196400996486, 0.15032234957068108, 2.2683800444288917,
         #         0.15032234957068108, 0.12082146452513869, 1.6606811609717798]
@@ -160,16 +163,19 @@ class DynamicTIP:
 
     def plan(self, x, j):
         # print 'plan()', x, j
-        if self.is_stopped(x):  # If the current state has negative velocity
-            if int(x.c1) == 1:  # If this is the second contact
-                return (x, j)
-            else:
-                return (x, g_inf)  # If this is not the second
+        # If the current state has negative velocity
+        if self.is_stopped(x):
+            return x, j
+            # if int(x.c1) == 3:  # If this is the second contact
+            #     return (x, j)
+            # else:
+            #     return (x, g_inf)  # If this is not the second
 
         if self.is_grounded(x):  # If the rod falls to the ground
             return (x, g_inf)
 
-        if int(x.c1) > 0:  # Exceed the maximum contacts
+        # if int(x.c1) >= self.prob.n:  # Exceed the maximum contacts
+        if int(x.c1) >= 3:  # Exceed the maximum contacts
             return (x, g_inf)
 
         if j > self.upper_bound:  # Not promising state

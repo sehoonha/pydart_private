@@ -58,7 +58,7 @@ class Simulation(object):
         # # ### Now, configure the controllers
         # # Abstract view of skeleton
         # self.tips = self.prob.tips[5:6]
-        self.tips = [self.prob.tips[0] ]
+        self.tips = [self.prob.tips[0], self.prob.tips[1] ]
         # self.tips = [TIP(self.skel, 'rfoot', 'lfoot'),
         #              TIP(self.skel, 'lfoot', 'hands')]
         # # self.tips = [TIP(self.skel, 'feet', 'hands'), ]
@@ -90,7 +90,6 @@ class Simulation(object):
         # For handle callbacks properly..
         self.history.clear()
         self.history.push()
-
 
     @property
     def tip(self):

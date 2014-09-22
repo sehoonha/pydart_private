@@ -89,7 +89,8 @@ class StateDB(object):
         return self.engines[c]
 
     def to_query(self, x):
-        return self.w * np.array([x.th1, x.dth1, x.r1, x.dr1, x.t])
+        t = min(x.t, 0.2)
+        return self.w * np.array([x.th1, x.dth1, x.r1, x.dr1, t])
 
     def add(self, x, next_x, v, u=None):
         q = self.to_query(x)
