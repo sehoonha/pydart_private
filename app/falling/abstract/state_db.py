@@ -3,6 +3,8 @@ from math import sin, cos, sqrt
 import numpy as np
 import plotly.plotly as py
 import plotly.graph_objs as pyg
+from nearpy import Engine
+from nearpy.hashes import RandomBinaryProjections
 
 
 class State(namedtuple('State', ['th1', 'dth1', 'r1', 'dr1', 'c1', 't'])):
@@ -47,17 +49,52 @@ def get_points(x, u):
     return Points(x1, y1, dx1, dy1, x2, y2, dx2, dy2)
 
 
-class StateDB(object):
+class StateDBEngine(object):
     def __init__(self):
-        self.info = {}
+        # initialize "nearby" library
+        self.dim = 5
+        self.rbp = RandomBinaryProjections('rbp', 100)
+        self.engine = Engine(self.dim, lshashes=[self.rbp])
+        # performance counter
+        self.counter = 0
+
+    def add(self, x, data):
+        self.engine.store_vector(x, data)
+        self.counter += 1
+
+    def lookup(self, x, THRESHOLD=0.01):
+        naver = self.engine.neighbours(x)
+        for pt, data, d in naver:
+            if d < THRESHOLD:
+                return data
+        return None
+
+
+class StateDB(object):
+    def __init__(self, _n):
+        self.n = _n
+        self.reset()
 
     def reset(self):
+        n = self.n
         self.info = {}
+        self.w = np.array([1.0, 0.1, 1.0, 100.0, 1.0])
+        self.engines = [StateDBEngine() for _ in range(n)]
 
     def __len__(self):
         return len(self.info)
 
+    def find_engine(self, x):
+        c = int(x.c1)
+        return self.engines[c]
+
+    def to_query(self, x):
+        return self.w * np.array([x.th1, x.dth1, x.r1, x.dr1, x.t])
+
     def add(self, x, next_x, v, u=None):
+        q = self.to_query(x)
+        data = (x, next_x, v, u)
+        self.find_engine(x).add(q, data)
         self.info[x] = (next_x, v, u)
 
     def trace(self, x):
@@ -67,14 +104,23 @@ class StateDB(object):
         return [(x, v, u)] + self.trace(next_x)
 
     def lookup(self, x):
-        w = np.array([1.0, 0.1, 1.0, 100.0, 100.0, 1.0])
-        for s, (next_s, v, u) in self.info.iteritems():
-            lhs = np.array(x)
-            rhs = np.array(s)
-            d = w.dot((lhs - rhs) ** 2)
-            if d < 0.01:
-                return (s, v)
-        return (None, None)
+        q = self.to_query(x)
+        data = self.find_engine(x).lookup(q)
+        if data is None:
+            return (None, None)
+        (x, next_x, v, u) = data
+        return (x, v)
+
+        # d = self.find_engine(x).min_d(lhs)
+        # if d < 0.01:
+        #     return True
+        # for s, (next_s, v, u) in self.info.iteritems():
+        #     lhs = np.array(x)
+        #     rhs = np.array(s)
+        #     d = w.dot((lhs - rhs) ** 2)
+        #     if d < 0.01:
+        #         return (s, v)
+        # return (None, None)
 
     def foo(self):
         states = [n_x for n_x, v, u in self.info.values() if int(n_x.c) == 1]

@@ -13,7 +13,7 @@ class DynamicTIP:
         # strucures
         self.prob = _prob
         self.rng = _range
-        self.db = StateDB()
+        self.db = StateDB(self.prob.n)
         # member variables
         self.eval_counter = 0
         self.N_GRID = 11
@@ -117,12 +117,12 @@ class DynamicTIP:
                 r2 = r1 * cos(th1) / -cos(th1 + th2)
                 # Check the dynamics
                 if not self.rng.query_dynamics(t, c1, c2, th2):
-                    print 'reject the bad dynamics'
+                    # print 'reject the bad dynamics'
                     continue
                 # Check the kinematics
                 query = (r1, r2, th2 / 10.0)
                 if ss.is_new(query, 0.02):
-                    print 'reject the unseen query:', query, ss.min_d(query)
+                    # print 'reject the unseen query:', query, ss.min_d(query)
                     continue
                 print 'accept the seen query:', query
                 # If the stopper is feasible
