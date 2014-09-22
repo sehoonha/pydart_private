@@ -5,11 +5,11 @@ import plotly.plotly as py
 import plotly.graph_objs as pyg
 
 
-class State(namedtuple('State', ['th1', 'dth1', 'r1', 'dr1', 'c'])):
+class State(namedtuple('State', ['th1', 'dth1', 'r1', 'dr1', 'c', 't'])):
     __slots__ = ()
 
     def __str__(self):
-        return 'State(%.4f, %.4f, %.4f, %.4f, %d)' % self
+        return 'State(%.4f, %.4f, %.4f, %.4f, %d, %.3f)' % self
 
 
 class Control(namedtuple('Control', ['th2', 'r2', 'n_dr1'])):

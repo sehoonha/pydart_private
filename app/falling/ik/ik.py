@@ -11,8 +11,8 @@ class ObjTIP:
         self.tip = _tip
 
     def state(self):
-        th1 = self.tip.theta()
-        return np.concatenate([[th1], self.tip.get_state()])
+        th1 = self.tip.th1
+        return np.concatenate([[th1], self.tip.pose()])
 
     def cost(self):
         state = self.state()
@@ -25,8 +25,8 @@ class ObjTWOTIP:
         self.tips = _tips
 
     def state(self):
-        th1 = self.tips[0].theta()
-        state = np.concatenate([[th1]] + [t.get_state() for t in self.tips])
+        th1 = self.tips[0].th1
+        state = np.concatenate([[th1]] + [t.pose() for t in self.tips])
         return state
 
     def cost(self):
@@ -56,9 +56,9 @@ class IK:
 
         self.dim = max([i for i, dof, w in self.param_desc]) + 1
 
-        # self.objs = [ObjTIP(self.sim.tip)]
-        # self.objs[0].target = self.sim.abstract_tip.commands()
-        # print 'objs[0].target = ', self.objs[0].target
+        self.objs = [ObjTIP(self.sim.tip)]
+        self.objs[0].target = self.sim.abstract_tip.commands()
+        print 'objs[0].target = ', self.objs[0].target
 
         # self.objs = [ ObjTIP(self.sim.tip) ]
         # self.objs[0].target = [0.14, 0.08, 2.7]
@@ -68,9 +68,9 @@ class IK:
         # self.objs[1].target = [0.08, 0.17, 1.0]
         # print 'objs[1].target = ', self.objs[1].target
 
-        self.objs = [ObjTWOTIP(self.sim.tips)]
-        self.objs[0].target = self.sim.abstract_tip.commands()
-        print 'objs[0].target = ', self.objs[0].target
+        # self.objs = [ObjTWOTIP(self.sim.tips)]
+        # self.objs[0].target = self.sim.abstract_tip.commands()
+        # print 'objs[0].target = ', self.objs[0].target
 
     def expand(self, x):
         q = self.sim.skel.q

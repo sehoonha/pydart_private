@@ -21,7 +21,7 @@ class DynamicTIP:
 
     def set_x0(self, tips):
         t0 = tips[0]
-        self.x0 = State(t0.theta(), t0.dtheta(), t0.d01(), 0, 0)
+        self.x0 = State(t0.th1, t0.dth1, t0.r1, 0, 0, 0.0)
         print 'set abstract.DynamicTIP.x0 = ', self.x0
 
     def set_bounds(self, tips):
@@ -36,7 +36,7 @@ class DynamicTIP:
         # self.hi = [Control(a, b + g_eps, c), Control(d, e + g_eps, f)]
 
         for i, tip in enumerate(tips):
-            (a, d) = (tip.angle(), tip.d12())
+            (a, d) = (tip.th2, tip.r2)
             if i == 0:
                 self.lo += [Control(a - 1.0, d - 0.02, -0.01)]
                 self.hi += [Control(a + 0.05, d + 0.02, 0.01)]
@@ -61,7 +61,7 @@ class DynamicTIP:
 
         (m, g) = (self.m, self.g)
         ddth1 = (m * r1 * (2 * dr1 * dth1 - g * sin(th1))) / (m * (r1 ** 2))
-        return [dth1, ddth1, dr1, 0, 0]
+        return [dth1, ddth1, dr1, 0, 0, 1.0]
 
     def step(self, x):
         # time = np.arange(0.0, 0.01, 0.005)
@@ -90,7 +90,8 @@ class DynamicTIP:
         n_r1 = u.r2
         n_dr1 = u.n_dr1
         n_c = x.c + 1
-        n_x = State(n_th1, n_dth1, n_r1, n_dr1, n_c)
+        n_t = x.t
+        n_x = State(n_th1, n_dth1, n_r1, n_dr1, n_c, n_t)
         return (n_x, j)
 
     def stoppers(self, x):
@@ -113,18 +114,18 @@ class DynamicTIP:
         return stoppers
 
     def commands(self):
-        # return [0.2064,
-        #         0.19116964009964868, 0.18624620237610856, 2.1633800444288918]
         return [0.2064,
-                0.1908196400996486, 0.15032234957068108, 2.2683800444288917,
-                0.15032234957068108, 0.12082146452513869, 1.6606811609717798]
+                0.19116964009964868, 0.18624620237610856, 2.1633800444288918]
+        # return [0.2064,
+        #         0.1908196400996486, 0.15032234957068108, 2.2683800444288917,
+        #         0.15032234957068108, 0.12082146452513869, 1.6606811609717798]
 
     def plan_initial(self):
         self.upper_bound = g_inf
         j = g_inf
         x = None
         for dr1 in np.linspace(self.lo0, self.hi0, self.N_GRID):
-            x_ = State(self.x0.th1, self.x0.dth1, self.x0.r1, dr1, 0)
+            x_ = State(self.x0.th1, self.x0.dth1, self.x0.r1, dr1, 0, 0.0)
             x_, j_ = self.plan(x_, 0)
             if j_ < j:
                 (x, j) = (x_, j_)
