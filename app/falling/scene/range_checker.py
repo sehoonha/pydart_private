@@ -1,27 +1,50 @@
+
+import time
 import math
 import numpy as np
 from numpy.linalg import norm
+from nearpy import Engine
+from nearpy.hashes import RandomBinaryProjections
+
+
+THRESHOLD = 0.01
 
 
 def is_similar(lhs, rhs):
     """ lhs and rhs are poses as np.array """
-    return (norm(lhs - rhs) < 0.05)
+    return (norm(lhs - rhs) < THRESHOLD)
 
 
 class StopperSet(object):
     def __init__(self, _states=None):
+        # Weight
+        self.w = np.array([1.0, 1.0, 0.1])
         self.states = []
+        # initialize "nearby" library
+        self.dim = 3
+        self.rbp = RandomBinaryProjections('rbp', 100)
+        self.engine = Engine(self.dim, lshashes=[self.rbp])
+        # performance counter
+        self.counter = 0
+        self.time_counter = 0.0
+        # load data if necessary
         if _states is not None:
-            self.states = _states
-        self.w = np.array([1.0, 0.1, 1.0])
+            for x in _states:
+                self.insert(x)
 
     def insert(self, x):
-        self.states.append(np.array(x))
+        self.engine.store_vector(x, 'pt%d' % self.counter)
+        self.counter += 1
+        self.states.append(x)
 
     def is_new(self, lhs):
-        for rhs in self.states:
-            if is_similar(lhs, rhs):
+        t0 = time.time()
+        naver = self.engine.neighbours(lhs)
+        for pt, name, d in naver:
+            if d < THRESHOLD:
+                self.time_counter += (time.time() - t0)
                 return False
+        self.time_counter += (time.time() - t0)
         return True
 
     def insert_if_new(self, x):
@@ -30,10 +53,10 @@ class StopperSet(object):
             self.insert(x)
 
     def __len__(self):
-        return len(self.states)
+        return self.counter
 
     def __repr__(self):
-        return 'StopperSet(%r)' % self.states
+        return 'StopperSet(%r)' % (self.states)
 
 
 class RangeChecker(object):
@@ -55,7 +78,7 @@ class RangeChecker(object):
         self.check_kinematic_cached()
         for tip, ss in zip(self.prob.tips, self.stop_sets):
             print 'TIP ', str(tip),
-            print ' sampled set is', len(ss), id(ss)
+            print ' sampled set is', len(ss), id(ss), ss.time_counter
 
     def check_init_angle(self):
         self.init_angles = [tip.th2 for tip in self.prob.tips]
@@ -65,7 +88,7 @@ class RangeChecker(object):
         # Each edge has a set of stoppers
         self.stop_sets = [StopperSet() for _ in range(self.prob.m)]
 
-        for i in range(1000):
+        for i in range(3000):
             self.set_random_pose()
             for tip, ss in zip(self.prob.tips, self.stop_sets):
                 x = tip.pose()
