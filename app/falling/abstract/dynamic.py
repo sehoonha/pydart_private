@@ -9,15 +9,18 @@ g_inf = float("inf")
 
 
 class DynamicTIP:
-    def __init__(self):
+    def __init__(self, _prob, _range):
+        # strucures
+        self.prob = _prob
+        self.rng = _range
+        self.db = StateDB()
+        # member variables
         self.eval_counter = 0
         self.N_GRID = 11
-
+        # math quantities
         self.m = 1.08
         self.I = 0.0080
         self.g = -9.8
-
-        self.db = StateDB()
 
     def set_x0(self, tips):
         t0 = tips[0]
@@ -26,32 +29,32 @@ class DynamicTIP:
 
     def set_bounds(self, tips):
         """Bound for control signals: [(dr1, th2, r2), (dr2, th3, r3)]"""
-        (self.lo0, self.hi0) = (-0.01, 0.01)
-        self.lo = []
-        self.hi = []
+        (self.lo_dr, self.hi_dr) = (-0.01, 0.01)
+        # self.lo = []
+        # self.hi = []
 
-        # (a, b, c) = (2.3284, 0.1522, -0.1000)
-        # (d, e, f) = (1.7107, 0.1108, -0.1000)
-        # self.lo = [Control(a, b - g_eps, c), Control(d, e - g_eps, f)]
-        # self.hi = [Control(a, b + g_eps, c), Control(d, e + g_eps, f)]
+        # # (a, b, c) = (2.3284, 0.1522, -0.1000)
+        # # (d, e, f) = (1.7107, 0.1108, -0.1000)
+        # # self.lo = [Control(a, b - g_eps, c), Control(d, e - g_eps, f)]
+        # # self.hi = [Control(a, b + g_eps, c), Control(d, e + g_eps, f)]
 
-        for i, tip in enumerate(tips):
-            (a, d) = (tip.th2, tip.r2)
-            if i == 0:
-                self.lo += [Control(a - 1.0, d - 0.02, -0.01)]
-                self.hi += [Control(a + 0.05, d + 0.02, 0.01)]
-            else:
-                self.lo += [Control(a - 1.0, d - 0.02, -0.01)]
-                self.hi += [Control(a + 1.0, d + 0.02, 0.01)]
+        # for i, tip in enumerate(tips):
+        #     (a, d) = (tip.th2, tip.r2)
+        #     if i == 0:
+        #         self.lo += [Control(a - 1.0, d - 0.02, -0.01)]
+        #         self.hi += [Control(a + 0.05, d + 0.02, 0.01)]
+        #     else:
+        #         self.lo += [Control(a - 1.0, d - 0.02, -0.01)]
+        #         self.hi += [Control(a + 1.0, d + 0.02, 0.01)]
 
-            print 'set abstract.DynamicTIP.lo = ', self.lo[i]
-            print 'set abstract.DynamicTIP.hi = ', self.hi[i]
+        #     print 'set abstract.DynamicTIP.lo = ', self.lo[i]
+        #     print 'set abstract.DynamicTIP.hi = ', self.hi[i]
 
     def test_control(self):
         u = np.array([0.0054, 2.255, 0.1576, -0.00997, 1.583, 0.1215])
         e = 0.01
         self.N_GRID = 1
-        (self.lo0, self.hi0) = (u[0], u[0])
+        (self.lo_dr, self.hi_dr) = (u[0], u[0])
         self.lo = [Control(u[1], u[2] - e, u[3]), Control(u[4], u[5] - e, 0.0)]
         self.hi = [Control(u[1], u[2] + e, u[3]), Control(u[4], u[5] + e, 0.0)]
 
@@ -71,7 +74,8 @@ class DynamicTIP:
         return State(*X[-1])
 
     def is_stopped(self, x):
-        return (x.dth1 < 0)
+        return (x.c1 != 0)
+        # return (x.dth1 < 0)
 
     def is_grounded(self, x):
         return (x.th1 > 0.5 * math.pi)
@@ -89,28 +93,43 @@ class DynamicTIP:
         n_dth1 = x.dth1 - (1 / I) * (x2 - x1) * j
         n_r1 = u.r2
         n_dr1 = u.n_dr1
-        n_c = x.c + 1
+        n_c = x.c1 + 1
         n_t = x.t
         n_x = State(n_th1, n_dth1, n_r1, n_dr1, n_c, n_t)
         return (n_x, j)
 
     def stoppers(self, x):
-        (th1, r1) = (x.th1, x.r1)
-        lo = self.lo[int(x.c)]
-        hi = self.hi[int(x.c)]
+        (th1, r1, c1, t) = (x.th1, x.r1, int(x.c1), x.t )
         stoppers = []
         # Generate all feasible stoppers
-        for th2 in np.linspace(lo.th2, hi.th2, self.N_GRID):
-            # Condition  y2 = r1 * cos(th1) + r2 * cos(th1 + th2) = 0
-            r2 = r1 * cos(th1) / -cos(th1 + th2)
-            # if int(x.c) == 0:
-            #     print 'check', th2, r2, 'is in', lo.r2, hi.r2, 'for', x
-            if r2 < lo.r2 or hi.r2 < r2:
+        # For all possible next contact
+        print '-- check :', x
+        for c2 in self.prob.next_v[c1]:
+            if c2 != 1:
                 continue
-            # If the stopper is feasible
-            for n_dr1 in np.linspace(lo.n_dr1, hi.n_dr1, self.N_GRID):
-                stoppers += [Control(th2, r2, n_dr1)]
-            # stoppers += [Control(th2, r2, 0.0)]
+            e = self.prob.next_e[c1][c2]
+            ss = self.rng.stop_sets[e]
+            th2_0 = self.rng.init_angles[e]
+            (min_th2, max_th2) = ss.th2_range
+            print c1, c2, 'edge ', e, 'range', min_th2, max_th2, 'init', th2_0
+            for th2 in np.linspace(min_th2, max_th2, self.N_GRID):
+                # Condition  y2 = r1 * cos(th1) + r2 * cos(th1 + th2) = 0
+                r2 = r1 * cos(th1) / -cos(th1 + th2)
+                # Check the dynamics
+                if not self.rng.query_dynamics(t, c1, c2, th2):
+                    print 'reject the bad dynamics'
+                    continue
+                # Check the kinematics
+                query = (r1, r2, th2 / 10.0)
+                if ss.is_new(query, 0.02):
+                    print 'reject the unseen query:', query, ss.min_d(query)
+                    continue
+                print 'accept the seen query:', query
+                # If the stopper is feasible
+                for n_dr1 in np.linspace(self.lo_dr, self.hi_dr, self.N_GRID):
+                    stoppers += [Control(th2, r2, n_dr1, c2)]
+
+        # exit(0)
         return stoppers
 
     def commands(self):
@@ -124,7 +143,7 @@ class DynamicTIP:
         self.upper_bound = g_inf
         j = g_inf
         x = None
-        for dr1 in np.linspace(self.lo0, self.hi0, self.N_GRID):
+        for dr1 in np.linspace(self.lo_dr, self.hi_dr, self.N_GRID):
             x_ = State(self.x0.th1, self.x0.dth1, self.x0.r1, dr1, 0, 0.0)
             x_, j_ = self.plan(x_, 0)
             if j_ < j:
@@ -142,7 +161,7 @@ class DynamicTIP:
     def plan(self, x, j):
         # print 'plan()', x, j
         if self.is_stopped(x):  # If the current state has negative velocity
-            if int(x.c) == 1:  # If this is the second contact
+            if int(x.c1) == 1:  # If this is the second contact
                 return (x, j)
             else:
                 return (x, g_inf)  # If this is not the second
@@ -150,7 +169,7 @@ class DynamicTIP:
         if self.is_grounded(x):  # If the rod falls to the ground
             return (x, g_inf)
 
-        if int(x.c) == 1:  # Exceed the maximum contacts
+        if int(x.c1) > 0:  # Exceed the maximum contacts
             return (x, g_inf)
 
         if j > self.upper_bound:  # Not promising state

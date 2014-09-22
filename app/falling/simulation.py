@@ -73,11 +73,14 @@ class Simulation(object):
         print 'skel.approx_inertia_x = ', self.skel.approx_inertia_x()
         print 'skel.q = ', self.skel.q
 
+        self.rc = scene.range_checker.RangeChecker(self)
+        self.rc.check_all()
+
         # Abstract model
         # self.abstract_tip = abstract.tip_v2.TIPv2()
         # self.abstract_tip = abstract.tip.TIP()
         # self.abstract_twotip = abstract.twotip.TWOTIP()
-        self.abstract_tip = abstract.dynamic.DynamicTIP()
+        self.abstract_tip = abstract.dynamic.DynamicTIP(self.prob, self.rc)
 
         # Control
         self.maxTorque = 0.3 * 1.5
@@ -88,8 +91,6 @@ class Simulation(object):
         self.history.clear()
         self.history.push()
 
-        rc = scene.range_checker.RangeChecker(self)
-        rc.check_all()
 
     @property
     def tip(self):

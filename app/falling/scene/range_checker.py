@@ -27,6 +27,7 @@ class StopperSet(object):
         # performance counter
         self.counter = 0
         self.time_counter = 0.0
+        self.th2_range = (2 * math.pi, -2 * math.pi)
         # load data if necessary
         if _states is not None:
             for x in _states:
@@ -36,16 +37,26 @@ class StopperSet(object):
         self.engine.store_vector(x, 'pt%d' % self.counter)
         self.counter += 1
         self.states.append(x)
+        th2 = x[-1] / self.w[-1]
+        self.th2_range = (min(self.th2_range[0], th2),
+                          max(self.th2_range[1], th2))
 
-    def is_new(self, lhs):
+    def is_new(self, lhs, threshold=THRESHOLD):
         t0 = time.time()
         naver = self.engine.neighbours(lhs)
         for pt, name, d in naver:
-            if d < THRESHOLD:
+            if d < threshold:
                 self.time_counter += (time.time() - t0)
                 return False
         self.time_counter += (time.time() - t0)
         return True
+
+    def min_d(self, lhs):
+        naver = self.engine.neighbours(lhs)
+        dists = [d for _, _, d in naver]
+        if len(dists) == 0:
+            return 1000.0
+        return min(dists)
 
     def insert_if_new(self, x):
         x = x * self.w
@@ -79,6 +90,7 @@ class RangeChecker(object):
         for tip, ss in zip(self.prob.tips, self.stop_sets):
             print 'TIP ', str(tip),
             print ' sampled set is', len(ss), id(ss), ss.time_counter
+            print ' th2_range = ', ss.th2_range
 
     def check_init_angle(self):
         self.init_angles = [tip.th2 for tip in self.prob.tips]
@@ -105,6 +117,13 @@ class RangeChecker(object):
     def check_kinematic_cached(self):
         import cached_stopper_sets
         self.stop_sets = cached_stopper_sets.cached_sets
+
+    def query_dynamics(self, t, c1, c2, th2):
+        e = self.prob.next_e[c1][c2]
+        th2_0 = self.init_angles[e]
+        vel = 1.0  # maximum velocity of the th2
+        lo, hi = (th2_0 - t * vel, th2_0 + t * vel)
+        return (lo < th2) and (th2 < hi)
 
     def set_random_pose(self):
         param_desc = [(0, 'l_shoulder', 1.0),

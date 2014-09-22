@@ -5,18 +5,18 @@ import plotly.plotly as py
 import plotly.graph_objs as pyg
 
 
-class State(namedtuple('State', ['th1', 'dth1', 'r1', 'dr1', 'c', 't'])):
+class State(namedtuple('State', ['th1', 'dth1', 'r1', 'dr1', 'c1', 't'])):
     __slots__ = ()
 
     def __str__(self):
         return 'State(%.4f, %.4f, %.4f, %.4f, %d, %.3f)' % self
 
 
-class Control(namedtuple('Control', ['th2', 'r2', 'n_dr1'])):
+class Control(namedtuple('Control', ['th2', 'r2', 'n_dr1', 'c2'])):
     __slots__ = ()
 
     def __str__(self):
-        return 'Control(%.4f, %.4f, %.4f)' % self
+        return 'Control(%.4f, %.4f, %.4f, %d)' % self
 
 Points = namedtuple('Points', ['x1', 'y1', 'dx1', 'dy1',
                                'x2', 'y2', 'dx2', 'dy2'])
@@ -67,7 +67,7 @@ class StateDB(object):
         return [(x, v, u)] + self.trace(next_x)
 
     def lookup(self, x):
-        w = np.array([1.0, 0.1, 1.0, 100.0, 100.0])
+        w = np.array([1.0, 0.1, 1.0, 100.0, 100.0, 1.0])
         for s, (next_s, v, u) in self.info.iteritems():
             lhs = np.array(x)
             rhs = np.array(s)
