@@ -42,6 +42,7 @@ class BioloidGPPoses:
         q[self.dofs['l_hip']] = 0.1
         q[self.dofs['l_foot']] = -0.1
         q[self.dofs['l_thigh']] = 1.3
+        q[self.dofs['l_heel']] = -0.3
         return q
 
     def step_low_pose(self):

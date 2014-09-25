@@ -77,7 +77,7 @@ class IK:
                            (3, 'r_thigh', 1.0),
                            (4, 'l_shin', 0.5),
                            (5, 'r_shin', 0.5),
-                           (6, 'l_heel', 0.05),
+                           (6, 'l_heel', 0.5),
                            (7, 'r_heel', 0.05) ]
 
         self.dim = max([i for i, dof, w in self.param_desc]) + 1
@@ -132,38 +132,51 @@ class IK:
 
     def evaluate(self, x=None):
         if x is not None:
-            if np.max(np.fabs(x)) > 1.57:
-                return np.max(np.fabs(x))
 
             q = self.expand(x)
             dq = q - self.q0
+
+            # Check the pose
+            if np.max(np.fabs(q)) > 1.57:
+                return np.max(np.fabs(q))
+            # Check the change of pose
             if np.max(np.fabs(dq)) > 0.8:
                 return 10.0 * np.max(np.fabs(dq))
 
             self.sim.skel.q = q
 
         costs = [obj.cost() for obj in self.objs]
-        print sum(costs), costs
+        # print sum(costs), costs
         return sum(costs)
 
-    def optimize(self, x0=None, restore=True):
+    def optimize(self, restore=True):
         saved_pose = self.sim.skel.q
         saved_vel = self.sim.skel.qdot
 
         self.q0 = self.sim.skel.q
 
-        if x0 is None:
-            # x0 = np.zeros(self.dim)
-            x0 = np.random.rand(self.dim)
-
         print "==== ik.IK optimize...."
-
+        # x = np.array([  0.797,   9.20728001e-04,   9.37700050e-01,
+        #                 -3.45819731e-01,   2.15869410e-01,   4.95856065e-01,
+        #                 -20.3038,   1.57000000e+00])
         # self.res = { "x" : x, "value" : self.evaluate(x) }
         # self.res = minimize(lambda x: self.evaluate_orientation(x), x0,
-        self.res = minimize(lambda x: self.evaluate(x), x0,
-                            method='nelder-mead', tol=0.000001,
-                            options={'maxiter': 10000, 'maxfev': 10000,
-                                     'xtol': 10e-8, 'ftol': 10e-8})
+        self.res = None
+        for i in range(10):
+            x0 = np.random.rand(self.dim)
+            res = minimize(lambda x: self.evaluate(x), x0,
+                           method='nelder-mead', tol=0.00001,
+                           # method='SLSQP', tol=0.00001,
+                           options={'maxiter': 10000, 'maxfev': 10000,
+                                    'xtol': 10e-8, 'ftol': 10e-8})
+            if self.res is None or res['fun'] < self.res['fun']:
+                self.res = res
+            print i, self.res['fun']
+        # opt = {'popsize': 32}
+        # self.res = cma.fmin(self.evaluate, x0, 1.0, opt)
+        # self.res = {"x": self.res[0]}
+
+        self.sim.skel.q = self.expand(self.res['x'])
 
         print "==== result\n", self.res
         print "state = ", self.objs[0].state()
