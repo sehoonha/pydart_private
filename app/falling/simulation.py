@@ -66,6 +66,11 @@ class Simulation(object):
 
         self.event_handler = events.Handler()
 
+        # Control
+        self.maxTorque = 0.3 * 1.5
+        self.pd = PDController(self.skel, 50.0, 1.0)
+        self.pd.target = self.skel.q
+
         # Reset to the initial state
         self.reset()
 
@@ -81,11 +86,6 @@ class Simulation(object):
         # self.abstract_tip = abstract.tip.TIP()
         # self.abstract_twotip = abstract.twotip.TWOTIP()
         self.abstract_tip = abstract.dynamic.DynamicTIP(self.prob, self.rc)
-
-        # Control
-        self.maxTorque = 0.3 * 1.5
-        self.pd = PDController(self.skel, 50.0, 1.0)
-        self.pd.target = self.skel.q
 
         # For handle callbacks properly..
         self.history.clear()
@@ -150,8 +150,15 @@ class Simulation(object):
         # self.skel.x = BioloidGPPoses().stepping()
         # self.skel.x = BioloidGPPoses().side()
         self.skel.x = self.cfg.init_state
-
+        for i in range(10):
+            (b, f, p) = self.cfg.ext_force
+            body = self.skel.body(b)
+            body.add_ext_force_at(f, p)
+            self.skel.tau = self.control()
+            self.world.step()
+        state_after_pushed = self.skel.x
         self.world.reset()
+        self.skel.x = state_after_pushed
 
         # ### Reset inner structures
         self.event_handler.clear()
@@ -162,30 +169,7 @@ class Simulation(object):
 
         self.terminated = dict()
 
-    def generate_initial_states(self):
-        if self.cfg.ext_force is not None:
-            if self.world.nframes < 10:
-                print 'push!!'
-                (b, f, p) = self.cfg.ext_force
-                body = self.skel.body(b)
-                body.add_ext_force_at(f, p)
-            elif self.world.nframes == 10:
-                cond = self.conditions[0]
-                state = self.skel.x
-                self.cond_states[cond] = state
-                self.conditions.pop(0)
-                if self.conditions:
-                    print 'self.reset()'
-                    print self.skel.x
-                    self.reset()
-                else:
-                    print repr(self.cond_states)
-                    self.event_handler.push("pause", 0)
-
     def step(self):
-        if self.cfg.conditions:
-            self.generate_initial_states()
-
         self.skel.tau = self.control()
         self.world.step()
         self.history.push()

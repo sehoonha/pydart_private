@@ -31,7 +31,7 @@ class Config(object):
         return state
 
     def config(self, class_name, height_level, push_level):
-        return self.config_cached(class_name, height_level, push_level)
+        # return self.config_cached(class_name, height_level, push_level)
 
         print 'config', class_name, height_level, push_level
         # 1. Set the pose
