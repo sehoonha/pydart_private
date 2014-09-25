@@ -93,7 +93,8 @@ class DynamicTIP:
         n_dth1 = x.dth1 - (1 / I) * (x2 - x1) * j
         n_r1 = u.r2
         n_dr1 = u.n_dr1
-        n_c = x.c1 + 1
+        # n_c = x.c1 + 1
+        n_c = u.c2
         n_t = x.t
         n_x = State(n_th1, n_dth1, n_r1, n_dr1, n_c, n_t)
         return (n_x, j)
@@ -134,8 +135,7 @@ class DynamicTIP:
 
     def commands(self):
         return [0.2064,
-                0.19075830724994544, 0.1891832551480506, 2.4385504527676996,
-                0.18858325514805063, 0.23220104451557058, 2.7650949499671214]
+                0.19035830724994546, 0.22504997962813594, 1.8550685725083569]
         # return [0.2064,
         #         0.19116964009964868, 0.18624620237610856, 2.1633800444288918]
         # return [0.2064,
@@ -162,7 +162,7 @@ class DynamicTIP:
         return j
 
     def plan(self, x, j):
-        # print 'plan()', x, j
+        print 'plan()', x, j
         # If the current state has negative velocity
         if self.is_stopped(x):
             return x, j

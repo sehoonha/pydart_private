@@ -39,10 +39,14 @@ class History:
 
     def push_impulses(self, data):
         skelcontacts = data['skelcontacts']
+        """
         pivots = [self.world.skel.body_index(p) for p in data['tip_pivot_nodes']]
         pivots = []
         vertical_forces = [float(-c[4]) for c, b in skelcontacts if b not in pivots]
-        raw_impulse = np.sum(vertical_forces) * self.world.dt
+        """
+        vertical_forces = [float(-c[4]) for c, b in skelcontacts]
+        mg = self.world.skel.m * 9.8
+        raw_impulse = (np.sum(vertical_forces) - mg) * self.world.dt
         data['raw_impulse'] = raw_impulse
 
         window_size = 40

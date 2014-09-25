@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from OpenGL.GL import glPushMatrix, glPopMatrix, glColor, glTranslate
 from OpenGL.GLUT import glutSolidSphere
@@ -21,6 +22,10 @@ class Contact(object):
             positions += [w[0:3]]
         avg = (sum(positions) / len(positions))
         return avg
+
+    def angle(self, _o):
+        p = self.p - _o.p
+        return math.atan2(p[2], p[1])
 
     @property
     def p(self):

@@ -58,7 +58,7 @@ class Simulation(object):
         # # ### Now, configure the controllers
         # # Abstract view of skeleton
         # self.tips = self.prob.tips[5:6]
-        self.tips = [self.prob.tips[0], self.prob.tips[1] ]
+        self.tips = [self.prob.tips[0]]
         # self.tips = [TIP(self.skel, 'rfoot', 'lfoot'),
         #              TIP(self.skel, 'lfoot', 'hands')]
         # # self.tips = [TIP(self.skel, 'feet', 'hands'), ]
@@ -123,9 +123,9 @@ class Simulation(object):
         self.abstract_tip.set_x0(self.tips)
         self.abstract_tip.set_bounds(self.tips)
         # self.abstract_tip.test_control()
-        self.abstract_tip.plan_initial()
-        # ik = IK(self)
-        # self.pd.target = ik.optimize(restore=False)
+        # self.abstract_tip.plan_initial()
+        ik = IK(self)
+        self.pd.target = ik.optimize(restore=False)
 
     def control(self):
         tau = np.zeros(self.skel.ndofs)

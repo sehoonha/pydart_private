@@ -85,7 +85,7 @@ class RangeChecker(object):
     def check_all(self):
         print '==== start the range check ===='
         self.check_init_angle()
-        self.check_kinematic()
+        self.check_kinematic(False)
         # self.check_kinematic_cached()
         for tip, ss in zip(self.prob.tips, self.stop_sets):
             print 'TIP ', str(tip),
@@ -96,7 +96,9 @@ class RangeChecker(object):
         self.init_angles = [tip.th2 for tip in self.prob.tips]
         print self.init_angles
 
-    def check_kinematic(self):
+    def check_kinematic(self, generate_cache=True):
+        saved_x = self.skel.x
+
         # Each edge has a set of stoppers
         self.stop_sets = [StopperSet() for _ in range(self.prob.m)]
 
@@ -108,11 +110,13 @@ class RangeChecker(object):
                     continue
                 ss.insert_if_new(x)
 
-        fp = open('cached_stopper_sets.py', 'w+')
-        fp.write('from range_checker import StopperSet\n')
-        fp.write('from numpy import array\n')
-        fp.write('cached_sets=%s' % repr(self.stop_sets))
-        fp.close()
+        if generate_cache:
+            fp = open('cached_stopper_sets.py', 'w+')
+            fp.write('from range_checker import StopperSet\n')
+            fp.write('from numpy import array\n')
+            fp.write('cached_sets=%s' % repr(self.stop_sets))
+            fp.close()
+        self.skel.x = saved_x
 
     def check_kinematic_cached(self):
         import cached_stopper_sets

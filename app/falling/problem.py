@@ -60,14 +60,15 @@ class Problem(object):
                     return i
             return None
 
-        defs = [("r_toe", "l_heel"),
-                ("r_toe", "l_toe"),
-                ("r_toe", "hands"),
-                ("r_toe", "head"),
-                ("l_heel", "l_toe"),
-                ("l_toe", "hands"),
-                ("l_toe", "head"),
-                ("hands", "head"), ]
+        defs = [("r_toe", "l_toe")]
+        # defs = [("r_toe", "l_heel"),
+        #         ("r_toe", "l_toe"),
+        #         ("r_toe", "hands"),
+        #         ("r_toe", "head"),
+        #         ("l_heel", "l_toe"),
+        #         ("l_toe", "hands"),
+        #         ("l_toe", "head"),
+        #         ("hands", "head"), ]
 
         self.edges = [(find_index(a), find_index(b)) for a, b in defs]
         self.tips = [TIP(id, self.contacts[i], self.contacts[j])
@@ -87,3 +88,6 @@ class Problem(object):
         print 'edge table:'
         for row in self.next_e:
             print row
+
+    def contact(self, _name):
+        return next(x for x in self.contacts if x.name == _name)
