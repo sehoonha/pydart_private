@@ -1,36 +1,68 @@
 import numpy as np
-from numpy.linalg import norm
+from numpy.linalg import norm, det
 
 from scipy.optimize import minimize
 import cma
 
 
-class ObjC:
-    def __init__(self, _skel, _target):
-        self.skel = _skel
-        self.target = _target
+class ObjTIP:
+    def __init__(self, _tip):
+        self.target = None
+        self.tip = _tip
+
+    def state(self):
+        th1 = self.tip.th1
+        return np.concatenate([[th1], self.tip.pose()])
 
     def cost(self):
-        C = self.skel.C
-        C = np.array([C[2], C[1]])
-        return norm((C - self.target) * [2.0, 2.0] ) ** 2
+        state = self.state()
+        return norm((state - self.target) * [10.0, 1.0, 1.0, 0.1] ) ** 2
 
 
-class ObjPt:
-    def __init__(self, _con, _target):
-        self.con = _con
-        self.target = _target
+class ObjTWOTIP:
+    def __init__(self, _tips):
+        self.target = None
+        self.tips = _tips
+
+    def state(self):
+        th1 = self.tips[0].th1
+        state = np.concatenate([[th1]] + [t.pose() for t in self.tips])
+        return state
 
     def cost(self):
-        P = self.con.p
-        P = np.array([P[2], P[1]])
-        return norm((P - self.target) * [1.0, 1.0] ) ** 2
+        w = np.array([10.0, 1.0, 1.0, 0.5, 1.0, 1.0, 0.5])
+        return norm((self.state() - self.target) * w) ** 2
+
+
+class ObjHidePoint:
+    """ p1 should be hide from the line (o, p0) """
+    def __init__(self, _o, _p0, _p1):
+        self.o = _o
+        self.p0 = _p0
+        self.p1 = _p1
+
+    def cost(self):
+        # a0 = self.p0.angle(self.o)
+        # a1 = self.p1.angle(self.o)
+        # print 'a0, a1:', a0, a1
+        # return 1.0 if (a0 - 0.2) < a1 else 0.0
+
+        # http://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
+        a = self.o.p
+        n = self.p0.p - a
+        n /= norm(n)
+        ap = self.p1.p - a
+        d = norm(ap - (ap.dot(n)) * n)
+
+        # determinant to test which side
+        side = det([[n[2], ap[2]], [n[1], ap[1]]])
+        # print side
+        return -0.1 * d if side > 0 else 1.0 + d
 
 
 class IK:
-    def __init__(self, _sim, _plan):
+    def __init__(self, _sim):
         self.sim = _sim
-        self.plan = _plan
 
         self.res = None
 
@@ -50,17 +82,34 @@ class IK:
 
         self.dim = max([i for i, dof, w in self.param_desc]) + 1
 
-        skel = self.sim.skel
-        plan = self.plan
-        prob = self.sim.prob
+        if len(self.sim.tips) == 1:
+            self.objs = [ObjTIP(self.sim.tip)]
+            self.objs[0].target = self.sim.abstract_tip.commands()
+            print 'tip.objs[0].target = ', self.objs[0].target
+        else:
+            self.objs = [ObjTWOTIP(self.sim.tips)]
+            self.objs[0].target = self.sim.abstract_tip.commands()
+            print 'twotips.objs[0].target = ', self.objs[0].target
 
-        self.objs = []
-        self.objs += [ObjC(skel, plan.C())]
-        self.objs += [ObjPt(prob.contact('r_toe'), plan.P(0))]
-        self.objs += [ObjPt(prob.contact('l_heel'), plan.P(1))]
-        self.objs += [ObjPt(prob.contact('l_toe'), plan.P(2))]
+        r_toe = self.sim.prob.contact('r_toe')
+        l_heel = self.sim.prob.contact('l_heel')
+        l_toe = self.sim.prob.contact('l_toe')
+        obj = ObjHidePoint(r_toe, l_toe, l_heel)
+        self.objs += [obj]
 
+        # hands = self.sim.prob.contact('hands')
+        # obj0 = ObjHidePoint(r_toe, hands, l_toe)
+        # obj1 = ObjHidePoint(r_toe, hands, l_heel)
+        # self.objs += [obj0, obj1]
         print 'costs = ', [o.cost() for o in self.objs]
+
+        # self.objs = [ ObjTIP(self.sim.tip) ]
+        # self.objs[0].target = [0.14, 0.08, 2.7]
+        # print 'objs[0].target = ', self.objs[0].target
+
+        # self.objs += [ ObjTIP(self.sim.tip2) ]
+        # self.objs[1].target = [0.08, 0.17, 1.0]
+        # print 'objs[1].target = ', self.objs[1].target
 
     def expand(self, x):
         q = self.sim.skel.q
@@ -68,6 +117,18 @@ class IK:
             dof_i = self.sim.skel.dof_index(dof_name)
             q[dof_i] = w * x[x_i]
         return q
+
+    def evaluate_orientation(self, x=None):
+        q = self.sim.skel.q
+        q[0:3] = x
+        self.sim.skel.q = q
+        lhs = self.sim.skel.body("torso").T
+        lhs[0][3] = lhs[1][3] = lhs[2][3] = 0.0
+        rhs = np.array([[1, 0, 0, 0],
+                        [0, 0, 1, 0],
+                        [0, 1, 0, 0],
+                        [0, 0, 0, 1]])
+        return norm(lhs - rhs)
 
     def evaluate(self, x=None):
         if x is not None:
@@ -95,6 +156,11 @@ class IK:
         self.q0 = self.sim.skel.q
 
         print "==== ik.IK optimize...."
+        # x = np.array([  0.797,   9.20728001e-04,   9.37700050e-01,
+        #                 -3.45819731e-01,   2.15869410e-01,   4.95856065e-01,
+        #                 -20.3038,   1.57000000e+00])
+        # self.res = { "x" : x, "value" : self.evaluate(x) }
+        # self.res = minimize(lambda x: self.evaluate_orientation(x), x0,
         self.res = None
         for i in range(10):
             x0 = np.random.rand(self.dim)
@@ -106,10 +172,14 @@ class IK:
             if self.res is None or res['fun'] < self.res['fun']:
                 self.res = res
             print i, self.res['fun']
+        # opt = {'popsize': 32}
+        # self.res = cma.fmin(self.evaluate, x0, 1.0, opt)
+        # self.res = {"x": self.res[0]}
 
         self.sim.skel.q = self.expand(self.res['x'])
 
         print "==== result\n", self.res
+        print "state = ", self.objs[0].state()
         print 'final costs = ', [obj.cost() for obj in self.objs]
         print "==== ik.IK optimize....OK"
 

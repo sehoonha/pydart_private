@@ -1,3 +1,4 @@
+import sys
 import math
 from math import sin, cos
 import numpy as np
@@ -21,42 +22,12 @@ class DynamicTIP:
         self.m = 1.08
         self.I = 0.0080
         self.g = -9.8
+        (self.lo_dr, self.hi_dr) = (-0.01, 0.01)
 
     def set_x0(self, tips):
         t0 = tips[0]
         self.x0 = State(t0.th1, t0.dth1, t0.r1, 0, 0, 0.0)
         print 'set abstract.DynamicTIP.x0 = ', self.x0
-
-    def set_bounds(self, tips):
-        """Bound for control signals: [(dr1, th2, r2), (dr2, th3, r3)]"""
-        (self.lo_dr, self.hi_dr) = (-0.01, 0.01)
-        # self.lo = []
-        # self.hi = []
-
-        # # (a, b, c) = (2.3284, 0.1522, -0.1000)
-        # # (d, e, f) = (1.7107, 0.1108, -0.1000)
-        # # self.lo = [Control(a, b - g_eps, c), Control(d, e - g_eps, f)]
-        # # self.hi = [Control(a, b + g_eps, c), Control(d, e + g_eps, f)]
-
-        # for i, tip in enumerate(tips):
-        #     (a, d) = (tip.th2, tip.r2)
-        #     if i == 0:
-        #         self.lo += [Control(a - 1.0, d - 0.02, -0.01)]
-        #         self.hi += [Control(a + 0.05, d + 0.02, 0.01)]
-        #     else:
-        #         self.lo += [Control(a - 1.0, d - 0.02, -0.01)]
-        #         self.hi += [Control(a + 1.0, d + 0.02, 0.01)]
-
-        #     print 'set abstract.DynamicTIP.lo = ', self.lo[i]
-        #     print 'set abstract.DynamicTIP.hi = ', self.hi[i]
-
-    def test_control(self):
-        u = np.array([0.0054, 2.255, 0.1576, -0.00997, 1.583, 0.1215])
-        e = 0.01
-        self.N_GRID = 1
-        (self.lo_dr, self.hi_dr) = (u[0], u[0])
-        self.lo = [Control(u[1], u[2] - e, u[3]), Control(u[4], u[5] - e, 0.0)]
-        self.hi = [Control(u[1], u[2] + e, u[3]), Control(u[4], u[5] + e, 0.0)]
 
     def deriv(self, _state, _t):
         x = State(*_state)
@@ -162,20 +133,20 @@ class DynamicTIP:
         return j
 
     def plan(self, x, j):
-        print 'plan()', x, j
+        # print 'plan()', x, j
         # If the current state has negative velocity
         if self.is_stopped(x):
-            return x, j
-            # if int(x.c1) == 3:  # If this is the second contact
-            #     return (x, j)
-            # else:
-            #     return (x, g_inf)  # If this is not the second
+            # return x, j
+            if int(x.c1) == 2:  # If this is the second contact
+                return (x, j)
+            else:
+                return (x, g_inf)  # If this is not the second
 
         if self.is_grounded(x):  # If the rod falls to the ground
             return (x, g_inf)
 
         # if int(x.c1) >= self.prob.n:  # Exceed the maximum contacts
-        if int(x.c1) >= 3:  # Exceed the maximum contacts
+        if int(x.c1) >= 2:  # Exceed the maximum contacts
             return (x, g_inf)
 
         if j > self.upper_bound:  # Not promising state
@@ -186,8 +157,15 @@ class DynamicTIP:
             # print x, ' == ', x_prime, ':', j, 'vs. ', j_prime
             return (x_prime, j_prime)
 
-        if self.eval_counter % 10000 == 0:
-            print 'eval_counter:', self.eval_counter, self.upper_bound
+        if self.eval_counter % 1000 == 0:
+            # print '*',
+            # print '\reval_counter:', self.eval_counter, self.upper_bound
+            sys.stdout.write('\reval_counter: %r %r'
+                             % (self.eval_counter, self.upper_bound))
+            sys.stdout.flush()
+            if self.eval_counter % 10000 == 0:
+                print
+
         self.eval_counter += 1
 
         # Case 1: keep falling

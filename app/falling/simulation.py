@@ -13,7 +13,6 @@ import gltools
 from history import History
 import events
 from control.pd import PDController
-from model.tip import TIP
 from ik.ik import IK
 import scene.config
 import scene.range_checker
@@ -22,6 +21,7 @@ import abstract.tip
 import abstract.tip_v2
 import abstract.twotip
 import abstract.dynamic
+import abstract.plan
 
 
 def confine(x, lo, hi):
@@ -96,35 +96,13 @@ class Simulation(object):
         return self.tips[self.tip_index]
 
     def plan(self):
-        # # Plan with TIP
-        # self.abstract_tip.set_x0(self.tip)
-        # self.abstract_tip.set_bounds(self.tip)
-        # self.abstract_tip.optimize()
-        # ik = IK(self)
-        # self.pd.target = ik.optimize(restore=False)
-
-        # # Direct planning in FB
-        # ik = IK(self)
-        # ik.optimize_with_fullbody_motion()
-
-        # ### Plan with Double TIP
-        # ik = IK(self)
-        # self.pd.target = ik.optimize(restore = True)
-
-        # # Plan with Sequential TIP
-        # self.abstract_twotip.set_x0(self.tips)
-        # self.abstract_twotip.set_bounds(self.tips)
-        # self.abstract_twotip.simulate_random()
-        # # self.abstract_twotip.optimize()
-        # ik = IK(self)
-        # self.pd.target = ik.optimize(restore=False)
-
         # Plan with Dynamic TIP
         self.abstract_tip.set_x0(self.tips)
-        self.abstract_tip.set_bounds(self.tips)
-        # self.abstract_tip.test_control()
         # self.abstract_tip.plan_initial()
-        ik = IK(self)
+
+        pn = abstract.plan.Plan()
+        # pn.plot()
+        ik = IK(self, pn)
         self.pd.target = ik.optimize(restore=False)
 
     def control(self):
@@ -146,9 +124,6 @@ class Simulation(object):
             self.cfg.config(*cond)
 
         # Reset Pydart
-        # self.skel.x = BioloidGPPoses().stand()
-        # self.skel.x = BioloidGPPoses().stepping()
-        # self.skel.x = BioloidGPPoses().side()
         self.skel.x = self.cfg.init_state
         for i in range(10):
             (b, f, p) = self.cfg.ext_force
@@ -160,7 +135,7 @@ class Simulation(object):
         self.world.reset()
         self.skel.x = state_after_pushed
 
-        # ### Reset inner structures
+        # Reset inner structures
         self.event_handler.clear()
         self.tip_index = 0
         self.history.clear()
