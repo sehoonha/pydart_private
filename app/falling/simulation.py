@@ -2,6 +2,7 @@ import sys
 import config
 sys.path.append(config.PYDART_PATH)
 import os
+import time
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(ROOT_DIR)
 
@@ -98,12 +99,17 @@ class Simulation(object):
     def plan(self):
         # Plan with Dynamic TIP
         self.abstract_tip.set_x0(self.tips)
-        # self.abstract_tip.plan_initial()
-
-        pn = abstract.plan.Plan()
-        # pn.plot()
-        ik = IK(self, pn)
-        self.pd.target = ik.optimize(restore=False)
+        self.abstract_tip.plan_initial()
+        x0 = self.abstract_tip.x0
+        path = self.abstract_tip.path
+        print 'x0 = ', repr(x0)
+        print 'path = ', repr(self.abstract_tip.path)
+        print 'sleep 5 seconds'
+        time.sleep(5)
+        pn = abstract.plan.Plan(x0, path)
+        pn.plot()
+        # ik = IK(self, pn)
+        # self.pd.target = ik.optimize(restore=False)
 
     def control(self):
         tau = np.zeros(self.skel.ndofs)

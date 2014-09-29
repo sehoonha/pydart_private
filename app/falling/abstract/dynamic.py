@@ -22,7 +22,7 @@ class DynamicTIP:
         self.m = 1.08
         self.I = 0.0080
         self.g = -9.8
-        (self.lo_dr, self.hi_dr) = (-0.01, 0.01)
+        (self.lo_dr, self.hi_dr) = (-0.3, 0.3)
 
     def set_x0(self, tips):
         t0 = tips[0]
@@ -130,6 +130,9 @@ class DynamicTIP:
         # for i, (x, v, u) in enumerate(path):
         #     print i, x, v, u
         self.db.plot_trace(x)
+
+        self.x0 = x
+        self.path = self.db.trace_impacts(x)
         return j
 
     def plan(self, x, j):

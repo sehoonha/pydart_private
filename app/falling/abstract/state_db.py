@@ -104,6 +104,10 @@ class StateDB(object):
         (next_x, v, u) = self.info[x]
         return [(x, v, u)] + self.trace(next_x)
 
+    def trace_impacts(self, x0):
+        path = [(x, v, u) for (x, v, u) in self.trace(x0) if u is not None]
+        return path
+
     def lookup(self, x):
         q = self.to_query(x)
         data = self.find_engine(x).lookup(q)
