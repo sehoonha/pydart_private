@@ -43,6 +43,12 @@ class Plan:
         p = get_points(x, u)
         return np.array([p.x2, p.y2])
 
+    def contact1(self, index):
+        return int(self.states[index + 1].c1)
+
+    def contact2(self, index):
+        return int(self.controls[index].c2)
+
     # def C(self, collision_index=-1):
     #     x = self.x0
     #     (th1, r1) = (x.th1, x.r1)

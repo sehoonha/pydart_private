@@ -57,6 +57,9 @@ class MyWindow(QtGui.QMainWindow):
         self.planAction = QtGui.QAction('Plan', self)
         self.planAction.triggered.connect(self.planEvent)
 
+        self.nextAction = QtGui.QAction('Next', self)
+        self.nextAction.triggered.connect(self.nextEvent)
+
         self.resetAction = QtGui.QAction('Reset', self)
         self.resetAction.triggered.connect(self.resetEvent)
 
@@ -92,6 +95,7 @@ class MyWindow(QtGui.QMainWindow):
         # Create a toolbar
         self.toolbar = self.addToolBar('Control')
         self.toolbar.addAction(self.planAction)
+        self.toolbar.addAction(self.nextAction)
         self.toolbar.addSeparator()
         self.toolbar.addAction(self.resetAction)
         self.toolbar.addAction(self.playAction)
@@ -168,6 +172,9 @@ class MyWindow(QtGui.QMainWindow):
 
     def planEvent(self):
         self.sim.plan()
+
+    def nextEvent(self):
+        self.sim.ik.next_target()
 
     def resetEvent(self):
         self.sim.reset()

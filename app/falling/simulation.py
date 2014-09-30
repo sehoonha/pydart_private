@@ -14,7 +14,7 @@ import gltools
 from history import History
 import events
 from control.pd import PDController
-from ik.ik import IK
+from ik.ik_multi import IKMulti
 import scene.config
 import scene.range_checker
 import problem
@@ -102,14 +102,15 @@ class Simulation(object):
         self.abstract_tip.plan_initial()
         x0 = self.abstract_tip.x0
         path = self.abstract_tip.path
+
         print 'x0 = ', repr(x0)
         print 'path = ', repr(self.abstract_tip.path)
-        print 'sleep 5 seconds'
-        time.sleep(5)
+        # print 'sleep 5 seconds'
+        # time.sleep(5)
         pn = abstract.plan.Plan(x0, path)
-        pn.plot()
-        # ik = IK(self, pn)
-        # self.pd.target = ik.optimize(restore=False)
+        # pn.plot()
+        self.ik = IKMulti(self, pn)
+        self.ik.optimize(restore=False)
 
     def control(self):
         tau = np.zeros(self.skel.ndofs)

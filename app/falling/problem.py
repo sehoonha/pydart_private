@@ -92,4 +92,8 @@ class Problem(object):
             print row
 
     def contact(self, _name):
-        return next(x for x in self.contacts if x.name == _name)
+        if isinstance(_name, int):
+            index = _name
+            return self.contacts[index]
+        else:
+            return next(x for x in self.contacts if x.name == _name)
