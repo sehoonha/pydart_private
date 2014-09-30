@@ -144,7 +144,7 @@ class IKMulti(object):
 
         print "==== ik.IKMulti optimize...."
         self.res = None
-        for i in range(10):
+        for i in range(5):
             x0 = np.random.rand(self.totaldim)
             res = minimize(lambda x: self.evaluate(x), x0,
                            method='nelder-mead', tol=0.00001,
@@ -166,6 +166,7 @@ class IKMulti(object):
         if restore:
             self.sim.skel.q = saved_pose
             self.sim.skel.qdot = saved_vel
+        return self.targets
 
     def next_target(self):
         self.skel.q = self.targets[self.target_index]

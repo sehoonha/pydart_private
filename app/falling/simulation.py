@@ -13,7 +13,6 @@ import gltools
 
 from history import History
 import events
-from control.pd import PDController
 from ik.ik_multi import IKMulti
 import scene.config
 import scene.range_checker
@@ -23,10 +22,7 @@ import abstract.tip_v2
 import abstract.twotip
 import abstract.dynamic
 import abstract.plan
-
-
-def confine(x, lo, hi):
-    return min(max(lo, x), hi)
+import model.controller
 
 
 def STR(v):
@@ -57,20 +53,8 @@ class Simulation(object):
         self.history = History(self)
 
         # # ### Now, configure the controllers
-        # # Abstract view of skeleton
-        # self.tips = self.prob.tips[5:6]
-        self.tips = [self.prob.tips[0]]
-        # self.tips = [TIP(self.skel, 'rfoot', 'lfoot'),
-        #              TIP(self.skel, 'lfoot', 'hands')]
-        # # self.tips = [TIP(self.skel, 'feet', 'hands'), ]
-        # #              TIP(self.skel, 'hands', 'head')]
-
+        self.tip_controller = model.controller.Controller(self.skel, self.prob)
         self.event_handler = events.Handler()
-
-        # Control
-        self.maxTorque = 0.3 * 1.5
-        self.pd = PDController(self.skel, 50.0, 1.0)
-        self.pd.target = self.skel.q
 
         # Reset to the initial state
         self.reset()
@@ -94,11 +78,11 @@ class Simulation(object):
 
     @property
     def tip(self):
-        return self.tips[self.tip_index]
+        return self.tip_controller.tip()
 
     def plan(self):
         # Plan with Dynamic TIP
-        self.abstract_tip.set_x0(self.tips)
+        self.abstract_tip.set_x0(self.tip_controller.tips)
         self.abstract_tip.plan_initial()
         x0 = self.abstract_tip.x0
         path = self.abstract_tip.path
@@ -108,23 +92,18 @@ class Simulation(object):
         # print 'sleep 5 seconds'
         # time.sleep(5)
         pn = abstract.plan.Plan(x0, path)
+        print 'new plan is generated'
+        self.tip_controller = model.controller.Controller(self.skel,
+                                                          self.prob, pn)
+        print 'new tip controller is generated'
+
         # pn.plot()
         self.ik = IKMulti(self, pn)
         self.ik.optimize(restore=False)
-
-    def control(self):
-        tau = np.zeros(self.skel.ndofs)
-        # Track the initial pose
-        tau += self.pd.control()
-
-        # Erase the first six dof forces
-        tau[0:6] = 0
-        for i in range(6, self.skel.ndofs):
-            tau[i] = confine(tau[i], -self.maxTorque, self.maxTorque)
-
-        return tau
+        self.tip_controller.targets = self.ik.targets
 
     def reset(self):
+        # print '== reset =='
         # Reset the configure
         if self.cfg.conditions:
             cond = self.cfg.conditions[0]
@@ -136,43 +115,36 @@ class Simulation(object):
             (b, f, p) = self.cfg.ext_force
             body = self.skel.body(b)
             body.add_ext_force_at(f, p)
-            self.skel.tau = self.control()
+            self.skel.tau = self.tip_controller.control()
             self.world.step()
         state_after_pushed = self.skel.x
         self.world.reset()
         self.skel.x = state_after_pushed
 
         # Reset inner structures
+        self.tip_controller.reset()
         self.event_handler.clear()
-        self.tip_index = 0
         self.history.clear()
         self.history.push()
-        self.history.callbacks = [self.tip]
+        self.history.callbacks = [self.tip_controller]
 
         self.terminated = dict()
 
     def step(self):
-        self.skel.tau = self.control()
+        self.skel.tau = self.tip_controller.control()
         self.world.step()
         self.history.push()
 
-        pivot_nodes = []
-        for i in range(self.tip_index + 1):
-            pivot_nodes += self.tips[i].pivot_nodes()
-
-        if len(set(self.skel.contacted_body_names()) - set(pivot_nodes)) > 0:
-            if self.tip_index < len(self.tips) - 1:
-                # self.event_handler.push("terminate", 40)
-                self.event_handler.push("proceed", 40)
-            else:
-                self.event_handler.push("terminate", 40)
+        if self.tip_controller.check_next():
+            self.event_handler.push("proceed", 40)
 
         for e in self.event_handler.pop():
             # print 'New Event: ', e.name, 'at', self.world.nframes
             if e.name == "proceed":
-                self.history.callbacks.remove(self.tip)
-                self.tip_index += 1
-                self.history.callbacks += [self.tip]
+                self.tip_controller.proceed()
+                # print 'proceed:', self.tip_controller.is_terminated()
+                if self.tip_controller.is_terminated():
+                    self.event_handler.push("terminate", 0)
             elif e.name == 'pause':
                 return True
             elif e.name == 'terminate':
@@ -200,8 +172,9 @@ class Simulation(object):
 
         # Draw TIP
         tip_index = self.history.get_frame()['tip_index']
-        for i in range(tip_index, len(self.tips)):
-            self.tips[i].render()
+        tips = self.tip_controller.tips
+        for i in range(tip_index, len(tips)):
+            tips[i].render()
 
         # Draw contacts
         gltools.glMove([0, 0, 0])

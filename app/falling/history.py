@@ -19,8 +19,9 @@ class History:
         skel = self.world.skel
         data = {}
         data['t'] = self.world.t
-        data['tip_index'] = self.sim.tip_index
-        data['tip_pivot_nodes'] = self.sim.tip.pivot_nodes()
+        data['tip_index'] = 0
+        # data['tip_pivot_nodes'] = self.sim.tip.pivot_nodes()
+        data['tip_pivot_nodes'] = ['test']
         data['nframes'] = self.world.nframes
         data['contacts'] = self.world.contacts()
         data['skelcontacts'] = skel.external_contacts_and_body_id()
