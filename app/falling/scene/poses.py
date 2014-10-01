@@ -39,9 +39,9 @@ class BioloidGPPoses:
         q[5] = q[4]
         q[self.dofs['r_hip']] = -0.1
         q[self.dofs['r_foot']] = 0.1
-        q[self.dofs['l_hip']] = 0.1
-        q[self.dofs['l_foot']] = -0.1
-        q[self.dofs['l_thigh']] = 1.3
+        q[self.dofs['l_hip']] = 0.3
+        q[self.dofs['l_foot']] = -0.2
+        q[self.dofs['l_thigh']] = 1.2
         q[self.dofs['l_heel']] = -0.3
         return q
 

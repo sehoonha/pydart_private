@@ -22,7 +22,7 @@ class DynamicTIP:
         self.m = 1.08
         self.I = 0.0080
         self.g = -9.8
-        (self.lo_dr, self.hi_dr) = (-0.3, 0.3)
+        (self.lo_dr, self.hi_dr) = (-0.2, 0.2)
 
     def set_x0(self, tips):
         t0 = tips[0]
@@ -130,7 +130,7 @@ class DynamicTIP:
         return 0.4264
 
     def plan_initial(self):
-        return self.saved_plan_initial()
+        # return self.saved_plan_initial()
 
         self.upper_bound = g_inf
         j = g_inf

@@ -89,8 +89,8 @@ class Simulation(object):
 
         print 'x0 = ', repr(x0)
         print 'path = ', repr(self.abstract_tip.path)
-        # print 'sleep 5 seconds'
-        # time.sleep(5)
+        print 'sleep 5 seconds'
+        time.sleep(5)
         pn = abstract.plan.Plan(x0, path)
         print 'new plan is generated'
         self.tip_controller = model.controller.Controller(self.skel,
