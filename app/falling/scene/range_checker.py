@@ -7,7 +7,7 @@ from nearpy import Engine
 from nearpy.hashes import RandomBinaryProjections
 
 
-THRESHOLD = 0.01
+THRESHOLD = 0.03
 
 
 def is_similar(lhs, rhs):
