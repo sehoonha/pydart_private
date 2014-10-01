@@ -22,7 +22,7 @@ class DynamicTIP:
         self.m = 1.08
         self.I = 0.0080
         self.g = -9.8
-        (self.lo_dr, self.hi_dr) = (-0.2, 0.2)
+        (self.lo_dr, self.hi_dr) = (-0.1, 0.1)
 
     def set_x0(self, tips):
         t0 = tips[0]
@@ -133,6 +133,7 @@ class DynamicTIP:
         # return self.saved_plan_initial()
 
         self.upper_bound = g_inf
+        # self.upper_bound = 0.52
         j = g_inf
         x = None
         for dr1 in np.linspace(self.lo_dr, self.hi_dr, self.N_GRID):

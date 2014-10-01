@@ -23,6 +23,7 @@ import abstract.twotip
 import abstract.dynamic
 import abstract.plan
 import model.controller
+import cProfile
 
 
 def STR(v):
@@ -83,7 +84,16 @@ class Simulation(object):
     def plan(self):
         # Plan with Dynamic TIP
         self.abstract_tip.set_x0(self.tip_controller.tips)
-        self.abstract_tip.plan_initial()
+        # self.abstract_tip.plan_initial()
+        print
+        print 'start profiling..............................'
+        print
+        # cProfile.run('self.abstract_tip.plan_initial()')
+        cProfile.runctx('self.abstract_tip.plan_initial()',
+                        globals(), locals())
+        print
+        print 'finish profiling....................!!!!!!!'
+        print
         x0 = self.abstract_tip.x0
         path = self.abstract_tip.path
 
@@ -93,11 +103,11 @@ class Simulation(object):
         time.sleep(5)
         pn = abstract.plan.Plan(x0, path)
         print 'new plan is generated'
+        pn.plot()
         self.tip_controller = model.controller.Controller(self.skel,
                                                           self.prob, pn)
         print 'new tip controller is generated'
 
-        # pn.plot()
         self.ik = IKMulti(self, pn)
         self.ik.optimize(restore=False)
         self.tip_controller.targets = self.ik.targets

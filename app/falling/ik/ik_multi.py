@@ -4,33 +4,47 @@ from numpy.linalg import norm
 from scipy.optimize import minimize
 
 
-class ObjC:
+class ObjC(object):
     def __init__(self, _skel, _target, _index):
         self.skel = _skel
         self.target = _target
         self.index = _index
 
-    def cost(self):
+    @property
+    def C(self):
         C = self.skel.C
-        C = np.array([C[2], C[1]])
-        return norm((C - self.target) * [2.0, 2.0] ) ** 2
+        return np.array([C[2], C[1]])
+
+    def cost(self):
+        return norm((self.C - self.target) * [2.0, 2.0] ) ** 2
+
+    def __str__(self):
+        return '[ObjC: %.6f (%r, %r)]' % (self.cost(), self.C, self.target)
 
 
-class ObjPt:
+class ObjPt(object):
     def __init__(self, _con, _target, _index):
         self.con = _con
         self.target = _target
         self.index = _index
 
-    def cost(self):
+    @property
+    def P(self):
         P = self.con.p
-        P = np.array([P[2], P[1]])
-        return norm((P - self.target) * [1.0, 1.0] ) ** 2
+        return np.array([P[2], P[1]])
+
+    def cost(self):
+        return norm((self.P - self.target) * [1.0, 1.0] ) ** 2
+
+    def __str__(self):
+        return '[ObjPt.%s: %.6f (%r, %r)]' % (self.con.name, self.cost(),
+                                              self.P, self.target)
 
 
 class ObjSmooth:
     def __init__(self):
         self.index = None
+        self.last_cost = 0.0
 
     def cost(self, poses):
         n = len(poses)
@@ -41,7 +55,11 @@ class ObjSmooth:
             diff = q_0 - q_1
             diff[:3] = 0.0
             v += norm(diff) ** 2
-        return 0.1 * v
+        self.last_cost = 0.1 * v
+        return self.last_cost
+
+    def __str__(self):
+        return '[ObjSmooth: %.6f]' % (self.last_cost)
 
 
 class IKMulti(object):
@@ -121,16 +139,22 @@ class IKMulti(object):
             poses.append(q_i)
         return poses
 
-    def get_costs(self, x):
+    def get_costs(self, x, verbose=False):
         poses = self.expand_all(x)
         costs = []
+        obj_strs = []
         for i in range(self.n):
             self.skel.q = poses[i]
             obj_i = [o for o in self.objs if o.index == i]
             costs += [o.cost() for o in obj_i]
+            obj_strs += [str(o) for o in obj_i]
 
         obj_other = [o for o in self.objs if o.index is None]
         costs += [o.cost(poses) for o in obj_other]
+        obj_strs += [str(o) for o in obj_other]
+        if verbose:
+            for i, obj_str in enumerate(obj_strs):
+                print i, obj_str
         return costs
 
     def evaluate(self, x):
@@ -160,7 +184,7 @@ class IKMulti(object):
         self.targets = self.expand_all(x)
 
         print "==== result\n", self.res
-        print 'final costs:', self.get_costs(x)
+        print 'final costs:', self.get_costs(x, True)
         print "==== ik.IKMulti optimize....OK"
 
         if restore:

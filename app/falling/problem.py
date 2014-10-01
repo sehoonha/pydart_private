@@ -61,8 +61,12 @@ class Problem(object):
             return None
 
         # defs = [("r_toe", "l_toe")]
+        # defs = [("r_toe", "l_heel"),
+        #         ("l_heel", "l_toe")]
         defs = [("r_toe", "l_heel"),
-                ("l_heel", "l_toe")]
+                ("l_heel", "l_toe"),
+                ("l_toe", "hands")]
+
         # defs = [("r_toe", "l_heel"),
         #         ("r_toe", "l_toe"),
         #         ("r_toe", "hands"),
