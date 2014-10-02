@@ -18,48 +18,59 @@ def is_similar(lhs, rhs):
 class StopperSet(object):
     def __init__(self, _states=None):
         # Weight
-        self.w = np.array([1.0, 1.0, 0.1])
-        self.states = []
         # initialize "nearby" library
         self.dim = 3
-        self.rbp = RandomBinaryProjections('rbp', 100)
-        self.engine = Engine(self.dim, lshashes=[self.rbp])
+
+        self.lo = [0.05, 0.05, 0.0]
+        self.hi = [0.20, 0.20, 3.0]
+        self.step = [0.01, 0.01, 0.15]
+        self.num = [int((self.hi[i] - self.lo[i]) / self.step[i])
+                    for i in range(self.dim)]
+
+        self.data = np.zeros(shape=self.num, dtype=int)
+
         # performance counter
         self.counter = 0
-        self.time_counter = 0.0
         self.th2_range = (2 * math.pi, -2 * math.pi)
-        # load data if necessary
-        if _states is not None:
-            for x in _states:
-                self.insert(x)
+        self.time_counter = 0.0
 
-    def insert(self, x):
-        self.engine.store_vector(x, 'pt%d' % self.counter)
-        self.counter += 1
-        self.states.append(x)
-        th2 = x[-1] / self.w[-1]
-        self.th2_range = (min(self.th2_range[0], th2),
-                          max(self.th2_range[1], th2))
+        # # load data if necessary
+        # if _states is not None:
+        #     for x in _states:
+        #         self.insert(x)
 
-    def is_new(self, lhs, threshold=THRESHOLD):
-        t0 = time.time()
-        naver = self.engine.neighbours(lhs)
-        for pt, name, d in naver:
-            if d < threshold:
-                self.time_counter += (time.time() - t0)
+    def to_index(self, x):
+        return [int((x[i] - self.lo[i]) / self.step[i] )
+                for i in range(self.dim)]
+
+    def is_valid(self, index):
+        for i in range(self.dim):
+            if index[i] < 0:
                 return False
-        self.time_counter += (time.time() - t0)
+            if index[i] >= self.num[i]:
+                return False
         return True
 
-    def min_d(self, lhs):
-        naver = self.engine.neighbours(lhs)
-        dists = [d for _, _, d in naver]
-        if len(dists) == 0:
-            return 1000.0
-        return min(dists)
+    def insert(self, x):
+        index = self.to_index(x)
+        if not self.is_valid(index):
+            return
+        self.data[tuple(index)] += 1
+        # Other checking
+        self.counter += 1
+        self.th2_range = (min(self.th2_range[0], x[-1]),
+                          max(self.th2_range[1], x[-1]))
+
+    def is_new(self, x, threshold=THRESHOLD):
+        t0 = time.time()
+        index = self.to_index(x)
+        if not self.is_valid(index):
+            self.time_counter += (time.time() - t0)
+            return False
+        self.time_counter += (time.time() - t0)
+        return (self.data[tuple(index)] > 0)
 
     def insert_if_new(self, x):
-        x = x * self.w
         if self.is_new(x):
             self.insert(x)
 
@@ -67,7 +78,7 @@ class StopperSet(object):
         return self.counter
 
     def __repr__(self):
-        return 'StopperSet(%r)' % (self.states)
+        return 'StopperSet(%r)' % (self.data)
 
 
 class RangeChecker(object):
@@ -91,6 +102,8 @@ class RangeChecker(object):
             print 'TIP ', str(tip),
             print ' sampled set is', len(ss), id(ss), ss.time_counter
             print ' th2_range = ', ss.th2_range
+            print ' lo = ', ss.lo
+            print ' hi = ', ss.hi
 
     def check_init_angle(self):
         self.init_angles = [tip.th2 for tip in self.prob.tips]
