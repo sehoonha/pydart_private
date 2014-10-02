@@ -35,14 +35,17 @@ class DynamicTIP:
 
         (m, g) = (self.m, self.g)
         ddth1 = (m * r1 * (2 * dr1 * dth1 - g * sin(th1))) / (m * (r1 ** 2))
-        return [dth1, ddth1, dr1, 0, 0, 1.0]
+        return np.array([dth1, ddth1, dr1, 0, 0, 1.0])
 
     def step(self, x):
-        # time = np.arange(0.0, 0.01, 0.005)
-        time = np.array([0.0, 0.005])
+        # time = np.array([0.0, 0.005])
+        # x0 = np.array(x)
+        # X = odeint(self.deriv, x0, time)
+        # return State(*X[-1])
         x0 = np.array(x)
-        X = odeint(self.deriv, x0, time)
-        return State(*X[-1])
+        dx = self.deriv(x0, 0.0)
+        x1 = x0 + 0.005 * dx
+        return State(*x1)
 
     def is_stopped(self, x):
         # return (x.c1 != 0)

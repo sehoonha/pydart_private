@@ -84,16 +84,16 @@ class Simulation(object):
     def plan(self):
         # Plan with Dynamic TIP
         self.abstract_tip.set_x0(self.tip_controller.tips)
-        self.abstract_tip.plan_initial()
-        # print
-        # print 'start profiling..............................'
-        # print
-        # # cProfile.run('self.abstract_tip.plan_initial()')
-        # cProfile.runctx('self.abstract_tip.plan_initial()',
-        #                 globals(), locals())
-        # print
-        # print 'finish profiling....................!!!!!!!'
-        # print
+        # self.abstract_tip.plan_initial()
+        print
+        print 'start profiling..............................'
+        print
+        # cProfile.run('self.abstract_tip.plan_initial()')
+        cProfile.runctx('self.abstract_tip.plan_initial()',
+                        globals(), locals())
+        print
+        print 'finish profiling....................!!!!!!!'
+        print
         x0 = self.abstract_tip.x0
         path = self.abstract_tip.path
 
