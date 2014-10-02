@@ -55,7 +55,7 @@ class ObjSmooth:
             diff = q_0 - q_1
             diff[:3] = 0.0
             v += norm(diff) ** 2
-        self.last_cost = 0.1 * v
+        self.last_cost = 0.0 * v
         return self.last_cost
 
     def __str__(self):
@@ -141,13 +141,25 @@ class IKMulti(object):
 
     def get_costs(self, x, verbose=False):
         poses = self.expand_all(x)
+        # Check the validity
+        for q in poses:
+            # Check the pose
+            if np.max(np.fabs(q)) > 2.0:
+                return [np.max(np.fabs(q))] * len(self.objs)
+            # # Check the change of pose
+            # dq = q - self.q0
+            # if np.max(np.fabs(dq)) > 0.8:
+            #     return [10.0 * np.max(np.fabs(dq))] * len(self.objs)
+
+        # Collect all the costs
         costs = []
         obj_strs = []
         for i in range(self.n):
             self.skel.q = poses[i]
             obj_i = [o for o in self.objs if o.index == i]
             costs += [o.cost() for o in obj_i]
-            obj_strs += [str(o) for o in obj_i]
+            if verbose:
+                obj_strs += [str(o) for o in obj_i]
 
         obj_other = [o for o in self.objs if o.index is None]
         costs += [o.cost(poses) for o in obj_other]
@@ -170,7 +182,7 @@ class IKMulti(object):
         self.res = None
         for i in range(5):
             x0 = np.random.rand(self.totaldim)
-            res = minimize(lambda x: self.evaluate(x), x0,
+            res = minimize(self.evaluate, x0,
                            method='nelder-mead', tol=0.00001,
                            # method='SLSQP', tol=0.00001,
                            options={'maxiter': 10000, 'maxfev': 10000,

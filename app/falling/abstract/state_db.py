@@ -72,7 +72,7 @@ class StateDBEngine(object):
         self.engine.store_vector(x, data)
         self.counter += 1
 
-    def lookup(self, x, THRESHOLD=0.01):
+    def lookup(self, x, THRESHOLD=0.03):
         naver = self.engine.neighbours(x)
         for pt, data, d in naver:
             if d < THRESHOLD:
@@ -164,28 +164,22 @@ class StateDB(object):
             print 'impulse:', entry.v
             print 'x0:', entry.x
             print 'nx_0:', entry.nx_0
+            print 'u:', entry.u
             print 'nx_1:', entry.nx_1
 
-            if entry.u is not None:
-                p0 = get_first_point(entry.x)
-                p = get_points(entry.nx_0, entry.u)
-                x = np.array([p0.x1, 0.0, p.x1, p.x2]) + x_offset
-                y = np.array([p0.y1, 0.0, p.y1, p.y2])
-                print 'line:', zip(x, y)
-                traces += [pyg.Scatter(x=x, y=y, name='TIP%d' % i)]
-                x_offset = x[-1]
-                print 'x_offset:', x_offset
+            p0 = get_first_point(entry.x)
+            p = get_points(entry.nx_0, entry.u)
+            x = np.array([p0.x1, 0.0, p.x1, p.x2]) + x_offset
+            y = np.array([p0.y1, 0.0, p.y1, p.y2])
+            print 'line:', zip(x, y)
+            traces += [pyg.Scatter(x=x, y=y, name='TIP%d' % i)]
+            x_offset = x[-1]
+            print 'x_offset:', x_offset
 
-                r1 = sqrt(p.x1 ** 2 + p.y1 ** 2)
-                r2 = sqrt((p.x1 - p.x2) ** 2 + (p.y1 - p.y2) ** 2)
-                th2 = entry.u.th2
-                cmds += [r1, r2, th2]
-            elif i == 0 or i == len(path) - 1:
-                p = get_first_point(x)
-                x = np.array([0.0, p.x1]) + x_offset
-                y = np.array([0.0, p.y1])
-                print 'line: ', zip(x, y)
-                traces += [pyg.Scatter(x=x, y=y, name='TIP%d' % i)]
+            r1 = sqrt(p.x1 ** 2 + p.y1 ** 2)
+            r2 = sqrt((p.x1 - p.x2) ** 2 + (p.y1 - p.y2) ** 2)
+            th2 = entry.u.th2
+            cmds += [r1, r2, th2]
 
         data = pyg.Data(traces)
         layout = pyg.Layout(xaxis=pyg.XAxis(range=[-0.1, 0.4]),

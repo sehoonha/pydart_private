@@ -8,10 +8,10 @@ import plotly.graph_objs as pyg
 
 class Plan:
     def __init__(self, _x0, _path):
-        # self.x0 = _x0
-        # self.path = _path
-        self.states = [_x0] + [x for (x, v, u) in _path]
-        self.controls = [u for (x, v, u) in _path]
+        self.x0 = _x0
+        self.path = _path
+        self.states = [_x0] + [entry.nx_0 for entry in _path]
+        self.controls = [entry.u for entry in _path]
 
     @property
     def n(self):

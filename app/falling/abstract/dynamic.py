@@ -3,7 +3,7 @@ import math
 from math import sin, cos
 import numpy as np
 # from collections import namedtuple
-from scipy.integrate import odeint
+# from scipy.integrate import odeint
 from state_db import State, Control, PathEntry, get_points, StateDB
 
 g_inf = float("inf")
@@ -99,12 +99,7 @@ class DynamicTIP:
                 # Check the kinematics
                 query = (r1, r2, th2 / 10.0)
                 if ss.is_new(query, 0.02):
-                    # print 'reject the unseen query:', query, ss.min_d(query)
                     continue
-                # print 'accept the seen query:', query
-                # If the stopper is feasible
-                # for n_dr1 in np.linspace(self.lo_dr, self.hi_dr, self.N_GRID):
-                #     stoppers += [Control(th2, r2, n_dr1, c2)]
                 stoppers += [Control(th2, r2, c2)]
 
         # exit(0)
@@ -140,10 +135,11 @@ class DynamicTIP:
         # for i, (x, v, u) in enumerate(path):
         #     print i, x, v, u
         self.db.plot_trace(x)
-        exit(0)
+        # exit(0)
 
         self.x0 = x
-        self.path = self.db.trace_impacts(x)
+        # self.path = self.db.trace_impacts(x)
+        self.path = self.db.trace(x)
         return j
 
     def plan(self, x, j):
@@ -165,12 +161,12 @@ class DynamicTIP:
         if j > self.upper_bound:  # Not promising state
             return (x, g_inf)
 
-        print self.eval_counter, 'plan()', x, j
+        print self.eval_counter, 'plan()', x, j, len(self.db)
 
-        # x_prime, j_prime = self.db.lookup(x)  # Lookup the similar states
-        # if x_prime is not None:
-        #     # print x, ' == ', x_prime, ':', j, 'vs. ', j_prime
-        #     return (x_prime, j_prime)
+        x_prime, j_prime = self.db.lookup(x)  # Lookup the similar states
+        if x_prime is not None:
+            # print x, ' == ', x_prime, ':', j, 'vs. ', j_prime
+            return (x_prime, j_prime)
 
         if self.eval_counter % 1000 == 0:
             # print '*',
@@ -201,26 +197,3 @@ class DynamicTIP:
         self.upper_bound = min(self.upper_bound, best_j)
         self.db.add(x, best_entry)
         return (x, best_j)
-
-        # # Case 1: keep falling
-        # (best_x, best_j, best_u) = (None, g_inf, None)
-        # if x.dr1 is None:
-        #     for n_dr1 in np.linspace(self.lo_dr, self.hi_dr, self.N_GRID):
-        #         x_next = State(x.th1, x.dth1, x.r1, n_dr1, x.c1, x.t)
-        #         (x_, j_) = self.plan(self.step(x_next), j)
-        #         if j_ < best_j:
-        #             (best_x, best_j) = (x_, j_)
-        # else:
-        #     (best_x, best_j) = self.plan(self.step(x), j)
-
-        # # Case 2: use all feasible stoppers
-        # for u in self.stoppers(x):
-        #     x_impact, j_impact = self.impact(x, u)
-        #     (x_, j_) = self.plan(x_impact, max(j, j_impact))
-        #     if j_ < best_j:
-        #         (best_x, best_j, best_u) = (x_, j_, u)
-
-        # # print x, '->', best_x, best_j, best_u
-        # self.upper_bound = min(self.upper_bound, best_j)
-        # # self.db.add(x, best_x, best_j, best_u)
-        # return (x, best_j)

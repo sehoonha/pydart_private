@@ -66,7 +66,7 @@ class StopperSet(object):
         index = self.to_index(x)
         if not self.is_valid(index):
             self.time_counter += (time.time() - t0)
-            return False
+            return True
         self.time_counter += (time.time() - t0)
         return (self.data[tuple(index)] > 0)
 

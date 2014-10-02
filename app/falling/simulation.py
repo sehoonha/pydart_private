@@ -68,9 +68,6 @@ class Simulation(object):
         self.rc.check_all()
 
         # Abstract model
-        # self.abstract_tip = abstract.tip_v2.TIPv2()
-        # self.abstract_tip = abstract.tip.TIP()
-        # self.abstract_twotip = abstract.twotip.TWOTIP()
         self.abstract_tip = abstract.dynamic.DynamicTIP(self.prob, self.rc)
 
         # For handle callbacks properly..
@@ -84,16 +81,16 @@ class Simulation(object):
     def plan(self):
         # Plan with Dynamic TIP
         self.abstract_tip.set_x0(self.tip_controller.tips)
-        # self.abstract_tip.plan_initial()
-        print
-        print 'start profiling..............................'
-        print
-        # cProfile.run('self.abstract_tip.plan_initial()')
-        cProfile.runctx('self.abstract_tip.plan_initial()',
-                        globals(), locals())
-        print
-        print 'finish profiling....................!!!!!!!'
-        print
+        self.abstract_tip.plan_initial()
+        # print
+        # print 'start profiling..............................'
+        # print
+        # # cProfile.run('self.abstract_tip.plan_initial()')
+        # cProfile.runctx('self.abstract_tip.plan_initial()',
+        #                 globals(), locals())
+        # print
+        # print 'finish profiling....................!!!!!!!'
+        # print
         x0 = self.abstract_tip.x0
         path = self.abstract_tip.path
 
@@ -110,6 +107,14 @@ class Simulation(object):
 
         self.ik = IKMulti(self, pn)
         self.ik.optimize(restore=False)
+        # print
+        # print 'start profiling..............................'
+        # print
+        # cProfile.runctx('self.ik.optimize(restore=False)',
+        #                 globals(), locals())
+        # print
+        # print 'finish profiling....................!!!!!!!'
+        # print
         self.tip_controller.targets = self.ik.targets
 
     def reset(self):
