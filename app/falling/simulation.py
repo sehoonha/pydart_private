@@ -94,8 +94,8 @@ class Simulation(object):
         x0 = self.abstract_tip.x0
         path = self.abstract_tip.path
 
-        print 'x0 = ', repr(x0)
-        print 'path = ', repr(self.abstract_tip.path)
+        print 'x0 = ', str(x0)
+        print 'path = ', str(self.abstract_tip.path)
         print 'sleep 5 seconds'
         time.sleep(5)
         pn = abstract.plan.Plan(x0, path)

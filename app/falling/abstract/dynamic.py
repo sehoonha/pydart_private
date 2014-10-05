@@ -17,6 +17,7 @@ class DynamicTIP:
         self.db = StateDB(self.prob.n)
         # member variables
         self.eval_counter = 0
+        self.kill_counter = 0
         self.N_GRID = 11
         # math quantities
         self.m = 1.08
@@ -129,7 +130,7 @@ class DynamicTIP:
         x = State(self.x0.th1, self.x0.dth1, self.x0.r1, None, 0, 0.0)
         x_, j = self.plan(x, 0)
         print 'best: ', x, ':', j
-        print '# evals = ', self.eval_counter
+        print '# evals = ', self.eval_counter, self.kill_counter
 
         # path = self.db.trace(x)
         # for i, (x, v, u) in enumerate(path):
@@ -145,26 +146,28 @@ class DynamicTIP:
     def plan(self, x, j):
         # If the current state has negative velocity
         if self.is_stopped(x):
-            # return x, j
-            if int(x.c1) == 2:  # If this is the second contact
-                return (x, j)
-            else:
-                return (x, g_inf)  # If this is not the second
+            return x, j
+            # if int(x.c1) == 2:  # If this is the second contact
+            #     return (x, j)
+            # else:
+            #     return (x, g_inf)  # If this is not the second
 
         if self.is_grounded(x):  # If the rod falls to the ground
             return (x, g_inf)
 
-        # if int(x.c1) >= self.prob.n:  # Exceed the maximum contacts
         if int(x.c1) >= 2:  # Exceed the maximum contacts
             return (x, g_inf)
 
         if j > self.upper_bound:  # Not promising state
             return (x, g_inf)
 
-        print self.eval_counter, 'plan()', x, j, len(self.db)
-
+        # print
+        # print '>> lookup', x
         x_prime, j_prime = self.db.lookup(x)  # Lookup the similar states
+        # print '>> x_prime = ', x_prime
+        # print
         if x_prime is not None:
+            self.kill_counter += 1
             # print x, ' == ', x_prime, ':', j, 'vs. ', j_prime
             return (x_prime, j_prime)
 
@@ -178,9 +181,11 @@ class DynamicTIP:
                 print
 
         self.eval_counter += 1
+        print self.eval_counter, 'plan()', x, j, len(self.db)
 
         # (best_x, best_max_j, best_now_j, best_u) = (None, g_inf, None, None)
-        (best_j, best_entry) = (g_inf, None)
+        best_j = g_inf
+        best_entry = PathEntry(x, None, None, g_inf, g_inf, None)
         for n_dr1 in np.linspace(self.lo_dr, self.hi_dr, self.N_GRID):
             x_now = State(x.th1, x.dth1, x.r1, n_dr1, x.c1, x.t)
             while not self.is_grounded(x_now):

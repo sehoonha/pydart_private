@@ -38,7 +38,7 @@ class Config(object):
         self.set_pose(class_name, height_level)
         # 2. Proceed the simulation
         if push_level == 0:
-            self.ext_force = ("torso", [0, 0, 50], [0, 0, 0.03])
+            self.ext_force = ("torso", [0, 0, 20], [0, 0, 0.03])
         else:
             self.ext_force = ("torso", [0, 0, 100], [0, 0, 0.03])
 

@@ -69,15 +69,22 @@ class StateDBEngine(object):
         self.counter = 0
 
     def add(self, x, data):
+        # print 'add data = ', data
         self.engine.store_vector(x, data)
         self.counter += 1
 
-    def lookup(self, x, THRESHOLD=0.03):
+    def lookup(self, x, THRESHOLD=0.1):
         naver = self.engine.neighbours(x)
-        for pt, data, d in naver:
-            if d < THRESHOLD:
-                return data
-        return None
+        if len(naver) == 0:
+            return None
+
+        pt, data, d = naver[0]
+        # print 'lhs, rhs', x, pt,
+        # print 'd = ', d, (d < THRESHOLD), (data is None)
+        if d < THRESHOLD:
+            return data
+        else:
+            return None
 
 
 class PathEntry(namedtuple('PathEntry',

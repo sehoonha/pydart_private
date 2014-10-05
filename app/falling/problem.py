@@ -63,18 +63,22 @@ class Problem(object):
         # defs = [("r_toe", "l_toe")]
         # defs = [("r_toe", "l_heel"),
         #         ("l_heel", "l_toe")]
-        defs = [("r_toe", "l_heel"),
-                ("l_heel", "l_toe"),
-                ("l_toe", "hands")]
-
+        # defs = [("r_toe", "l_heel"),
+        #         ("l_heel", "l_toe"),
+        #         ("l_toe", "hands")]
         # defs = [("r_toe", "l_heel"),
         #         ("r_toe", "l_toe"),
         #         ("r_toe", "hands"),
-        #         ("r_toe", "head"),
         #         ("l_heel", "l_toe"),
-        #         ("l_toe", "hands"),
-        #         ("l_toe", "head"),
-        #         ("hands", "head"), ]
+        #         ("l_toe", "hands"), ]
+        defs = [("r_toe", "l_heel"),
+                ("r_toe", "l_toe"),
+                ("r_toe", "hands"),
+                ("r_toe", "head"),
+                ("l_heel", "l_toe"),
+                ("l_toe", "hands"),
+                ("l_toe", "head"),
+                ("hands", "head"), ]
 
         self.edges = [(find_index(a), find_index(b)) for a, b in defs]
         self.tips = [TIP(id, self.contacts[i], self.contacts[j])
