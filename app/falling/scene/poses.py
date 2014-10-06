@@ -18,7 +18,7 @@ class BioloidGPPoses:
         q[5] = q[4]
         return q
 
-    def leaned_pose(self):
+    def lean_pose(self):
         q = np.zeros(self.ndofs)
         q[0] = -0.41 * math.pi
         q[4] = 0.221
@@ -50,10 +50,55 @@ class BioloidGPPoses:
         q[0] += 0.07 * math.pi
         q[4] -= 0.02
         q[5] = q[4]
+
         q[self.dofs['r_thigh']] = 0.6
         q[self.dofs['r_shin']] = -0.6
         q[self.dofs['r_heel']] = 0.3
         q[self.dofs['l_thigh']] += 0.3
+        return q
+
+    def skate_pose(self):
+        q = np.zeros(self.ndofs)
+        q[0] = -0.14 * math.pi
+        q[4] = 0.215
+        q[5] = 0.130
+        q[self.dofs['l_shoulder']] = 0.1
+        q[self.dofs['l_hand']] = 1.2
+        q[self.dofs['r_shoulder']] = 0.1
+        q[self.dofs['r_hand']] = 1.2
+
+        q[self.dofs['l_hip']] = 0.3
+        q[self.dofs['l_foot']] = -0.2
+
+        q[self.dofs['l_thigh']] = 0.9
+        q[self.dofs['l_shin']] = 0.5
+        q[self.dofs['l_heel']] = -0.3
+        q[self.dofs['r_thigh']] = -0.5
+        return q
+
+    def back_pose(self):
+        q = np.zeros(self.ndofs)
+        q[3:6] = [-0.177, 0.172, 0.142]
+        # q[3:6] += (np.random.rand(3) - 0.5) * 0.06
+        print 'q[3:6] =', q[3:6]
+        # q[0] += 0.07 * math.pi
+        q[:3] = np.array([-0.05, -2.25, -2.15])
+        # q[:3] += (np.random.rand(3) - 0.5) * 0.6
+        # Side? q[:3] =  [-0.25776439  1.19493421  1.01768632]
+        # Side? q[:3] =  [-1.16825849  1.02963722  1.93913537]
+        # Back? q[:3] =  [ 0.11217433 -2.73289058 -2.20660662]
+        print 'q[:3] = ', q[:3]
+
+        q[self.dofs['l_thigh']] = 0.9
+        q[self.dofs['r_thigh']] = 0.9
+        q[self.dofs['l_heel']] = -0.9
+        q[self.dofs['r_heel']] = -0.9
+
+        q[self.dofs['l_shoulder']] = -1.0
+        q[self.dofs['r_shoulder']] = -1.0
+        # q[self.dofs['l_hand']] = 1.2
+        # q[self.dofs['r_hand']] = 1.2
+
         return q
 
     def zeros(self):
@@ -84,18 +129,12 @@ class BioloidGPPoses:
 
     def step(self):
         return np.concatenate((self.step_pose(), self.zeros()))
-        # return np.array([-1.36108996e+00, -2.32449899e-04, -1.38394301e-04,
-        #                  -2.65499732e-05, 2.25060793e-01, 2.24089733e-01,
-        #                  1.00355394e-01, -1.62119860e-03, -9.98813291e-02,
-        #                  -1.78460384e-03, 1.31169001e+00, 1.03413412e-04,
-        #                  1.54253901e-02, 8.46826654e-05, 3.50951937e-03,
-        #                  1.18418164e-03, 4.79084271e-03, 1.27505475e-03,
-        #                  7.38350432e-04, 1.11403096e-03, -9.95010855e-02,
-        #                  9.96810523e-02, 3.19884897e+00, 2.83695710e-01,
-        #                  1.85382210e-01, 3.45534400e-02, -8.97281130e-01,
-        #                  7.49017200e-02, -3.01235420e-01, 3.37649310e-01,
-        #                  -2.00526820e-01, 4.70401080e-01, 5.07673400e-01,
-        #                  -5.62214760e-01, -4.47272440e-01, -5.60732950e-01,
-        #                  -1.19884757e+00, -1.60686947e+00, 3.77829360e-01,
-        #                  -1.83634955e+00, 1.43441750e+00, 1.94303486e+00,
-        #                  -1.91136289e+00, -1.16790100e-01])
+
+    def lean(self):
+        return np.concatenate((self.lean_pose(), self.zeros()))
+
+    def skate(self):
+        return np.concatenate((self.skate_pose(), self.zeros()))
+
+    def back(self):
+        return np.concatenate((self.back_pose(), self.zeros()))

@@ -14,7 +14,7 @@ import gltools
 from history import History
 import events
 from ik.ik_multi import IKMulti
-import scene.config
+import scene.configure
 import scene.range_checker
 import problem
 import abstract.tip
@@ -48,8 +48,7 @@ class Simulation(object):
         self.skel.set_joint_damping(0.15)
 
         # Configure the scene
-        self.cfg = scene.config.Config(self)
-        print 'conditions = ', self.cfg.conditions
+        self.cfg = scene.configure.Configure(self)
         self.prob = problem.Problem(self)
         self.history = History(self)
 
@@ -118,23 +117,18 @@ class Simulation(object):
         self.tip_controller.targets = self.ik.targets
 
     def reset(self):
-        # print '== reset =='
-        # Reset the configure
-        if self.cfg.conditions:
-            cond = self.cfg.conditions[0]
-            self.cfg.config(*cond)
-
-        # Reset Pydart
-        self.skel.x = self.cfg.init_state
-        for i in range(10):
-            (b, f, p) = self.cfg.ext_force
-            body = self.skel.body(b)
-            body.add_ext_force_at(f, p)
-            self.skel.tau = self.tip_controller.control()
-            self.world.step()
-        state_after_pushed = self.skel.x
-        self.world.reset()
-        self.skel.x = state_after_pushed
+        # # Reset Pydart
+        # self.skel.x = self.cfg.init_state
+        # for i in range(self.):
+        #     (b, f, p) = self.cfg.ext_force
+        #     body = self.skel.body(b)
+        #     body.add_ext_force_at(f, p)
+        #     self.skel.tau = self.tip_controller.control()
+        #     self.world.step()
+        # state_after_pushed = self.skel.x
+        # self.world.reset()
+        # self.skel.x = state_after_pushed
+        self.cfg.reset_simulation(self)
 
         # Reset inner structures
         self.tip_controller.reset()
