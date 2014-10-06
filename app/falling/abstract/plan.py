@@ -20,15 +20,19 @@ class Plan:
 
     def state(self, index):
         if index == 0:
-            x0 = self.states[index]
+            # x0 = self.states[index]
+            # x1 = self.states[index + 1]
+            # return State(x0.th1, 0, x1.r1, 0, 0, 0)
             x1 = self.states[index + 1]
-            return State(x0.th1, 0, x1.r1, 0, 0, 0)
+            return State(x1.th1, 0, x1.r1, 0, 0, 0)
         else:
-            x0 = self.states[index]
+            # x0 = self.states[index]
+            # x1 = self.states[index + 1]
+            # u0 = self.controls[index - 1]
+            # th1 = x0.th1 + u0.th2 - math.pi
+            # return State(th1, 0, x1.r1, 0, 0, 0)
             x1 = self.states[index + 1]
-            u0 = self.controls[index - 1]
-            th1 = x0.th1 + u0.th2 - math.pi
-            return State(th1, 0, x1.r1, 0, 0, 0)
+            return State(x1.th1, 0, x1.r1, 0, 0, 0)
 
     def control(self, index):
         return self.controls[index]

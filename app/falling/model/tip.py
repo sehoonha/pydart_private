@@ -50,7 +50,8 @@ class TIP(object):
 
     @property
     def th1(self):
-        return math.atan2(self.C[2], self.C[1])
+        d = self.C - self.p1
+        return math.atan2(d[2], d[1])
 
     def projected_Cdot(self):
         v = self.skel.Cdot

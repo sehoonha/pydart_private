@@ -100,7 +100,7 @@ class Simulation(object):
         # time.sleep(5)
         pn = abstract.plan.Plan(x0, path)
         print 'new plan is generated'
-        pn.plot()
+        # pn.plot()
         self.tip_controller = model.controller.Controller(self.skel,
                                                           self.prob, pn)
         print 'new tip controller is generated'

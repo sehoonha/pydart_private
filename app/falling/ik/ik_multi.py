@@ -16,7 +16,7 @@ class ObjC(object):
         return np.array([C[2], C[1]])
 
     def cost(self):
-        return norm((self.C - self.target) * [2.0, 2.0] ) ** 2
+        return norm((self.C - self.target) * [10.0, 1.0] ) ** 2
 
     def __str__(self):
         return '[ObjC: %.6f (%r, %r)]' % (self.cost(), self.C, self.target)
@@ -34,7 +34,7 @@ class ObjPt(object):
         return np.array([P[2], P[1]])
 
     def cost(self):
-        return norm((self.P - self.target) * [1.0, 1.0] ) ** 2
+        return norm((self.P - self.target) * [1.0, 2.0] ) ** 2
 
     def __str__(self):
         return '[ObjPt.%s: %.6f (%r, %r)]' % (self.con.name, self.cost(),
@@ -57,7 +57,7 @@ class ObjSmooth:
             diff = q_0 - q_1
             diff[:6] = 0.0
             v += norm(diff) ** 2
-        self.last_cost = 0.001 * v * 0.0
+        self.last_cost = 0.001 * v
         return self.last_cost
 
     def __str__(self):
@@ -182,22 +182,22 @@ class IKMulti(object):
 
         print "==== ik.IKMulti optimize...."
         self.res = None
-        # self.res = {'x': np.array([
-        #     -1.61999654, 0.2016161, 0.24878222, -0.370209, 1.01168284,
-        #     # 0.66363487, -0.736161, 0.02177281, 0.76231301, 5.58035627,
-        #     1.3, -0.1, 0.02177281, 0.76231301, 5.58035627,
-        #     2.09446735])}
+        self.res = {'x': np.array([-0.77172458,  0.19871531,  0.21868452,  0.17185685,  0.33834571,
+        1.25300053, -0.02280025,  0.5381403 ,  1.28949734,  6.99707179,
+       -0.99463907, -1.51258019,  0.23655244,  0.19174509,  0.23344627,
+        0.66863518,  0.31042541,  0.56950158,  0.32536246, -0.48708032,
+        1.72454033, -0.81934541])}
 
-        for i in range(5):
-            x0 = np.random.rand(self.totaldim)
-            res = minimize(self.evaluate, x0,
-                           method='nelder-mead', tol=0.00001,
-                           # method='SLSQP', tol=0.00001,
-                           options={'maxiter': 100000, 'maxfev': 100000,
-                                    'xtol': 10e-8, 'ftol': 10e-8})
-            if self.res is None or res['fun'] < self.res['fun']:
-                self.res = res
-            print i, self.res['fun']
+        # for i in range(5):
+        #     x0 = np.random.rand(self.totaldim)
+        #     res = minimize(self.evaluate, x0,
+        #                    method='nelder-mead', tol=0.00001,
+        #                    # method='SLSQP', tol=0.00001,
+        #                    options={'maxiter': 100000, 'maxfev': 100000,
+        #                             'xtol': 10e-8, 'ftol': 10e-8})
+        #     if self.res is None or res['fun'] < self.res['fun']:
+        #         self.res = res
+        #     print i, self.res['fun']
 
         x = self.res['x']
         self.target_index = 0

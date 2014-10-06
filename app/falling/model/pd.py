@@ -12,7 +12,7 @@ class PDController:
         self.kp = np.array([_kp] * self.ndofs)
         self.kd = np.array([_kd] * self.ndofs)
         self.target = None
-        self.maxTorque = 0.3 * 1.5
+        self.maxTorque = 0.3 * 1.5 * 5.0
 
     def control(self):
         q = self.skel.q
