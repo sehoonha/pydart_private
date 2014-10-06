@@ -42,6 +42,12 @@ class Plan:
         p = get_points(x, u)
         return np.array([p.x1, p.y1])
 
+    def C_rel(self, index):
+        c = self.C(index)
+        p = self.P(index)
+        d = p[0]
+        return c / d
+
     def P(self, index):
         (x, u) = self.state(index), self.control(index)
         p = get_points(x, u)

@@ -12,14 +12,32 @@ class ObjC(object):
 
     @property
     def C(self):
-        C = self.skel.C
+        C = self.skel.C()
         return np.array([C[2], C[1]])
 
     def cost(self):
-        return norm((self.C - self.target) * [10.0, 1.0] ) ** 2
+        return norm((self.C - self.target) * [1.0, 1.0] ) ** 2
 
     def __str__(self):
         return '[ObjC: %.6f (%r, %r)]' % (self.cost(), self.C, self.target)
+
+
+class ObjCRel(object):
+    def __init__(self, _tip, _target, _index):
+        self.tip = _tip
+        self.target = _target
+        self.index = _index
+
+    @property
+    def C(self):
+        C = self.tip.C_rel()
+        return np.array([C[2], C[1]])
+
+    def cost(self):
+        return norm((self.C - self.target) * [0.1, 0.1] ) ** 2
+
+    def __str__(self):
+        return '[ObjCRel: %.6f (%r, %r)]' % (self.cost(), self.C, self.target)
 
 
 class ObjPt(object):
@@ -98,20 +116,24 @@ class IKMulti(object):
         self.objs = []
         for i in range(self.n):
             print '== %d th impact' % i
-            c_1 = self.plan.contact1(i)
-            con_1 = self.prob.contact(c_1)
-            p_1 = np.array([0.0, 0.0])
-            c_2 = self.plan.contact2(i)
-            con_2 = self.prob.contact(c_2)
-            p_2 = self.plan.P(i)
-            C = self.plan.C(i)
-            print 'p_1 = ', c_1, con_1.name, p_1
-            print 'p_2 = ', c_2, con_2.name, p_2
-            print 'C = ', C
+            c1 = self.plan.contact1(i)
+            con1 = self.prob.contact(c1)
+            p1 = np.array([0.0, 0.0])
+            c2 = self.plan.contact2(i)
+            con2 = self.prob.contact(c2)
+            p2 = self.plan.P(i)
+            C = self.plan.C_rel(i)
+            e = self.prob.next_e[c1][c2]
+            tip = self.prob.tips[e]
+            print 'p_1 = ', c1, con1.name, p1
+            print 'p_2 = ', c2, con2.name, p2
+            print 'edge = ', e, tip
+            print 'C_rel = ', C
 
-            self.objs += [ObjPt(con_1, p_1, i)]
-            self.objs += [ObjPt(con_2, p_2, i)]
-            self.objs += [ObjC(self.skel, C, i)]
+            self.objs += [ObjPt(con1, p1, i)]
+            self.objs += [ObjPt(con2, p2, i)]
+            # self.objs += [ObjC(self.skel, C, i)]
+            self.objs += [ObjCRel(self.prob.tips[e], C, i)]
         self.objs += [ObjSmooth(self.skel.q)]
         print '# objs = ', len(self.objs)
         print 'objs = ', self.objs
@@ -182,11 +204,11 @@ class IKMulti(object):
 
         print "==== ik.IKMulti optimize...."
         self.res = None
-        self.res = {'x': np.array([-0.77172458,  0.19871531,  0.21868452,  0.17185685,  0.33834571,
-        1.25300053, -0.02280025,  0.5381403 ,  1.28949734,  6.99707179,
-       -0.99463907, -1.51258019,  0.23655244,  0.19174509,  0.23344627,
-        0.66863518,  0.31042541,  0.56950158,  0.32536246, -0.48708032,
-        1.72454033, -0.81934541])}
+        self.res = {'x':np.array([-1.14106607, 0.17670427, 0.25559106, -0.0110979, 0.50778251,
+        1.14567754, -0.23695715, -0.56642192,  0.04896628,  5.47540686,
+        0.92026575, -1.33003133,  0.18483881,  0.19278139, -0.18769482,
+        0.91292351,  1.04257039, -0.43872298, -1.40326266,  0.52962157,
+       -1.8548081 ,  0.07832709])}
 
         # for i in range(5):
         #     x0 = np.random.rand(self.totaldim)

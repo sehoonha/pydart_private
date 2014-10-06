@@ -14,7 +14,7 @@ class Controller(object):
         else:
             self.__init_plan(_plan)
         # PD Control
-        self.pd = pd.PDController(self.skel, 250.0, 1.0)
+        self.pd = pd.PDController(self.skel, 50.0, 1.0, 0.3 * 1.5 * 2)
         self.update_target()
 
     def __init_default(self):

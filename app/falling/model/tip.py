@@ -38,6 +38,17 @@ class TIP(object):
         """Returns the COM """
         return self.skel.C
 
+    def C_rel(self):
+        c = self.C - self.p1
+        u_ = self.p2 - self.p1
+        d = norm(u_)
+        u = u_ / norm(u_)
+        v = np.array([0, u[2], -u[1]])
+
+        x = c.dot(u)
+        y = c.dot(v)
+        return np.array([0.0, y, x]) / d
+
     @property
     def r1(self):
         """Returns the distance between origin and COM """
@@ -106,6 +117,6 @@ class TIP(object):
     def __str__(self):
         # values = [self.th1, self.dth1, self.r1,
         #           self.th2, self.r2]
-        return "[%s, %s: (%.3f %.1f) %.3f (%.3f) %.3f]" % \
+        return "[%s, %s: (%.3f %.1f) %.3f (%.3f) %.3f] %r" % \
             (self.c1.name, self.c2.name, self.th1, self.dth1, self.r1,
-             self.th2, self.r2)
+             self.th2, self.r2, self.C_rel())

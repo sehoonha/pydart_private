@@ -23,8 +23,8 @@ class World(object):
         self.skels = []
         self.control_skel = None
 
-    def add_skeleton(self, filename, control=True):
-        self.skels += [Skeleton(self, filename)]
+    def add_skeleton(self, filename, friction=1.0, control=True):
+        self.skels += [Skeleton(self, filename, friction)]
         if control:
             self.control_skel = self.skels[-1]
 
@@ -83,10 +83,11 @@ class World(object):
 
 
 class Skeleton(object):
-    def __init__(self, _world, _filename):
+    def __init__(self, _world, _filename, _friction):
         self.world = _world
         self.filename = _filename
-        self.id = papi.addSkeleton(self.world.id, _filename)
+        self.friction = _friction
+        self.id = papi.addSkeleton(self.world.id, _filename, _friction)
 
         # Initialize dofs
         _ndofs = papi.getSkeletonNumDofs(self.world.id, self.id)

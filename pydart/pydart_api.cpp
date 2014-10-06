@@ -131,12 +131,17 @@ int createWorld(double timestep) {
 void destroyWorld(int wid) {
 }
 
-int addSkeleton(int wid, const char* const path) {
+int addSkeleton(int wid, const char* const path, double frictionCoeff) {
     using namespace dart::simulation;
     using namespace dart::dynamics;
     dart::utils::DartLoader urdfLoader;
     Skeleton* skel = urdfLoader.parseSkeleton(path);
-
+    cout << "skel [" << path << "] : friction = " << frictionCoeff << endl;
+    for (int i = 0; i < skel->getNumBodyNodes(); ++i) {
+        dart::dynamics::BodyNode* bn = skel->getBodyNode(i);
+        bn->setFrictionCoeff(frictionCoeff);
+    }
+    
     World* world = Manager::world(wid);
     int id = world->getNumSkeletons();
     world->addSkeleton(skel);
