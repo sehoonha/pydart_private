@@ -95,9 +95,9 @@ class Simulation(object):
         path = self.abstract_tip.path
 
         print 'x0 = ', str(x0)
-        print 'path = ', str(self.abstract_tip.path)
-        print 'sleep 5 seconds'
-        time.sleep(5)
+        print 'path = ', str(path)
+        # print 'sleep 5 seconds'
+        # time.sleep(5)
         pn = abstract.plan.Plan(x0, path)
         print 'new plan is generated'
         pn.plot()

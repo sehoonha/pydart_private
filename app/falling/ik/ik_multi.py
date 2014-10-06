@@ -42,20 +42,22 @@ class ObjPt(object):
 
 
 class ObjSmooth:
-    def __init__(self):
+    def __init__(self, _init_q):
         self.index = None
         self.last_cost = 0.0
+        self.init_q = _init_q
 
     def cost(self, poses):
+        poses = [self.init_q] + poses
         n = len(poses)
         v = 0.0
         for i in range(n - 1):
             q_0 = poses[i]
             q_1 = poses[i + 1]
             diff = q_0 - q_1
-            diff[:3] = 0.0
+            diff[:6] = 0.0
             v += norm(diff) ** 2
-        self.last_cost = 0.0 * v
+        self.last_cost = 0.001 * v * 0.0
         return self.last_cost
 
     def __str__(self):
@@ -110,7 +112,7 @@ class IKMulti(object):
             self.objs += [ObjPt(con_1, p_1, i)]
             self.objs += [ObjPt(con_2, p_2, i)]
             self.objs += [ObjC(self.skel, C, i)]
-        self.objs += [ObjSmooth()]
+        self.objs += [ObjSmooth(self.skel.q)]
         print '# objs = ', len(self.objs)
         print 'objs = ', self.objs
 
@@ -180,12 +182,18 @@ class IKMulti(object):
 
         print "==== ik.IKMulti optimize...."
         self.res = None
+        # self.res = {'x': np.array([
+        #     -1.61999654, 0.2016161, 0.24878222, -0.370209, 1.01168284,
+        #     # 0.66363487, -0.736161, 0.02177281, 0.76231301, 5.58035627,
+        #     1.3, -0.1, 0.02177281, 0.76231301, 5.58035627,
+        #     2.09446735])}
+
         for i in range(5):
             x0 = np.random.rand(self.totaldim)
             res = minimize(self.evaluate, x0,
                            method='nelder-mead', tol=0.00001,
                            # method='SLSQP', tol=0.00001,
-                           options={'maxiter': 10000, 'maxfev': 10000,
+                           options={'maxiter': 100000, 'maxfev': 100000,
                                     'xtol': 10e-8, 'ftol': 10e-8})
             if self.res is None or res['fun'] < self.res['fun']:
                 self.res = res

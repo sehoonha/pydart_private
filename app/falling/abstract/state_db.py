@@ -92,7 +92,7 @@ class PathEntry(namedtuple('PathEntry',
     __slots__ = ()
 
     def __str__(self):
-        return 'PathEntry(%r, %r, %r, %.4f, %.4f, %r)' % self
+        return 'PathEntry(%s, %s, %s, %.4f, %.4f, %s)' % self
 
 
 class StateDB(object):
