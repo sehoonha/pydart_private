@@ -48,6 +48,11 @@ class Plan:
         d = p[2]
         return c / d
 
+    def base_dist(self, index):
+        p = self.P(index)
+        d = p[2]
+        return d
+
     def P(self, index):
         (x, u) = self.state(index), self.control(index)
         p = get_points(x, u)

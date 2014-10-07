@@ -49,6 +49,11 @@ class TIP(object):
         y = c.dot(v)
         return np.array([0.0, y, x]) / d
 
+    def base_dist(self):
+        u_ = self.p2 - self.p1
+        d = norm(u_)
+        return d
+
     @property
     def r1(self):
         """Returns the distance between origin and COM """

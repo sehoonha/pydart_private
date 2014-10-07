@@ -42,6 +42,25 @@ class ObjCRel(object):
         return '[ObjCRel: %.6f (%r, %r)]' % (self.cost(), self.C, self.target)
 
 
+class ObjBaseDist(object):
+    def __init__(self, _tip, _target, _index):
+        self.tip = _tip
+        self.target = _target
+        self.index = _index
+
+    @property
+    def d(self):
+        return self.tip.base_dist()
+
+    def cost(self):
+        diff = self.d - self.target
+        return (diff * 1.0) ** 2
+
+    def __str__(self):
+        return '[ObjBaseDist: %.6f (%.4f, %.4f)]' % (self.cost(),
+                                                     self.d, self.target)
+
+
 class ObjPt(object):
     def __init__(self, _con, _target, _index):
         self.con = _con
@@ -93,12 +112,12 @@ class IKMulti(object):
         # Parameter descriptions
         # param_desc: ( [{dof_index or dof_name}, {weight}] )
         desc = []
-        desc.append([(0, 1.0)])  # Orientation
-        desc.append([(1, 1.0)])  # Orientation
-        desc.append([(2, 1.0)])  # X-Y
-        desc.append([(3, 1.0)])  # X-Y
-        desc.append([(4, 1.0)])  # X-Y
-        desc.append([(5, 1.0)])  # X-Y
+        # desc.append([(0, 1.0)])  # Orientation
+        # desc.append([(1, 1.0)])  # Orientation
+        # desc.append([(2, 1.0)])  # X-Y
+        # desc.append([(3, 1.0)])  # X-Y
+        # desc.append([(4, 1.0)])  # X-Y
+        # desc.append([(5, 1.0)])  # X-Y
 
         desc.append([('l_shoulder', 1.0), ('r_shoulder', 1.0), ])
         desc.append([('l_hand', 1.0), ('r_hand', 1.0), ])
@@ -132,17 +151,19 @@ class IKMulti(object):
             con2 = self.prob.contact(c2)
             p2 = self.plan.P(i)
             C = self.plan.C_rel(i)
+            bd = self.plan.base_dist(i)
             e = self.prob.next_e[c1][c2]
             tip = self.prob.tips[e]
             print 'p_1 = ', c1, con1.name, p1
             print 'p_2 = ', c2, con2.name, p2
             print 'edge = ', e, tip
-            print 'C_rel = ', C
+            print 'C_rel = ', C, 'base_dist', bd
 
-            self.objs += [ObjPt(con1, p1, i)]
-            self.objs += [ObjPt(con2, p2, i)]
+            # self.objs += [ObjPt(con1, p1, i)]
+            # self.objs += [ObjPt(con2, p2, i)]
             # self.objs += [ObjC(self.skel, C, i)]
             self.objs += [ObjCRel(self.prob.tips[e], C, i)]
+            self.objs += [ObjBaseDist(self.prob.tips[e], bd, i)]
         self.objs += [ObjSmooth(self.skel.q)]
         print '# objs = ', len(self.objs)
         print 'objs = ', self.objs
@@ -177,8 +198,9 @@ class IKMulti(object):
         # Check the validity
         for q in poses:
             # Check the pose
-            if np.max(np.fabs(q)) > 3.0:
-                return [np.max(np.fabs(q))] * len(self.objs)
+            max_joint = np.max(np.fabs(q[6:]))
+            if max_joint > 2.0:
+                return [max_joint] * len(self.objs)
             # # Check the change of pose
             # dq = q - self.q0
             # if np.max(np.fabs(dq)) > 0.8:
