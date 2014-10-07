@@ -99,9 +99,10 @@ class DynamicTIP:
                     continue
                 # Check the kinematics
                 query = (r1, r2, th2 / 10.0)
-                if ss.is_new(query, 0.02):
+                if ss.is_new(query):
                     continue
                 stoppers += [Control(th2, r2, c2)]
+                # print 'stopper:', stoppers[-1]
 
         # exit(0)
         return stoppers
@@ -119,7 +120,7 @@ class DynamicTIP:
         return 0.4264
 
     def plan_initial(self):
-        return self.saved_plan_initial()
+        # return self.saved_plan_initial()
 
         self.upper_bound = g_inf
         # self.upper_bound = 0.52

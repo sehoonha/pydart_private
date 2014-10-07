@@ -49,6 +49,15 @@ class Problem(object):
                 ("knees", ["l_shin", "r_shin"], [[0, 0, 0], [0, 0, 0]]),
                 ("head", ["torso"], [[0.0, 0.0, 0.03]]),
             ]
+        elif self.name == 'lean':
+            defs = [
+                ("toes", ["l_foot", "r_foot"],
+                 [[-0.05, 0.025, 0.0], [-0.05, 0.025, 0.0]]),
+                ("knees", ["l_shin", "r_shin"], [[0, 0, 0], [0, 0, 0]]),
+                ("hands", ["l_hand", "r_hand"],
+                 [[0, -0.11, 0.01], [0, 0.11, -0.01]]),
+                ("head", ["torso"], [[0.0, 0.0, 0.03]]),
+            ]
         elif self.name == 'skate':
             defs = [
                 ("l_toe", ["l_foot"], [[-0.05, 0.025, 0.0]]),
@@ -101,6 +110,12 @@ class Problem(object):
                     ("l_heel", "l_toe"),
                     ("l_toe", "hands"),
                     ("l_toe", "head"),
+                    ("hands", "head"), ]
+        elif self.name == 'lean':
+            defs = [("toes", "knees"),
+                    ("toes", "hands"),
+                    ("knees", "hands"),
+                    ("knees", "head"),
                     ("hands", "head"), ]
         elif self.name == 'skate':
             defs = [("l_toe", "hands"),

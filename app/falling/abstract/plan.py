@@ -40,23 +40,23 @@ class Plan:
     def C(self, index):
         (x, u) = self.state(index), self.control(index)
         p = get_points(x, u)
-        return np.array([0.0, p.y1, p.x1])
+        return np.array([p.x1, p.y1])
 
     def C_rel(self, index):
         c = self.C(index)
         p = self.P(index)
-        d = p[2]
+        d = p[0]
         return c / d
 
     def base_dist(self, index):
         p = self.P(index)
-        d = p[2]
+        d = p[0]
         return d
 
     def P(self, index):
         (x, u) = self.state(index), self.control(index)
         p = get_points(x, u)
-        return np.array([0.0, p.y2, p.x2])
+        return np.array([p.x2, p.y2])
 
     def contact1(self, index):
         return int(self.states[index + 1].c1)

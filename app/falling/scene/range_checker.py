@@ -62,14 +62,15 @@ class StopperSet(object):
         self.th2_range = (min(self.th2_range[0], x[-1]),
                           max(self.th2_range[1], x[-1]))
 
-    def is_new(self, x, threshold=THRESHOLD):
+    def is_new(self, x):
         t0 = time.time()
         index = self.to_index(x)
         if not self.is_valid(index):
             self.time_counter += (time.time() - t0)
             return True
         self.time_counter += (time.time() - t0)
-        return (self.data[tuple(index)] > 0)
+        # print x, index, self.data[tuple(index)]
+        return (self.data[tuple(index)] == 0)
 
     def insert_if_new(self, x):
         if self.is_new(x):
@@ -101,10 +102,10 @@ class RangeChecker(object):
         # self.check_kinematic_cached()
         for tip, ss in zip(self.prob.tips, self.stop_sets):
             print 'TIP ', str(tip),
-            print ' sampled set is', len(ss), id(ss), ss.time_counter
+            print ' Len:', len(ss), 'Time: %.4f' % ss.time_counter
             print ' th2_range = ', ss.th2_range
-            print ' lo = ', ss.lo
-            print ' hi = ', ss.hi
+            # print ' lo = ', ss.lo
+            # print ' hi = ', ss.hi
 
     def check_init_angle(self):
         self.init_angles = [tip.th2 for tip in self.prob.tips]
@@ -116,7 +117,7 @@ class RangeChecker(object):
         # Each edge has a set of stoppers
         self.stop_sets = [StopperSet() for _ in range(self.prob.m)]
 
-        for i in range(3000):
+        for i in range(10000):
             self.set_random_pose()
             for tip, ss in zip(self.prob.tips, self.stop_sets):
                 x = tip.pose()

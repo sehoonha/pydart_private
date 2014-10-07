@@ -13,8 +13,8 @@ class ObjC(object):
     @property
     def C(self):
         C = self.skel.C()
-        # return np.array([C[2], C[1]])
-        return C
+        return np.array([C[2], C[1]])
+        # return C
 
     def cost(self):
         return norm((self.C - self.target) * [1.0, 1.0] ) ** 2
@@ -32,11 +32,11 @@ class ObjCRel(object):
     @property
     def C(self):
         C = self.tip.C_rel()
-        # return np.array([C[2], C[1]])
-        return C
+        return np.array([C[2], C[1]])
+        # return C
 
     def cost(self):
-        return norm((self.C - self.target) * [0.1, 0.1, 0.1] ) ** 2
+        return norm((self.C - self.target) * [0.3, 0.3] ) ** 2
 
     def __str__(self):
         return '[ObjCRel: %.6f (%r, %r)]' % (self.cost(), self.C, self.target)
@@ -70,11 +70,11 @@ class ObjPt(object):
     @property
     def P(self):
         P = self.con.p
-        # return np.array([P[2], P[1]])
-        return P
+        return np.array([P[2], P[1]])
+        # return P
 
     def cost(self):
-        return norm((self.P - self.target) * [1.0, 1.0, 2.0] ) ** 2
+        return norm((self.P - self.target) * [1.0, 1.0] ) ** 2
 
     def __str__(self):
         return '[ObjPt.%s: %.6f (%r, %r)]' % (self.con.name, self.cost(),
@@ -96,8 +96,9 @@ class ObjSmooth:
             q_1 = poses[i + 1]
             diff = q_0 - q_1
             diff[:6] = 0.0
-            v += norm(diff) ** 2
-        self.last_cost = 0.001 * v
+            # v += norm(diff) ** 2
+            v += diff.dot(diff)
+        self.last_cost = 0.0001 * v
         return self.last_cost
 
     def __str__(self):
@@ -121,15 +122,21 @@ class IKMulti(object):
 
         desc.append([('l_shoulder', 1.0), ('r_shoulder', 1.0), ])
         desc.append([('l_hand', 1.0), ('r_hand', 1.0), ])
-        # desc.append([('l_thigh', 1.0), ])
-        # desc.append([('r_thigh', 1.0), ])
-        # desc.append([('l_shin', 0.5), ])
-        # desc.append([('r_shin', 0.5), ])
-        # desc.append([('l_heel', 0.05), ])
-        # desc.append([('r_heel', 0.05), ])
-        desc.append([('l_thigh', 1.0), ('r_thigh', 1.0), ])
-        desc.append([('l_shin', 0.5), ('r_shin', 0.5), ])
-        desc.append([('l_heel', 0.05), ('r_heel', 0.05), ])
+
+        cfg_name = self.sim.cfg.name
+        leg_symmetry = cfg_name in ['lean', 'back']
+        print 'leg_symmetry:', leg_symmetry
+        if leg_symmetry:
+            desc.append([('l_thigh', 1.0), ('r_thigh', 1.0), ])
+            desc.append([('l_shin', 0.5), ('r_shin', 0.5), ])
+            desc.append([('l_heel', 0.05), ('r_heel', 0.05), ])
+        else:
+            desc.append([('l_thigh', 1.0), ])
+            desc.append([('r_thigh', 1.0), ])
+            desc.append([('l_shin', 0.5), ])
+            desc.append([('r_shin', 0.5), ])
+            desc.append([('l_heel', 0.05), ])
+            desc.append([('r_heel', 0.05), ])
         self.desc = desc
 
         # Dimensions
@@ -257,7 +264,8 @@ class IKMulti(object):
         self.targets = self.expand_all(x)
 
         print "==== result\n", self.res
-        print 'final costs:', self.get_costs(x, True)
+        print '[final costs]:'
+        self.get_costs(x, True)
         print "==== ik.IKMulti optimize....OK"
 
         if restore:

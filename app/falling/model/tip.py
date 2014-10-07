@@ -21,7 +21,13 @@ class TIP(object):
         self.skel = _c1.skel
 
     def pivot_nodes(self):
-        return self.c1.bodynames
+        # return self.c1.bodynames
+        pivots = self.c1.bodynames
+        if 'l_foot' in pivots:
+            pivots += ['l_heel']
+        if 'r_foot' in pivots:
+            pivots += ['r_heel']
+        return pivots
 
     @property
     def p1(self):
@@ -122,6 +128,6 @@ class TIP(object):
     def __str__(self):
         # values = [self.th1, self.dth1, self.r1,
         #           self.th2, self.r2]
-        return "[%s, %s: (%.3f %.1f) %.3f (%.3f) %.3f] %r" % \
+        return "[%s, %s: (%.3f %.1f) %.3f (%.3f) %.3f]" % \
             (self.c1.name, self.c2.name, self.th1, self.dth1, self.r1,
-             self.th2, self.r2, self.C_rel())
+             self.th2, self.r2)

@@ -21,7 +21,7 @@ class BioloidGPPoses:
     def lean_pose(self):
         q = np.zeros(self.ndofs)
         q[0] = -0.41 * math.pi
-        q[4] = 0.221
+        q[4] = 0.228
         q[5] = q[4]
         return q
 
