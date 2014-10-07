@@ -13,7 +13,8 @@ class ObjC(object):
     @property
     def C(self):
         C = self.skel.C()
-        return np.array([C[2], C[1]])
+        # return np.array([C[2], C[1]])
+        return C
 
     def cost(self):
         return norm((self.C - self.target) * [1.0, 1.0] ) ** 2
@@ -31,10 +32,11 @@ class ObjCRel(object):
     @property
     def C(self):
         C = self.tip.C_rel()
-        return np.array([C[2], C[1]])
+        # return np.array([C[2], C[1]])
+        return C
 
     def cost(self):
-        return norm((self.C - self.target) * [0.1, 0.1] ) ** 2
+        return norm((self.C - self.target) * [0.1, 0.1, 0.1] ) ** 2
 
     def __str__(self):
         return '[ObjCRel: %.6f (%r, %r)]' % (self.cost(), self.C, self.target)
@@ -49,10 +51,11 @@ class ObjPt(object):
     @property
     def P(self):
         P = self.con.p
-        return np.array([P[2], P[1]])
+        # return np.array([P[2], P[1]])
+        return P
 
     def cost(self):
-        return norm((self.P - self.target) * [1.0, 2.0] ) ** 2
+        return norm((self.P - self.target) * [1.0, 1.0, 2.0] ) ** 2
 
     def __str__(self):
         return '[ObjPt.%s: %.6f (%r, %r)]' % (self.con.name, self.cost(),
@@ -91,17 +94,23 @@ class IKMulti(object):
         # param_desc: ( [{dof_index or dof_name}, {weight}] )
         desc = []
         desc.append([(0, 1.0)])  # Orientation
+        desc.append([(1, 1.0)])  # Orientation
+        desc.append([(2, 1.0)])  # X-Y
+        desc.append([(3, 1.0)])  # X-Y
         desc.append([(4, 1.0)])  # X-Y
         desc.append([(5, 1.0)])  # X-Y
 
         desc.append([('l_shoulder', 1.0), ('r_shoulder', 1.0), ])
         desc.append([('l_hand', 1.0), ('r_hand', 1.0), ])
-        desc.append([('l_thigh', 1.0), ])
-        desc.append([('r_thigh', 1.0), ])
-        desc.append([('l_shin', 0.5), ])
-        desc.append([('r_shin', 0.5), ])
-        desc.append([('l_heel', 0.05), ])
-        desc.append([('r_heel', 0.05), ])
+        # desc.append([('l_thigh', 1.0), ])
+        # desc.append([('r_thigh', 1.0), ])
+        # desc.append([('l_shin', 0.5), ])
+        # desc.append([('r_shin', 0.5), ])
+        # desc.append([('l_heel', 0.05), ])
+        # desc.append([('r_heel', 0.05), ])
+        desc.append([('l_thigh', 1.0), ('r_thigh', 1.0), ])
+        desc.append([('l_shin', 0.5), ('r_shin', 0.5), ])
+        desc.append([('l_heel', 0.05), ('r_heel', 0.05), ])
         self.desc = desc
 
         # Dimensions
@@ -118,7 +127,7 @@ class IKMulti(object):
             print '== %d th impact' % i
             c1 = self.plan.contact1(i)
             con1 = self.prob.contact(c1)
-            p1 = np.array([0.0, 0.0])
+            p1 = np.array([0.0, 0.0, 0.0])
             c2 = self.plan.contact2(i)
             con2 = self.prob.contact(c2)
             p2 = self.plan.P(i)
@@ -168,7 +177,7 @@ class IKMulti(object):
         # Check the validity
         for q in poses:
             # Check the pose
-            if np.max(np.fabs(q)) > 2.0:
+            if np.max(np.fabs(q)) > 3.0:
                 return [np.max(np.fabs(q))] * len(self.objs)
             # # Check the change of pose
             # dq = q - self.q0
@@ -204,22 +213,22 @@ class IKMulti(object):
 
         print "==== ik.IKMulti optimize...."
         self.res = None
-        self.res = {'x':np.array([-1.14106607, 0.17670427, 0.25559106, -0.0110979, 0.50778251,
-        1.14567754, -0.23695715, -0.56642192,  0.04896628,  5.47540686,
-        0.92026575, -1.33003133,  0.18483881,  0.19278139, -0.18769482,
-        0.91292351,  1.04257039, -0.43872298, -1.40326266,  0.52962157,
-       -1.8548081 ,  0.07832709])}
+        #  self.res = {'x':np.array([-1.14106607, 0.17670427, 0.25559106, -0.0110979, 0.50778251,
+        #  1.14567754, -0.23695715, -0.56642192,  0.04896628,  5.47540686,
+        #  0.92026575, -1.33003133,  0.18483881,  0.19278139, -0.18769482,
+        #  0.91292351,  1.04257039, -0.43872298, -1.40326266,  0.52962157,
+        # -1.8548081 ,  0.07832709])}
 
-        # for i in range(5):
-        #     x0 = np.random.rand(self.totaldim)
-        #     res = minimize(self.evaluate, x0,
-        #                    method='nelder-mead', tol=0.00001,
-        #                    # method='SLSQP', tol=0.00001,
-        #                    options={'maxiter': 100000, 'maxfev': 100000,
-        #                             'xtol': 10e-8, 'ftol': 10e-8})
-        #     if self.res is None or res['fun'] < self.res['fun']:
-        #         self.res = res
-        #     print i, self.res['fun']
+        for i in range(5):
+            x0 = np.random.rand(self.totaldim)
+            res = minimize(self.evaluate, x0,
+                           method='nelder-mead', tol=0.00001,
+                           # method='SLSQP', tol=0.00001,
+                           options={'maxiter': 100000, 'maxfev': 100000,
+                                    'xtol': 10e-8, 'ftol': 10e-8})
+            if self.res is None or res['fun'] < self.res['fun']:
+                self.res = res
+            print i, self.res['fun']
 
         x = self.res['x']
         self.target_index = 0

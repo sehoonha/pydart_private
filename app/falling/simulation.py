@@ -49,7 +49,7 @@ class Simulation(object):
 
         # Configure the scene
         self.cfg = scene.configure.Configure(self)
-        self.prob = problem.Problem(self)
+        self.prob = problem.Problem(self, self.cfg.name)
         self.history = History(self)
 
         # # ### Now, configure the controllers

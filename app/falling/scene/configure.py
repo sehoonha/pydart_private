@@ -8,8 +8,8 @@ class Configure(object):
         # == A set of configs ==
         # self.config('step', 10)
         # self.config('lean', 10)
-        # self.config('skate', 20)
-        self.config('back', 5)
+        # self.config('skate', 10)
+        self.config('back', 3)
 
         self.conditions = None
         # self.conditions = self.generate()
@@ -21,6 +21,7 @@ class Configure(object):
 
     def config(self, class_name, force):
         print 'config', class_name, force
+        self.name = class_name
         # 1. Set the pose
         self.set_pose(class_name)
         # 2. Proceed the simulation
@@ -44,7 +45,6 @@ class Configure(object):
         skel = sim.skel
         world = sim.world
         # Reset Pydart
-        self.init_state = BioloidGPPoses().back()
         skel.x = self.init_state
         for i in range(self.ext_force_steps):
             (b, f, p) = self.ext_force

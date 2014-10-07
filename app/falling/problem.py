@@ -15,8 +15,9 @@ class Range(namedtuple('Range', ['lo', 'hi'])):
 
 
 class Problem(object):
-    def __init__(self, _sim):
+    def __init__(self, _sim, _name):
         self.sim = _sim
+        self.name = _name
         print '== start to define the problem =='
         self.define_contacts()
         self.define_edges()
@@ -36,16 +37,37 @@ class Problem(object):
 
     def define_contacts(self):
         # Start to test more contact candidates
-        defs = [
-            # ("feet", ["l_foot", "r_foot"], [[-0.05, 0.025, 0]] * 2),
-            ("r_toe", ["r_foot"], [[-0.05, 0.025, 0.0]]),
-            ("l_heel", ["l_foot"], [[0.05, 0.025, 0.0]]),
-            ("l_toe", ["l_foot"], [[-0.05, 0.025, 0.0]]),
-            ("hands", ["l_hand", "r_hand"],
-             [[0, -0.11, 0.01], [0, 0.11, -0.01]]),
-            ("knees", ["l_shin", "r_shin"], [[0, 0, 0], [0, 0, 0]]),
-            ("head", ["torso"], [[0.0, 0.0, 0.03]]),
-        ]
+        defs = None
+        if self.name == 'step':
+            defs = [
+                # ("feet", ["l_foot", "r_foot"], [[-0.05, 0.025, 0]] * 2),
+                ("r_toe", ["r_foot"], [[-0.05, 0.025, 0.0]]),
+                ("l_heel", ["l_foot"], [[0.05, 0.025, 0.0]]),
+                ("l_toe", ["l_foot"], [[-0.05, 0.025, 0.0]]),
+                ("hands", ["l_hand", "r_hand"],
+                 [[0, -0.11, 0.01], [0, 0.11, -0.01]]),
+                ("knees", ["l_shin", "r_shin"], [[0, 0, 0], [0, 0, 0]]),
+                ("head", ["torso"], [[0.0, 0.0, 0.03]]),
+            ]
+        elif self.name == 'skate':
+            defs = [
+                ("l_toe", ["l_foot"], [[-0.05, 0.025, 0.0]]),
+                ("hands", ["l_hand", "r_hand"],
+                 [[0, -0.11, 0.01], [0, 0.11, -0.01]]),
+                ("head", ["torso"], [[0.0, 0.0, 0.03]]),
+                ("r_heel", ["r_foot"], [[0.05, 0.025, 0.0]]),
+            ]
+        elif self.name == 'back':
+            defs = [
+                ("heels", ["l_foot", "r_foot"],
+                 [[0.05, 0.025, 0.0], [0.05, 0.025, 0.0]]),
+                ("hands", ["l_hand", "r_hand"],
+                 [[0, -0.11, 0.01], [0, 0.11, -0.01]]),
+                ("elbows", ["l_hand", "r_hand"],
+                 [[0, 0.04, 0.01], [0, -0.04, -0.01]]),
+                ("head", ["torso"], [[0.0, 0.0, 0.03]]),
+            ]
+
         self.vertices = [i for i in range(len(defs))]
         self.contacts = [Contact(self.skel, i, n, b, p)
                          for i, (n, b, p) in enumerate(defs)]
@@ -71,14 +93,25 @@ class Problem(object):
         #         ("r_toe", "hands"),
         #         ("l_heel", "l_toe"),
         #         ("l_toe", "hands"), ]
-        defs = [("r_toe", "l_heel"),
-                ("r_toe", "l_toe"),
-                ("r_toe", "hands"),
-                ("r_toe", "head"),
-                ("l_heel", "l_toe"),
-                ("l_toe", "hands"),
-                ("l_toe", "head"),
-                ("hands", "head"), ]
+        if self.name == 'step':
+            defs = [("r_toe", "l_heel"),
+                    ("r_toe", "l_toe"),
+                    ("r_toe", "hands"),
+                    ("r_toe", "head"),
+                    ("l_heel", "l_toe"),
+                    ("l_toe", "hands"),
+                    ("l_toe", "head"),
+                    ("hands", "head"), ]
+        elif self.name == 'skate':
+            defs = [("l_toe", "hands"),
+                    ("hands", "head"),
+                    ("head", "r_heel"), ]
+        elif self.name == 'back':
+            defs = [("heels", "hands"),
+                    ("heels", "elbows"),
+                    ("hands", "elbows"),
+                    ("hands", "head"),
+                    ("elbows", "head"), ]
 
         self.edges = [(find_index(a), find_index(b)) for a, b in defs]
         self.tips = [TIP(id, self.contacts[i], self.contacts[j])
