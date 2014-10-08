@@ -76,6 +76,13 @@ class Problem(object):
                  [[0, 0.04, 0.01], [0, -0.04, -0.01]]),
                 ("head", ["torso"], [[0.0, 0.0, 0.03]]),
             ]
+        elif self.name == 'side':
+            defs = [
+                ("r_foot", ["r_foot"], [[0.0, 0.025, 0.03]]),
+                ("r_hand", ["r_hand"], [[0.02, 0.05, -0.01]]),
+                ("r_shoulder", ["r_shoulder"], [[0.0, 0.0, 0.0]]),
+                ("head", ["torso"], [[0.0, 0.0, 0.03]]),
+            ]
 
         self.vertices = [i for i in range(len(defs))]
         self.contacts = [Contact(self.skel, i, n, b, p)
@@ -127,6 +134,10 @@ class Problem(object):
                     ("hands", "elbows"),
                     ("hands", "head"),
                     ("elbows", "head"), ]
+        elif self.name == 'side':
+            defs = [("r_foot", "r_hand"),
+                    ("r_hand", "r_shoulder"),
+                    ("r_shoulder", "head"), ]
 
         self.edges = [(find_index(a), find_index(b)) for a, b in defs]
         self.tips = [TIP(id, self.contacts[i], self.contacts[j])

@@ -9,7 +9,8 @@ class Configure(object):
         # self.config('step', 15)
         # self.config('lean', 10)
         # self.config('skate', 10)
-        self.config('back', 3)
+        # self.config('back', 3)
+        self.config('side', 10)
 
         self.conditions = None
         # self.conditions = self.generate()
@@ -36,6 +37,8 @@ class Configure(object):
             self.init_state = BioloidGPPoses().skate()
         elif class_name == 'back':
             self.init_state = BioloidGPPoses().back()
+        elif class_name == 'side':
+            self.init_state = BioloidGPPoses().side()
         else:
             print 'Invalid class_name:', class_name
             return
@@ -45,6 +48,7 @@ class Configure(object):
         skel = sim.skel
         world = sim.world
         # Reset Pydart
+        self.init_state = BioloidGPPoses().side()
         skel.x = self.init_state
         for i in range(self.ext_force_steps):
             (b, f, p) = self.ext_force
