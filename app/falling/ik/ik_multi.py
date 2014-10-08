@@ -98,7 +98,7 @@ class ObjSmooth:
             diff[:6] = 0.0
             # v += norm(diff) ** 2
             v += diff.dot(diff)
-        self.last_cost = 0.0001 * v
+        self.last_cost = 0.00 * v
         return self.last_cost
 
     def __str__(self):
@@ -274,5 +274,6 @@ class IKMulti(object):
         return self.targets
 
     def next_target(self):
+        print 'next_target: ik.target_index:', self.target_index
         self.skel.q = self.targets[self.target_index]
         self.target_index = (self.target_index + 1) % self.n
