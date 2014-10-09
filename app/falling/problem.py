@@ -150,7 +150,7 @@ class Problem(object):
                     ("r_shoulder", "head"), ]
         elif self.name == 'atlas_lean':
             defs = [("toes", "knees"),
-                    ("toes", "hands"),
+                    # ("toes", "hands"),
                     ("knees", "hands"),
                     ("knees", "head"),
                     ("hands", "head"), ]

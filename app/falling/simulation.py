@@ -171,6 +171,7 @@ class Simulation(object):
 
     def render(self):
         glPushMatrix()
+        gltools.render_axis(10)
         # Draw chess board
         gltools.glMove([0.0, -0.01, 0.0])
         gltools.render_chessboard(10, 20.0)
@@ -212,7 +213,9 @@ class Simulation(object):
                                                   data['max_impulse'])
         # status += "l_hand.v = %s " % STR(data['l_hand.v'])
         status += "I = %.4f " % self.skel.approx_inertia_x()
-        status += "TIP = " + str(data['tip']) + " "
+        # status += "TIP = " + str(data['tip']) + " "
+        tip = self.tip_controller.tip()
+        status += "TIP = " + str(tip)
         status += "Contacted = %s " % str(data['contactedBodies'])
 
         return status

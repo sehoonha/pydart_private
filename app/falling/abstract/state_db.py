@@ -190,7 +190,7 @@ class StateDB(object):
             th2 = entry.u.th2
             cmds += [r1, r2, th2]
 
-        length = 0.4 if max_height < 0.4 else 1.2
+        length = 0.4 if max_height < 0.4 else 1.5
 
         data = pyg.Data(traces)
         layout = pyg.Layout(xaxis=pyg.XAxis(range=[-0.1, length]),

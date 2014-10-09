@@ -3,8 +3,8 @@ import time
 import math
 import numpy as np
 from numpy.linalg import norm
-from nearpy import Engine
-from nearpy.hashes import RandomBinaryProjections
+# from nearpy import Engine
+# from nearpy.hashes import RandomBinaryProjections
 
 
 THRESHOLD = 0.03
@@ -27,7 +27,7 @@ class StopperSet(object):
             self.step = [0.005, 0.005, 0.1]
         else:
             self.lo = [0.50, 0.50, 0.0]
-            self.hi = [1.00, 1.00, 3.0]
+            self.hi = [1.20, 1.20, 3.0]
             self.step = [0.05, 0.05, 0.1]
 
         self.num = [int((self.hi[i] - self.lo[i]) / self.step[i])
@@ -174,19 +174,20 @@ class RangeChecker(object):
             # Validity check?
             self.skel.q = q
         else:
-            param_desc = [(0, 'l_arm_shy', 1.0),
-                          (0, 'r_arm_shy', 1.0),
-                          (1, 'l_arm_shx', 1.0),
-                          (1, 'r_arm_shx', -1.0),
-                          (2, 'l_arm_elx', 1.0),
-                          (2, 'r_arm_elx', -1.0),
-                          (3, 'back_bky', 1.0),
-                          (4, 'l_leg_hpy', 1.0),
-                          (4, 'r_leg_hpy', 1.0),
-                          (5, 'l_leg_kny', 0.5),
-                          (5, 'r_leg_kny', 0.5),
-                          (6, 'l_leg_aky', 0.1),
-                          (6, 'r_leg_aky', 0.1), ]
+            # param_desc = [(0, 'l_arm_shy', 1.0),
+            #               (0, 'r_arm_shy', 1.0),
+            #               (1, 'l_arm_shx', 1.0),
+            #               (1, 'r_arm_shx', -1.0),
+            #               (2, 'l_arm_elx', 1.0),
+            #               (2, 'r_arm_elx', -1.0),
+            param_desc = [(0, 'multi', 1.0),
+                          (1, 'back_bky', 1.0),
+                          (2, 'l_leg_hpy', 1.0),
+                          (2, 'r_leg_hpy', 1.0),
+                          (3, 'l_leg_kny', 0.5),
+                          (3, 'r_leg_kny', 0.5),
+                          (4, 'l_leg_aky', 0.1),
+                          (4, 'r_leg_aky', 0.1), ]
 
             dim = max([i for i, dof, w in param_desc]) + 1
             lo = np.array([-1.57] * dim)
@@ -194,8 +195,19 @@ class RangeChecker(object):
             x = lo + np.random.rand(dim) * (hi - lo)
             q = self.skel.q
             for x_i, dof_name, w in param_desc:
-                dof_i = self.skel.dof_index(dof_name)
-                q[dof_i] = w * x[x_i]
+                if dof_name == 'multi':
+                    v = w * x[x_i]
+                    i0 = self.skel.dof_index('l_arm_shy')
+                    i1 = self.skel.dof_index('l_arm_shx')
+                    i2 = self.skel.dof_index('r_arm_shy')
+                    i3 = self.skel.dof_index('r_arm_shx')
+                    q[i0] = v
+                    q[i1] = -0.5 - math.cos(v / 1.57)
+                    q[i2] = q[i0]
+                    q[i3] = -q[i1]
+                else:
+                    dof_i = self.skel.dof_index(dof_name)
+                    q[dof_i] = w * x[x_i]
             # Validity check?
             self.skel.q = q
 

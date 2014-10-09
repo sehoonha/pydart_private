@@ -142,12 +142,22 @@ class AtlasPoses:
 
     def lean_pose(self):
         q = np.zeros(self.ndofs)
-        q[0] = -0.5 * math.pi
-        q[4] = 0.73
-        q[5] = q[4]
+        q[:3] = np.array([2.4, 2.4, 2.4])
+        q[3:6] = [1.89, -0.67, -0.406]
 
-        q[self.dofs['l_arm_shy']] = -1.2
-        q[self.dofs['l_arm_shx']] = -0.5
+        # # q[self.dofs['l_arm_shy']] = -1.5
+        # # q[self.dofs['l_arm_shx']] = -0.5
+        # # q[self.dofs['l_arm_shy']] = 0
+        # # q[self.dofs['l_arm_shx']] = -1.5
+        # # q[self.dofs['l_arm_shy']] = 1.5
+        # # q[self.dofs['l_arm_shx']] = -0.5
+        # x = 1.3
+        # q[self.dofs['l_arm_shy']] = x
+        # # q[self.dofs['l_arm_shx']] = -1.5 + 0.6 * math.fabs(x)
+        # q[self.dofs['l_arm_shx']] = -0.5 - math.cos(x / 1.57)
+
+        q[self.dofs['l_arm_shy']] = -0.0
+        q[self.dofs['l_arm_shx']] = -1.0
         q[self.dofs['l_arm_elx']] = -0.5
         q[self.dofs['r_arm_shy']] = q[self.dofs['l_arm_shy']]
         q[self.dofs['r_arm_shx']] = -q[self.dofs['l_arm_shx']]

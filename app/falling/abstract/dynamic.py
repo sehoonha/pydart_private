@@ -26,7 +26,7 @@ class DynamicTIP:
             self.I = 0.0080
         else:
             self.m = 149.55
-            self.I = 29.7
+            self.I = 25.7
         self.g = -9.8
         (self.lo_dr, self.hi_dr) = (-0.1, 0.1)
 
@@ -103,8 +103,9 @@ class DynamicTIP:
                     # print 'reject the bad dynamics'
                     continue
                 # Check the kinematics
-                query = (r1, r2, th2 / 10.0)
+                query = (r1, r2, th2)
                 if ss.is_new(query):
+                    # print 'reject the bad kinematics'
                     continue
                 stoppers += [Control(th2, r2, c2)]
                 # print 'stopper:', stoppers[-1]
@@ -113,12 +114,12 @@ class DynamicTIP:
         return stoppers
 
     def saved_plan_initial(self):
-        self.x0 =  State(0.2268, 2.1215, 0.1469, None, 0, 0.000)
-        self.path =  [PathEntry(x=State(th1=0.22678919468393438, dth1=2.1215004150462069, r1=0.14690154003678757, dr1=None, c1=0, t=0.0), nx_0=State(th1=0.48235587143247677, dth1=4.2502800513724033, r1=0.15540154003678758, dr1=0.10000000000000001, c1=0.0, t=0.085000000000000006), nx_1=State(th1=-0.25982024479010946, dth1=2.6881959385367056, r1=0.14245217448069811, dr1=None, c1=1, t=0.085000000000000006), v=0.34146772580825652, v_max=0.59837360590691824, u=Control(th2=2.3994165373672067, r2=0.14245217448069811, c2=1)), ]
+        self.x0 =  State(-0.1776, 0.5371, 1.0636, None, 0, 0.000)
+        self.path =  [PathEntry(x=State(th1=-0.1775902009188819, dth1=0.5371288141189724, r1=1.0636041337291517, dr1=None, c1=0, t=0.0), nx_0=State(th1=1.1092103111313083, dth1=3.1498615765913951, r1=1.115404133729146, dr1=0.01999999999999999, c1=0.0, t=2.589999999999967), nx_1=State(th1=-0.82572993182920307, dth1=-2.177013271834157, r1=0.73267107135846976, dr1=None, c1=1, t=2.589999999999967), v=293.76984849228234, v_max=293.76984849228234, u=Control(th2=1.2066524106292817, r2=0.73267107135846976, c2=1))]
         return max([entry.v for entry in self.path])
 
     def plan_initial(self):
-        return self.saved_plan_initial()
+        # return self.saved_plan_initial()
 
         self.upper_bound = g_inf
         # self.upper_bound = 0.52

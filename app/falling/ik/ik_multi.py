@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from numpy.linalg import norm
 
@@ -54,11 +55,77 @@ class ObjBaseDist(object):
 
     def cost(self):
         diff = self.d - self.target
-        return (diff * 1.0) ** 2
+        return (diff * 10.0) ** 2
 
     def __str__(self):
         return '[ObjBaseDist: %.6f (%.4f, %.4f)]' % (self.cost(),
                                                      self.d, self.target)
+
+
+class ObjCCW(object):
+    def __init__(self, _tip, _index):
+        self.tip = _tip
+        self.index = _index
+
+    def ccw(self):
+        self.log = ""
+        points = [self.tip.p1, self.tip.p2, self.tip.C]
+        signed_area = 0
+        for i, pt in enumerate(points):
+            next_pt = points[(i + 1) % 3]
+            x1 = pt[2]
+            y1 = pt[1]
+            x2 = next_pt[2]
+            y2 = next_pt[1]
+            signed_area += (x1 * y2 - x2 * y1)
+            # self.log += "(%.4f %.4f)" % (x1, y1)
+            self.log += "(%.4f %.4f %.4f)" % (pt[0], pt[1], pt[2])
+        return signed_area
+        # u = self.tip.C - self.tip.p1
+        # v = self.tip.p2 - self.tip.p1
+        # return (u[2] * v[1] - u[1] * v[2])
+
+    def cost(self):
+        if self.ccw() < -0.0001:
+            return 10.0
+        return 0.0
+
+    def __str__(self):
+        return '[ObjCCW: %.6f (%.4f) %s]' % (self.cost(), self.ccw(), self.log)
+
+
+class ObjHide(object):
+    def __init__(self, _tip, _con, _index):
+        self.tip = _tip
+        self.con = _con
+        self.index = _index
+
+    def ccw(self):
+        self.log = ""
+        points = [self.tip.p1, self.tip.p2, self.con.p]
+        signed_area = 0
+        for i, pt in enumerate(points):
+            next_pt = points[(i + 1) % 3]
+            x1 = pt[2]
+            y1 = pt[1]
+            x2 = next_pt[2]
+            y2 = next_pt[1]
+            signed_area += (x1 * y2 - x2 * y1)
+            # self.log += "(%.4f %.4f)" % (x1, y1)
+            self.log += "(%.4f %.4f %.4f)" % (pt[0], pt[1], pt[2])
+        return signed_area
+        # u = self.tip.C - self.tip.p1
+        # v = self.tip.p2 - self.tip.p1
+        # return (u[2] * v[1] - u[1] * v[2])
+
+    def cost(self):
+        if self.ccw() < -0.0001:
+            return 10.0
+        return 0.0
+
+    def __str__(self):
+        return '[ObjHide{%s}: %.6f (%.4f)]' % (self.con.name,
+                                               self.cost(), self.ccw())
 
 
 class ObjPt(object):
@@ -133,9 +200,11 @@ class IKMulti(object):
                 desc.append([('l_heel', 0.05), ])
                 desc.append([('r_heel', 0.05), ])
         else:
-            desc.append([('l_arm_shy', 1.0), ('r_arm_shy', 1.0), ])
-            desc.append([('l_arm_shx', 1.0), ('r_arm_shx', -1.0), ])
-            desc.append([('l_arm_elx', 1.0), ('r_arm_elx', -1.0), ])
+            # desc.append([('l_arm_shy', 1.0), ('r_arm_shy', 1.0), ])
+            # desc.append([('l_arm_shx', 1.0), ('r_arm_shx', -1.0), ])
+            # desc.append([('l_arm_elx', 1.0), ('r_arm_elx', -1.0), ])
+            desc.append([('l_arm_shy', 1.0), ('r_arm_shy', 1.0),
+                         ('l_arm_shx', 0.0), ('r_arm_shx', 0.0), ])
             desc.append([('back_bky', 1.0), ])
             desc.append([('l_leg_hpy', 1.0), ('r_leg_hpy', 1.0), ])
             desc.append([('l_leg_kny', 1.0), ('r_leg_kny', 1.0), ])
@@ -174,7 +243,13 @@ class IKMulti(object):
             # self.objs += [ObjPt(con2, p2, i)]
             # self.objs += [ObjC(self.skel, C, i)]
             self.objs += [ObjCRel(self.prob.tips[e], C, i)]
+            self.objs += [ObjCCW(self.prob.tips[e], i)]
             self.objs += [ObjBaseDist(self.prob.tips[e], bd, i)]
+
+            rests = set(self.prob.contacts) - set([con1, con2])
+            for con in rests:
+                self.objs += [ObjHide(tip, con, i)]
+
         self.objs += [ObjSmooth(self.skel.q)]
         print '# objs = ', len(self.objs)
         print 'objs = ', self.objs
@@ -193,7 +268,12 @@ class IKMulti(object):
             x_i = x[i]
             for (d, w) in dofs:
                 index = d if isinstance(d, int) else self.skel.dof_index(d)
-                q[index] = w * x_i
+                if d == 'l_arm_shx':
+                    q[index] = -0.5 - math.cos(x_i / 1.57)
+                elif d == 'r_arm_shx':
+                    q[index] = 0.5 + math.cos(x_i / 1.57)
+                else:
+                    q[index] = w * x_i
         return q
 
     def expand_all(self, x):
@@ -246,22 +326,19 @@ class IKMulti(object):
 
         print "==== ik.IKMulti optimize...."
         self.res = None
+        # x_opt = np.array([-1.7585, -0.0573, 0.6502, 0.3405, 0.3409])
+        # self.res = {'x': x_opt}
 
-        x = np.array([0.0] * 7)
-        x[5] = 2.0
-        x[0] = -1.5
-        self.res = {'x': x}
-
-        # for i in range(5):
-        #     x0 = np.random.rand(self.totaldim)
-        #     res = minimize(self.evaluate, x0,
-        #                    method='nelder-mead', tol=0.00001,
-        #                    # method='SLSQP', tol=0.00001,
-        #                    options={'maxiter': 100000, 'maxfev': 100000,
-        #                             'xtol': 10e-8, 'ftol': 10e-8})
-        #     if self.res is None or res['fun'] < self.res['fun']:
-        #         self.res = res
-        #     print i, self.res['fun']
+        for i in range(5):
+            x0 = np.random.rand(self.totaldim)
+            res = minimize(self.evaluate, x0,
+                           method='nelder-mead', tol=0.00001,
+                           # method='SLSQP', tol=0.00001,
+                           options={'maxiter': 100000, 'maxfev': 100000,
+                                    'xtol': 10e-8, 'ftol': 10e-8})
+            if self.res is None or res['fun'] < self.res['fun']:
+                self.res = res
+            print i, self.res['fun']
 
         x = self.res['x']
         self.target_index = 0

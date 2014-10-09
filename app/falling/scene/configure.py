@@ -1,4 +1,7 @@
 from poses import BioloidGPPoses, AtlasPoses
+import numpy as np
+from numpy.linalg import norm
+from scipy.optimize import minimize
 
 
 class Configure(object):
@@ -31,7 +34,7 @@ class Configure(object):
         if self.sim.is_bioloid():
             self.ext_force = ("torso", [0, 0, force], [0, 0, 0.03])
         else:
-            self.ext_force = ("mtorso", [force, 0, 0], [0, 0, 0.4])
+            self.ext_force = ("mtorso", [0, 0, force], [0, 0, 0.4])
 
     def set_pose(self, class_name):
         if class_name == 'step':
@@ -51,11 +54,23 @@ class Configure(object):
             return
         self.skel.x = self.init_state
 
+    def optimize(self, x):
+        q = self.skel.q
+        q[3:6] = x
+        self.skel.q = q
+        v = norm(self.skel.C - np.array([0.0, 1.12, -0.15])) ** 2
+        print x, v
+        return v
+
     def reset_simulation(self, sim):
         skel = sim.skel
         world = sim.world
         # Reset Pydart
+        self.init_state = AtlasPoses().lean()
         skel.x = self.init_state
+
+        # minimize(self.optimize, np.array([0, 0, 0]))
+
         for i in range(self.ext_force_steps):
             (b, f, p) = self.ext_force
             body = skel.body(b)
