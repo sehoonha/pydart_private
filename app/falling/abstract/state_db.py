@@ -165,6 +165,7 @@ class StateDB(object):
         traces = []
         x_offset = 0.0
         cmds = []
+        max_height = 0.0
         for i, entry in enumerate(path):
             print
             print 'path entry ', i
@@ -178,6 +179,7 @@ class StateDB(object):
             p = get_points(entry.nx_0, entry.u)
             x = np.array([p0.x1, 0.0, p.x1, p.x2]) + x_offset
             y = np.array([p0.y1, 0.0, p.y1, p.y2])
+            max_height = max(max_height, max(y))
             print 'line:', zip(x, y)
             traces += [pyg.Scatter(x=x, y=y, name='TIP%d' % i)]
             x_offset = x[-1]
@@ -188,9 +190,11 @@ class StateDB(object):
             th2 = entry.u.th2
             cmds += [r1, r2, th2]
 
+        length = 0.4 if max_height < 0.4 else 1.2
+
         data = pyg.Data(traces)
-        layout = pyg.Layout(xaxis=pyg.XAxis(range=[-0.1, 0.4]),
-                            yaxis=pyg.YAxis(range=[-0.1, 0.4]))
+        layout = pyg.Layout(xaxis=pyg.XAxis(range=[-0.1, length]),
+                            yaxis=pyg.YAxis(range=[-0.1, length]))
 
         unique_url = py.plot({'data': data, 'layout': layout},
                              filename='Abstract TIP')

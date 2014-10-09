@@ -247,16 +247,21 @@ class IKMulti(object):
         print "==== ik.IKMulti optimize...."
         self.res = None
 
-        for i in range(5):
-            x0 = np.random.rand(self.totaldim)
-            res = minimize(self.evaluate, x0,
-                           method='nelder-mead', tol=0.00001,
-                           # method='SLSQP', tol=0.00001,
-                           options={'maxiter': 100000, 'maxfev': 100000,
-                                    'xtol': 10e-8, 'ftol': 10e-8})
-            if self.res is None or res['fun'] < self.res['fun']:
-                self.res = res
-            print i, self.res['fun']
+        x = np.array([0.0] * 7)
+        x[5] = 2.0
+        x[0] = -1.5
+        self.res = {'x': x}
+
+        # for i in range(5):
+        #     x0 = np.random.rand(self.totaldim)
+        #     res = minimize(self.evaluate, x0,
+        #                    method='nelder-mead', tol=0.00001,
+        #                    # method='SLSQP', tol=0.00001,
+        #                    options={'maxiter': 100000, 'maxfev': 100000,
+        #                             'xtol': 10e-8, 'ftol': 10e-8})
+        #     if self.res is None or res['fun'] < self.res['fun']:
+        #         self.res = res
+        #     print i, self.res['fun']
 
         x = self.res['x']
         self.target_index = 0
