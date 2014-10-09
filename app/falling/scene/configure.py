@@ -1,4 +1,4 @@
-from poses import BioloidGPPoses
+from poses import BioloidGPPoses, AtlasPoses
 
 
 class Configure(object):
@@ -10,7 +10,8 @@ class Configure(object):
         # self.config('lean', 10)
         # self.config('skate', 10)
         # self.config('back', 3)
-        self.config('side', 10)
+        # self.config('side', 10)
+        self.config('atlas_lean', 2000)
 
         self.conditions = None
         # self.conditions = self.generate()
@@ -21,12 +22,16 @@ class Configure(object):
         return self.sim.skel
 
     def config(self, class_name, force):
+        print 'skeleton', self.skel.filename
         print 'config', class_name, force
         self.name = class_name
         # 1. Set the pose
         self.set_pose(class_name)
         # 2. Proceed the simulation
-        self.ext_force = ("torso", [0, 0, force], [0, 0, 0.03])
+        if self.sim.is_bioloid():
+            self.ext_force = ("torso", [0, 0, force], [0, 0, 0.03])
+        else:
+            self.ext_force = ("mtorso", [force, 0, 0], [0, 0, 0.4])
 
     def set_pose(self, class_name):
         if class_name == 'step':
@@ -39,6 +44,8 @@ class Configure(object):
             self.init_state = BioloidGPPoses().back()
         elif class_name == 'side':
             self.init_state = BioloidGPPoses().side()
+        elif class_name == 'atlas_lean':
+            self.init_state = AtlasPoses().lean()
         else:
             print 'Invalid class_name:', class_name
             return
@@ -48,7 +55,6 @@ class Configure(object):
         skel = sim.skel
         world = sim.world
         # Reset Pydart
-        self.init_state = BioloidGPPoses().side()
         skel.x = self.init_state
         for i in range(self.ext_force_steps):
             (b, f, p) = self.ext_force

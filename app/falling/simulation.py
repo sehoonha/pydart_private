@@ -38,8 +38,10 @@ class Simulation(object):
         self.world = pydart.create_world(1.0 / 2000.0)
         self.world.add_skeleton(config.DATA_PATH + "sdf/ground.urdf",
                                 control=False)
+        # self.world.add_skeleton(config.DATA_PATH +
+        #                         "urdf/BioloidGP/BioloidGP.URDF")
         self.world.add_skeleton(config.DATA_PATH +
-                                "urdf/BioloidGP/BioloidGP.URDF")
+                                "urdf/atlas/atlas_v3_no_head.urdf")
 
         self.skel = self.world.skel  # shortcut for the control skeleton
         for i, dof in enumerate(self.skel.dofs):
@@ -72,6 +74,9 @@ class Simulation(object):
         # For handle callbacks properly..
         self.history.clear()
         self.history.push()
+
+    def is_bioloid(self):
+        return ("BioloidGP" in self.skel.filename)
 
     @property
     def tip(self):

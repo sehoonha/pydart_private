@@ -35,7 +35,12 @@ class Contact(object):
         glColor(0, 1, 1)
         glPushMatrix()
         glTranslate(*self.p)
-        glutSolidSphere(0.02, 4, 2)
+
+        if self.skel.m < 10.0:
+            glutSolidSphere(0.02, 4, 2)
+        else:
+            glutSolidSphere(0.06, 4, 2)
+
         glPopMatrix()
 
     def __repr__(self):

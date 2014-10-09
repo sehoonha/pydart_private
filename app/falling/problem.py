@@ -83,6 +83,16 @@ class Problem(object):
                 ("r_shoulder", ["r_shoulder"], [[0.0, 0.0, 0.0]]),
                 ("head", ["torso"], [[0.0, 0.0, 0.03]]),
             ]
+        elif self.name == 'atlas_lean':
+            defs = [
+                ("toes", ["l_foot", "r_foot"],
+                 [[0.18, 0.0, -0.03], [0.18, 0.0, -0.03]]),
+                ("hands", ["l_hand", "r_hand"],
+                 [[0.0, 0.2, 0.0], [0.0, -0.2, 0.0]]),
+                ("knees", ["l_lleg", "r_lleg"],
+                 [[0.12, 0.0, 0.0], [0.12, 0.0, 0.0]]),
+                ("head", ["mtorso"], [[0.2, 0.0, 0.7]], )
+            ]
 
         self.vertices = [i for i in range(len(defs))]
         self.contacts = [Contact(self.skel, i, n, b, p)
@@ -138,6 +148,12 @@ class Problem(object):
             defs = [("r_foot", "r_hand"),
                     ("r_hand", "r_shoulder"),
                     ("r_shoulder", "head"), ]
+        elif self.name == 'atlas_lean':
+            defs = [("toes", "knees"),
+                    ("toes", "hands"),
+                    ("knees", "hands"),
+                    ("knees", "head"),
+                    ("hands", "head"), ]
 
         self.edges = [(find_index(a), find_index(b)) for a, b in defs]
         self.tips = [TIP(id, self.contacts[i], self.contacts[j])

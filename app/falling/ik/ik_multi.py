@@ -113,30 +113,34 @@ class IKMulti(object):
         # Parameter descriptions
         # param_desc: ( [{dof_index or dof_name}, {weight}] )
         desc = []
-        # desc.append([(0, 1.0)])  # Orientation
-        # desc.append([(1, 1.0)])  # Orientation
-        # desc.append([(2, 1.0)])  # X-Y
-        # desc.append([(3, 1.0)])  # X-Y
-        # desc.append([(4, 1.0)])  # X-Y
-        # desc.append([(5, 1.0)])  # X-Y
-
-        desc.append([('l_shoulder', 1.0), ('r_shoulder', 1.0), ])
-        desc.append([('l_hand', 1.0), ('r_hand', 1.0), ])
 
         cfg_name = self.sim.cfg.name
         leg_symmetry = cfg_name in ['lean', 'back']
         print 'leg_symmetry:', leg_symmetry
-        if leg_symmetry:
-            desc.append([('l_thigh', 1.0), ('r_thigh', 1.0), ])
-            desc.append([('l_shin', 0.5), ('r_shin', 0.5), ])
-            desc.append([('l_heel', 0.05), ('r_heel', 0.05), ])
+
+        if self.sim.is_bioloid():
+            desc.append([('l_shoulder', 1.0), ('r_shoulder', 1.0), ])
+            desc.append([('l_hand', 1.0), ('r_hand', 1.0), ])
+            if leg_symmetry:
+                desc.append([('l_thigh', 1.0), ('r_thigh', 1.0), ])
+                desc.append([('l_shin', 0.5), ('r_shin', 0.5), ])
+                desc.append([('l_heel', 0.05), ('r_heel', 0.05), ])
+            else:
+                desc.append([('l_thigh', 1.0), ])
+                desc.append([('r_thigh', 1.0), ])
+                desc.append([('l_shin', 0.5), ])
+                desc.append([('r_shin', 0.5), ])
+                desc.append([('l_heel', 0.05), ])
+                desc.append([('r_heel', 0.05), ])
         else:
-            desc.append([('l_thigh', 1.0), ])
-            desc.append([('r_thigh', 1.0), ])
-            desc.append([('l_shin', 0.5), ])
-            desc.append([('r_shin', 0.5), ])
-            desc.append([('l_heel', 0.05), ])
-            desc.append([('r_heel', 0.05), ])
+            desc.append([('l_arm_shy', 1.0), ('r_arm_shy', 1.0), ])
+            desc.append([('l_arm_shx', 1.0), ('r_arm_shx', -1.0), ])
+            desc.append([('l_arm_elx', 1.0), ('r_arm_elx', -1.0), ])
+            desc.append([('back_bky', 1.0), ])
+            desc.append([('l_leg_hpy', 1.0), ('r_leg_hpy', 1.0), ])
+            desc.append([('l_leg_kny', 1.0), ('r_leg_kny', 1.0), ])
+            desc.append([('l_leg_aky', 1.0), ('r_leg_aky', 1.0), ])
+
         self.desc = desc
 
         # Dimensions
@@ -242,11 +246,6 @@ class IKMulti(object):
 
         print "==== ik.IKMulti optimize...."
         self.res = None
-        #  self.res = {'x':np.array([-1.14106607, 0.17670427, 0.25559106, -0.0110979, 0.50778251,
-        #  1.14567754, -0.23695715, -0.56642192,  0.04896628,  5.47540686,
-        #  0.92026575, -1.33003133,  0.18483881,  0.19278139, -0.18769482,
-        #  0.91292351,  1.04257039, -0.43872298, -1.40326266,  0.52962157,
-        # -1.8548081 ,  0.07832709])}
 
         for i in range(5):
             x0 = np.random.rand(self.totaldim)

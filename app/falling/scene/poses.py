@@ -125,3 +125,45 @@ class BioloidGPPoses:
 
     def side(self):
         return np.concatenate((self.side_pose(), self.zeros()))
+
+
+class AtlasPoses:
+    def __init__(self):
+        names = ['rx', 'ry', 'rz', 'tx', 'ty', 'tz', 'back_bkz',
+                 'l_leg_hpz', 'r_leg_hpz', 'back_bky', 'l_leg_hpx',
+                 'r_leg_hpx', 'back_bkx', 'l_leg_hpy', 'r_leg_hpy',
+                 'l_arm_shy', 'r_arm_shy', 'l_leg_kny', 'r_leg_kny',
+                 'l_arm_shx', 'r_arm_shx', 'l_leg_aky', 'r_leg_aky',
+                 'l_arm_ely', 'r_arm_ely', 'l_leg_akx', 'r_leg_akx',
+                 'l_arm_elx', 'r_arm_elx', 'l_arm_wry', 'r_arm_wry',
+                 'l_arm_wrx', 'r_arm_wrx', ]
+        self.ndofs = len(names)
+        self.dofs = {names[i]: i for i in range(len(names))}
+
+    def lean_pose(self):
+        q = np.zeros(self.ndofs)
+        q[0] = -0.5 * math.pi
+        q[4] = 0.73
+        q[5] = q[4]
+
+        q[self.dofs['l_arm_shy']] = -1.2
+        q[self.dofs['l_arm_shx']] = -0.5
+        q[self.dofs['l_arm_elx']] = -0.5
+        q[self.dofs['r_arm_shy']] = q[self.dofs['l_arm_shy']]
+        q[self.dofs['r_arm_shx']] = -q[self.dofs['l_arm_shx']]
+        q[self.dofs['r_arm_elx']] = -q[self.dofs['l_arm_elx']]
+
+        # q[self.dofs['l_leg_aky']] = -1.0
+        # q[self.dofs['r_leg_aky']] = -1.0
+        # q[self.dofs['l_leg_kny']] = -1.0
+        # q[self.dofs['r_leg_kny']] = -1.0
+        # q[self.dofs['l_leg_hpy']] = -1.0
+        # q[self.dofs['r_leg_hpy']] = -1.0
+        # q[self.dofs['back_bky']] = 1.0
+        return q
+
+    def zeros(self):
+        return np.zeros(self.ndofs)
+
+    def lean(self):
+        return np.concatenate((self.lean_pose(), self.zeros()))
