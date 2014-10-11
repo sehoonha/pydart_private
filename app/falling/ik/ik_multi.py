@@ -354,8 +354,3 @@ class IKMulti(object):
             self.sim.skel.q = saved_pose
             self.sim.skel.qdot = saved_vel
         return self.targets
-
-    def next_target(self):
-        print 'next_target: ik.target_index:', self.target_index
-        self.skel.q = self.targets[self.target_index]
-        self.target_index = (self.target_index + 1) % self.n

@@ -93,6 +93,12 @@ class MyWindow(QtGui.QMainWindow):
         self.plotImpactAction = QtGui.QAction('Impact', self)
         self.plotImpactAction.triggered.connect(self.plotImpactEvent)
 
+        self.loadAction = QtGui.QAction('&Load', self)
+        self.loadAction.triggered.connect(self.loadEvent)
+
+        self.saveAction = QtGui.QAction('&Save', self)
+        self.saveAction.triggered.connect(self.saveEvent)
+
     def initToolbar(self):
         # Create a toolbar
         self.toolbar = self.addToolBar('Control')
@@ -114,6 +120,8 @@ class MyWindow(QtGui.QMainWindow):
     def initMenu(self):
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
+        fileMenu.addAction(self.loadAction)
+        fileMenu.addAction(self.saveAction)
         fileMenu.addSeparator()
 
         # Recording menu
@@ -176,19 +184,36 @@ class MyWindow(QtGui.QMainWindow):
         self.sim.plan()
 
     def nextEvent(self):
-        self.sim.ik.next_target()
+        self.sim.tip_controller.next_target()
 
     def resetEvent(self):
         self.sim.reset()
 
     def plotEvent(self):
-        self.sim.history.plot()
+        self.sim.plan.plot()
 
     def plotCOMEvent(self):
         self.sim.history.plotCOM()
 
     def plotImpactEvent(self):
         self.sim.history.plotImpact()
+
+    def loadEvent(self):
+        filename = QtGui.QFileDialog.getOpenFileName(self, 'Open file',
+                                                     '.', '*.sim')
+        print 'load:', filename
+        self.sim.load(filename)
+        print 'load OK'
+
+    def saveEvent(self):
+        filename = QtGui.QFileDialog.getSaveFileName(self, 'Open file',
+                                                     '.', '*.sim')
+        if filename[-4:] != '.sim':
+            filename += '.sim'
+        print 'save:', filename
+        self.sim.save(filename)
+        print 'save OK'
+
 
 glutInit(sys.argv)
 app = QtGui.QApplication(["Falling controller with Pydart"])

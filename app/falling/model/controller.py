@@ -8,6 +8,7 @@ class Controller(object):
         self.prob = _prob
 
         self.tip_index = 0
+        self.target_index = 0
         self.targets = [self.skel.q]
         if _plan is None:
             self.__init_default()
@@ -84,3 +85,9 @@ class Controller(object):
         data['tip_index'] = self.tip_index
         data['tip_pivot_nodes'] = self.pivots()
         self.tip().push(history)
+
+    def next_target(self):
+        print 'tip_controller.next_target:', self.target_index
+        n = len(self.targets)
+        self.skel.q = self.targets[self.target_index]
+        self.target_index = (self.target_index + 1) % n

@@ -64,41 +64,43 @@ class Plan:
     def contact2(self, index):
         return int(self.controls[index].c2)
 
-    # def C(self, collision_index=-1):
-    #     x = self.x0
-    #     (th1, r1) = (x.th1, x.r1)
-    #     x1 = r1 * sin(th1)
-    #     y1 = r1 * cos(th1)
-    #     return np.array([x1, y1])
-
-    # def P(self, index, collision_index=-1):
-    #     if index == 0:
-    #         return np.array([0.0, 0.0])
-    #     else:
-    #         theta = pi + self.x0.th1
-    #         r2 = None
-    #         for u in self.controls[:index]:
-    #             theta -= (pi - u.th2)
-    #             r2 = u.r2
-    #         x2, y2 = r2 * sin(theta), r2 * cos(theta)
-    #         p = self.C() + np.array([x2, y2])
-    #         return p
-
-    # def __repr__(self):
-    #     pass
+    def __str__(self):
+        ret = "== Plan ==\n"
+        for i, entry in enumerate(self.path):
+            ret += '\n'
+            ret += 'Contact %d' % i + '\n'
+            ret += 'impulse: ' + str(entry.v) + '\n'
+            ret += 'x0: ' + str(entry.x) + '\n'
+            ret += 'nx_0: ' + str(entry.nx_0) + '\n'
+            ret += 'u: ' + str(entry.u) + '\n'
+            ret += 'nx_1: ' + str(entry.nx_1) + '\n'
+        return ret
 
     def plot(self):
         """Plot the configuration with the given index of collision"""
         traces = []
+        min_offset = 0.0
+        max_offset = 0.0
+        x_offset = 0.0
         for i in range(self.n):
             c = self.C(i)
             p = self.P(i)
-            x = np.array([0.0, c[0], p[0]]) + 0.1 * i
+            x = np.array([0.0, c[0], p[0]]) + x_offset
             y = np.array([0.0, c[1], p[1]])
+            x_offset = x[-1]
+
+            max_offset = max(max_offset, max(x))
+            max_offset = max(max_offset, max(y))
+            min_offset = min(min_offset, min(x))
+            min_offset = min(min_offset, min(y))
+
             traces += [pyg.Scatter(x=x, y=y, name='L%d' % i)]
         data = pyg.Data(traces)
-        layout = pyg.Layout(xaxis=pyg.XAxis(range=[-0.1, 0.4]),
-                            yaxis=pyg.YAxis(range=[-0.1, 0.4]))
+
+        origin = min_offset - 0.05
+        size = (max_offset - min_offset) + 0.1
+        layout = pyg.Layout(xaxis=pyg.XAxis(range=[origin, size]),
+                            yaxis=pyg.YAxis(range=[origin, size]))
 
         unique_url = py.plot({'data': data, 'layout': layout},
                              filename='TIP Pose')

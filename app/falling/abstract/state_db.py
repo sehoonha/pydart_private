@@ -162,6 +162,7 @@ class StateDB(object):
 
     def plot_trace(self, x):
         path = self.trace(x)
+        print 'path retrievd:', len(path)
         traces = []
         x_offset = 0.0
         cmds = []

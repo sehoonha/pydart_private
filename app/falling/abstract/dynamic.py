@@ -131,12 +131,13 @@ class DynamicTIP:
         # path = self.db.trace(x)
         # for i, (x, v, u) in enumerate(path):
         #     print i, x, v, u
-        self.db.plot_trace(x)
+        # self.db.plot_trace(x)
         # exit(0)
 
         self.x0 = x
         # self.path = self.db.trace_impacts(x)
         self.path = self.db.trace(x)
+        self.plot()
         return j
 
     def plan(self, x, j):
@@ -198,3 +199,6 @@ class DynamicTIP:
         self.upper_bound = min(self.upper_bound, best_j)
         self.db.add(x, best_entry)
         return (x, best_j)
+
+    def plot(self):
+        self.db.plot_trace(self.x0)

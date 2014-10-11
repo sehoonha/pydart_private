@@ -1,3 +1,4 @@
+
 import sys
 import config
 sys.path.append(config.PYDART_PATH)
@@ -5,6 +6,7 @@ import os
 import time
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(ROOT_DIR)
+import cPickle as pickle
 
 import pydart
 import numpy as np
@@ -24,10 +26,6 @@ import abstract.dynamic
 import abstract.plan
 import model.controller
 import cProfile
-
-
-def STR(v):
-    return str(["%.3f" % x for x in v])
 
 
 class Simulation(object):
@@ -102,14 +100,15 @@ class Simulation(object):
         print 'path = ', str(path)
         # print 'sleep 5 seconds'
         # time.sleep(5)
-        pn = abstract.plan.Plan(x0, path)
+        self.plan = abstract.plan.Plan(x0, path)
         print 'new plan is generated'
-        # pn.plot()
+        self.plan.plot()
         self.tip_controller = model.controller.Controller(self.skel,
-                                                          self.prob, pn)
+                                                          self.prob,
+                                                          self.plan)
         print 'new tip controller is generated'
 
-        self.ik = IKMulti(self, pn)
+        self.ik = IKMulti(self, self.plan)
         self.ik.optimize(restore=False)
         # print
         # print 'start profiling..............................'
@@ -211,7 +210,6 @@ class Simulation(object):
         status += "P = (%.4f %.4f) " % (data['P.x'], data['P.y'])
         status += "Impulse = %.4f (max %.4f) " % (data['impulse'],
                                                   data['max_impulse'])
-        # status += "l_hand.v = %s " % STR(data['l_hand.v'])
         status += "I = %.4f " % self.skel.approx_inertia_x()
         # status += "TIP = " + str(data['tip']) + " "
         tip = self.tip_controller.tip()
@@ -224,3 +222,16 @@ class Simulation(object):
         self.world.set_frame(i)
         # pydart_api.setWorldSimFrame(i)
         self.history.pop(i)
+
+    def save(self, filename):
+        protocol = pickle.HIGHEST_PROTOCOL
+        # protocol = 0
+        with open(filename, 'w+') as fp:
+            pickle.dump(self.plan, fp, protocol)
+            pickle.dump(self.tip_controller, fp, protocol)
+
+    def load(self, filename):
+        with open(filename, 'r') as fp:
+            self.plan = pickle.load(fp)
+            self.tip_controller = pickle.load(fp)
+        print self.plan
