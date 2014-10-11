@@ -51,7 +51,7 @@ class MyWindow(QtGui.QMainWindow):
         self.glwidget = GLWidget(self)
         self.glwidget.setGeometry(0, 30, 1280, 720)
         self.glwidget.sim = self.sim
-        zoom = -1.2 if self.sim.is_bioloid() else -4.2
+        zoom = -1.2 if self.sim.is_bioloid() else -4.5
         self.glwidget.zoom = zoom
 
     def initActions(self):

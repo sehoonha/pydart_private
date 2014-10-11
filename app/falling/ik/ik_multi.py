@@ -290,7 +290,7 @@ class IKMulti(object):
         for q in poses:
             # Check the pose
             max_joint = np.max(np.fabs(q[6:]))
-            if max_joint > 2.0:
+            if max_joint > 2.2:
                 return [max_joint] * len(self.objs)
             # # Check the change of pose
             # dq = q - self.q0
@@ -326,20 +326,21 @@ class IKMulti(object):
 
         print "==== ik.IKMulti optimize...."
         self.res = None
-        # x_opt = np.array([-1.7585, -0.0573, 0.6502, 0.3405, 0.3409])
-        # self.res = {'x': x_opt}
+        x_opt = np.array([-2.2, -0.6107, -0.6226, -0.4270, 0.4318])
+        # x_opt = np.array([-0.9982, -0.8941, 0.1035, 0.1872, 0.3379])
+        self.res = {'x': x_opt}
 
-        for i in range(5):
-            x0 = (np.random.rand(self.totaldim) - 0.5) * 3.14
-            print 'x0:', x0
-            res = minimize(self.evaluate, x0,
-                           method='nelder-mead', tol=0.00001,
-                           # method='SLSQP', tol=0.00001,
-                           options={'maxiter': 100000, 'maxfev': 100000,
-                                    'xtol': 10e-8, 'ftol': 10e-8})
-            if self.res is None or res['fun'] < self.res['fun']:
-                self.res = res
-            print i, self.res['fun']
+        # for i in range(1):
+        #     x0 = (np.random.rand(self.totaldim) - 0.5) * 3.14
+        #     print 'x0:', x0
+        #     res = minimize(self.evaluate, x0,
+        #                    method='nelder-mead', tol=0.00001,
+        #                    # method='SLSQP', tol=0.00001,
+        #                    options={'maxiter': 100000, 'maxfev': 100000,
+        #                             'xtol': 10e-8, 'ftol': 10e-8})
+        #     if self.res is None or res['fun'] < self.res['fun']:
+        #         self.res = res
+        #     print i, self.res['fun']
 
         x = self.res['x']
         self.target_index = 0

@@ -29,7 +29,7 @@ class GLWidget(QGLWidget):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         glLoadIdentity()
-        glTranslate(0.0, 0.0, self.zoom)  # Camera
+        glTranslate(0.0, -0.2, self.zoom)  # Camera
         glMultMatrixf(self.tb.matrix)
 
         self.sim.render()
