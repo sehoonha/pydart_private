@@ -14,11 +14,18 @@ class History:
 
     def clear(self):
         self.histories = []
+        # self.index = -1  # Use the latest
+
+    def __len__(self):
+        return len(self.histories)
 
     def push(self):
         skel = self.world.skel
         data = {}
         data['t'] = self.world.t
+        data['q'] = skel.q
+        data['qdot'] = skel.qdot
+        data['x'] = skel.x
         data['tip_index'] = 0
         # data['tip_pivot_nodes'] = self.sim.tip.pivot_nodes()
         data['tip_pivot_nodes'] = ['test']

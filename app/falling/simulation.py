@@ -3,13 +3,13 @@ import sys
 import config
 sys.path.append(config.PYDART_PATH)
 import os
-import time
+# import time
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(ROOT_DIR)
 import cPickle as pickle
 
 import pydart
-import numpy as np
+# import numpy as np
 from OpenGL.GL import glPushMatrix, glPopMatrix, glColor
 import gltools
 
@@ -25,7 +25,7 @@ import abstract.twotip
 import abstract.dynamic
 import abstract.plan
 import model.controller
-import cProfile
+# import cProfile
 
 
 class Simulation(object):
@@ -84,15 +84,8 @@ class Simulation(object):
         # Plan with Dynamic TIP
         self.abstract_tip.set_x0(self.tip_controller.tips)
         self.abstract_tip.plan_initial()
-        # print
-        # print 'start profiling..............................'
-        # print
-        # # cProfile.run('self.abstract_tip.plan_initial()')
         # cProfile.runctx('self.abstract_tip.plan_initial()',
         #                 globals(), locals())
-        # print
-        # print 'finish profiling....................!!!!!!!'
-        # print
         x0 = self.abstract_tip.x0
         path = self.abstract_tip.path
 
@@ -110,28 +103,9 @@ class Simulation(object):
 
         self.ik = IKMulti(self, self.plan)
         self.ik.optimize(restore=False)
-        # print
-        # print 'start profiling..............................'
-        # print
-        # cProfile.runctx('self.ik.optimize(restore=False)',
-        #                 globals(), locals())
-        # print
-        # print 'finish profiling....................!!!!!!!'
-        # print
         self.tip_controller.targets = self.ik.targets
 
     def reset(self):
-        # # Reset Pydart
-        # self.skel.x = self.cfg.init_state
-        # for i in range(self.):
-        #     (b, f, p) = self.cfg.ext_force
-        #     body = self.skel.body(b)
-        #     body.add_ext_force_at(f, p)
-        #     self.skel.tau = self.tip_controller.control()
-        #     self.world.step()
-        # state_after_pushed = self.skel.x
-        # self.world.reset()
-        # self.skel.x = state_after_pushed
         self.cfg.reset_simulation(self)
 
         # Reset inner structures
@@ -218,8 +192,17 @@ class Simulation(object):
 
         return status
 
+    def __len__(self):
+        return max(self.world.nframes, len(self.history))
+
     def set_world_frame(self, i):
-        self.world.set_frame(i)
+        if i < self.world.nframes:
+            self.world.set_frame(i)
+        elif i < len(self.history):
+            data = self.history.get_frame_at(i)
+            self.skel.x = data['x']
+        else:
+            print 'set_world_frame: invalid index', i
         # pydart_api.setWorldSimFrame(i)
         self.history.pop(i)
 
@@ -235,3 +218,15 @@ class Simulation(object):
             self.plan = pickle.load(fp)
             self.tip_controller = pickle.load(fp)
         print self.plan
+
+    def save_motion(self, filename):
+        protocol = pickle.HIGHEST_PROTOCOL
+        # protocol = 0
+        with open(filename, 'w+') as fp:
+            pickle.dump(self.history, fp, protocol)
+        print 'save #', len(self.history), 'frames'
+
+    def load_motion(self, filename):
+        with open(filename, 'r') as fp:
+            self.history = pickle.load(fp)
+        print 'load #', len(self.history), 'frames'

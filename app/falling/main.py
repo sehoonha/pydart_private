@@ -93,11 +93,17 @@ class MyWindow(QtGui.QMainWindow):
         self.plotImpactAction = QtGui.QAction('Impact', self)
         self.plotImpactAction.triggered.connect(self.plotImpactEvent)
 
-        self.loadAction = QtGui.QAction('&Load', self)
+        self.loadAction = QtGui.QAction('&Load Plan', self)
         self.loadAction.triggered.connect(self.loadEvent)
 
-        self.saveAction = QtGui.QAction('&Save', self)
+        self.saveAction = QtGui.QAction('&Save Plan', self)
         self.saveAction.triggered.connect(self.saveEvent)
+
+        self.loadmAction = QtGui.QAction('&Load Motion', self)
+        self.loadmAction.triggered.connect(self.loadmEvent)
+
+        self.savemAction = QtGui.QAction('&Save Motion', self)
+        self.savemAction.triggered.connect(self.savemEvent)
 
     def initToolbar(self):
         # Create a toolbar
@@ -123,6 +129,8 @@ class MyWindow(QtGui.QMainWindow):
         fileMenu.addAction(self.loadAction)
         fileMenu.addAction(self.saveAction)
         fileMenu.addSeparator()
+        fileMenu.addAction(self.loadmAction)
+        fileMenu.addAction(self.savemAction)
 
         # Recording menu
         recordingMenu = menubar.addMenu('&Recording')
@@ -152,7 +160,7 @@ class MyWindow(QtGui.QMainWindow):
             result = self.sim.step()
             if result:
                 self.playAction.setChecked(False)
-            doCapture = (self.sim.world.nframes % 4 == 1)
+            doCapture = (len(self.sim) % 4 == 1)
 
         if self.captureAction.isChecked() and doCapture:
             self.glwidget.capture()
@@ -160,7 +168,7 @@ class MyWindow(QtGui.QMainWindow):
     def renderTimerEvent(self):
         self.glwidget.updateGL()
         self.statusBar().showMessage(self.sim.status_string())
-        self.rangeSlider.setRange(0, self.sim.world.nframes - 1)
+        self.rangeSlider.setRange(0, len(self.sim) - 1)
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Escape:
@@ -200,19 +208,49 @@ class MyWindow(QtGui.QMainWindow):
 
     def loadEvent(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open file',
-                                                     '.', '*.sim')
+                                                     '.', '*.plan')
+        if len(filename) == 0:
+            print 'load cancel'
+            return
         print 'load:', filename
         self.sim.load(filename)
         print 'load OK'
 
     def saveEvent(self):
         filename = QtGui.QFileDialog.getSaveFileName(self, 'Open file',
-                                                     '.', '*.sim')
-        if filename[-4:] != '.sim':
-            filename += '.sim'
+                                                     '.', '*.plan')
+        if len(filename) == 0:
+            print 'save cancel'
+            return
+        if filename[-5:] != '.plan':
+            filename += '.plan'
         print 'save:', filename
         self.sim.save(filename)
         print 'save OK'
+
+    def loadmEvent(self):
+        filename = QtGui.QFileDialog.getOpenFileName(self, 'Open file',
+                                                     '.', '*.motion')
+        if len(filename) == 0:
+            print 'load motion cancel'
+            return
+
+        print 'load motion:', filename
+        self.sim.load_motion(filename)
+        print 'load motion OK'
+        self.rangeSlider.setRange(0, len(self.sim) - 1)
+
+    def savemEvent(self):
+        filename = QtGui.QFileDialog.getSaveFileName(self, 'Open file',
+                                                     '.', '*.motion')
+        if len(filename) == 0:
+            print 'save motion cancel'
+            return
+        if filename[-7:] != '.motion':
+            filename += '.motion'
+        print 'save motion:', filename
+        self.sim.save_motion(filename)
+        print 'save motion OK'
 
 
 glutInit(sys.argv)
