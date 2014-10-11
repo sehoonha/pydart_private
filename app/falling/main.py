@@ -189,7 +189,7 @@ class MyWindow(QtGui.QMainWindow):
         print repr(self.sim.skel.x)
 
     def planEvent(self):
-        self.sim.plan()
+        self.sim.do_plan()
 
     def nextEvent(self):
         self.sim.tip_controller.next_target()

@@ -80,7 +80,7 @@ class Simulation(object):
     def tip(self):
         return self.tip_controller.tip()
 
-    def plan(self):
+    def do_plan(self):
         # Plan with Dynamic TIP
         self.abstract_tip.set_x0(self.tip_controller.tips)
         self.abstract_tip.plan_initial()
@@ -95,7 +95,7 @@ class Simulation(object):
         # time.sleep(5)
         self.plan = abstract.plan.Plan(x0, path)
         print 'new plan is generated'
-        self.plan.plot()
+        # self.plan.plot()
         self.tip_controller = model.controller.Controller(self.skel,
                                                           self.prob,
                                                           self.plan)
