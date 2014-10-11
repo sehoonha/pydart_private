@@ -246,9 +246,9 @@ class IKMulti(object):
             self.objs += [ObjCCW(self.prob.tips[e], i)]
             self.objs += [ObjBaseDist(self.prob.tips[e], bd, i)]
 
-            rests = set(self.prob.contacts) - set([con1, con2])
-            for con in rests:
-                self.objs += [ObjHide(tip, con, i)]
+            # rests = set(self.prob.contacts) - set([con1, con2])
+            # for con in rests:
+            #     self.objs += [ObjHide(tip, con, i)]
 
         self.objs += [ObjSmooth(self.skel.q)]
         print '# objs = ', len(self.objs)
@@ -330,7 +330,8 @@ class IKMulti(object):
         # self.res = {'x': x_opt}
 
         for i in range(5):
-            x0 = np.random.rand(self.totaldim)
+            x0 = (np.random.rand(self.totaldim) - 0.5) * 3.14
+            print 'x0:', x0
             res = minimize(self.evaluate, x0,
                            method='nelder-mead', tol=0.00001,
                            # method='SLSQP', tol=0.00001,
