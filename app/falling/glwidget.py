@@ -29,7 +29,8 @@ class GLWidget(QGLWidget):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         glLoadIdentity()
-        glTranslate(0.0, -0.2, self.zoom)  # Camera
+        # glTranslate(0.0, -0.2, self.zoom)  # Camera
+        glTranslate(*self.tb.trans)
         glMultMatrixf(self.tb.matrix)
 
         self.sim.render()
@@ -92,7 +93,9 @@ class GLWidget(QGLWidget):
 
         modifiers = QtGui.QApplication.keyboardModifiers()
         if modifiers == QtCore.Qt.ShiftModifier:
-            self.zoom += 0.01 * (dx + dy)
+            self.tb.zoom_to(dx, -dy)
+        elif modifiers == QtCore.Qt.ControlModifier:
+            self.tb.trans_to(dx, -dy)
         else:
             self.tb.drag_to(x, y, dx, -dy)
         self.lastPos = event.pos()

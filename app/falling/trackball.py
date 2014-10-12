@@ -12,7 +12,7 @@
 # the name of Silicon Graphics, Inc. not be used in advertising
 # or publicity pertaining to distribution of the software without specific,
 # written prior permission.
-# 
+#
 # THE MATERIAL EMBODIED ON THIS SOFTWARE IS PROVIDED TO YOU "AS-IS"
 # AND WITHOUT WARRANTY OF ANY KIND, EXPRESS, IMPLIED OR OTHERWISE,
 # INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY OR
@@ -25,7 +25,7 @@
 # ADVISED OF THE POSSIBILITY OF SUCH LOSS, HOWEVER CAUSED AND ON
 # ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE
 # POSSESSION, USE OR PERFORMANCE OF THIS SOFTWARE.
-# 
+#
 # US Government Users Restricted Rights
 # Use, duplication, or disclosure by the Government is subject to
 # restrictions set forth in FAR 52.227.19(c)(2) or subparagraph
@@ -41,7 +41,7 @@
 # and David M. Ciemiewicz, Mark Grossman, Henry Moreton, and Paul Haeberli
 #
 # Note: See the following for more information on quaternions:
-# 
+#
 # - Shoemake, K., Animating rotation with quaternion curves, Computer
 #   Graphics 19, No 3 (Proc. SIGGRAPH'85), 245-254, 1985.
 # - Pletinckx, D., Quaternion calculus as a basic tool in computer
@@ -50,7 +50,7 @@
 ''' Provides a virtual trackball for 3D scene viewing
 
 Example usage:
- 
+
    trackball = Trackball(45,45)
 
    @window.event
@@ -149,17 +149,29 @@ def _q_rotmatrix(q):
 class Trackball(object):
     ''' Virtual trackball for 3D scene viewing. '''
 
-    def __init__(self, theta=0, phi=0, zoom=1, distance=3):
+    def __init__(self, theta=0, phi=0, zoom=1, rot=None, trans=None, distance=3):
         ''' Build a new trackball with specified view '''
 
-        self._rotation = [0,0,0,1]
         self.zoom = zoom
         self.distance = distance
         self._count = 0
         self._matrix=None
         self._RENORMCOUNT = 97
         self._TRACKBALLSIZE = 0.8
-        self._set_orientation(theta,phi)
+        if rot is None:
+            self._rotation = [0,0,0,1]
+            self._set_orientation(theta,phi)
+        else:
+            self._theta = theta
+            self._phi = phi
+            self._rotation = rot
+            m = _q_rotmatrix(self._rotation)
+            self._matrix = (GLfloat*len(m))(*m)
+
+        if trans is None:
+            self._trans = [0.0, 0.0, -1.2]
+        else:
+            self._trans = trans
 
     def drag_to (self, x, y, dx, dy):
         ''' Move trackball view from x,y to x+dx,y+dy. '''
@@ -178,12 +190,18 @@ class Trackball(object):
         m = _q_rotmatrix(self._rotation)
         self._matrix = (GLfloat*len(m))(*m)
 
-    def zoom_to (self, x, y, dx, dy):
-        ''' Zoom trackball by a factor dy '''
-        viewport = gl.glGetIntegerv(gl.GL_VIEWPORT)
-        height = float(viewport[3])
-        self.zoom = self.zoom-5*dy/height
+    # def zoom_to (self, x, y, dx, dy):
+    #     ''' Zoom trackball by a factor dy '''
+    #     viewport = gl.glGetIntegerv(gl.GL_VIEWPORT)
+    #     height = float(viewport[3])
+    #     self.zoom = self.zoom-5*dy/height
 
+    def zoom_to(self, dx, dy):
+        self._trans[2] += 0.01 * (dx + dy)
+
+    def trans_to(self, dx, dy):
+        self._trans[0] += 0.01 * dx
+        self._trans[1] += 0.01 * dy
 
     def push(self):
         viewport = gl.glGetIntegerv(gl.GL_VIEWPORT)
@@ -211,7 +229,13 @@ class Trackball(object):
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glPopMatrix()
 
+    def _get_trans(self):
+        return self._trans
+    trans = property(_get_trans,
+                     doc='''Translation matrix (read-only)''')
+
     def _get_matrix(self):
+        # print self._rotation
         return self._matrix
     matrix = property(_get_matrix,
                      doc='''Model view matrix transformation (read-only)''')
@@ -254,7 +278,7 @@ class Trackball(object):
 
 
     def _get_orientation(self):
-        ''' Return current computed orientation (theta,phi). ''' 
+        ''' Return current computed orientation (theta,phi). '''
 
         q0,q1,q2,q3 = self._rotation
         ax = math.atan(2*(q0*q1+q2*q3)/(1-2*(q1*q1+q2*q2)))*180.0/math.pi
@@ -262,7 +286,7 @@ class Trackball(object):
         return -az,ax
 
     def _set_orientation(self, theta, phi):
-        ''' Computes rotation corresponding to theta and phi. ''' 
+        ''' Computes rotation corresponding to theta and phi. '''
 
         self._theta = theta
         self._phi = phi
@@ -291,7 +315,7 @@ class Trackball(object):
         return z
 
 
-    def _rotate(self, x, y, dx, dy): 
+    def _rotate(self, x, y, dx, dy):
         ''' Simulate a track-ball.
 
             Project the points onto the virtual trackball, then figure out the
@@ -326,5 +350,7 @@ class Trackball(object):
         phi = str(self.phi)
         theta = str(self.theta)
         zoom = str(self.zoom)
-        return 'Trackball(phi=%s,theta=%s,zoom=%s)' % (phi,theta,zoom)
-
+        rot = str(self._rotation)
+        trans = str(self._trans)
+        return 'Trackball(phi=%s,theta=%s,zoom=%s,rot=%s,trans=%s)' % \
+            (phi,theta,zoom,rot, trans)

@@ -18,6 +18,7 @@ from PyQt4.QtOpenGL import *
 from glwidget import GLWidget
 
 from simulation import Simulation
+from trackball import Trackball
 
 
 class MyWindow(QtGui.QMainWindow):
@@ -44,6 +45,8 @@ class MyWindow(QtGui.QMainWindow):
         self.renderTimer.timeout.connect(self.renderTimerEvent)
         self.renderTimer.start(25)
 
+        self.cam0Event()
+
     def initUI(self):
         self.setGeometry(0, 0, 1280, 720)
         # self.setWindowTitle('Toolbar')
@@ -51,8 +54,6 @@ class MyWindow(QtGui.QMainWindow):
         self.glwidget = GLWidget(self)
         self.glwidget.setGeometry(0, 30, 1280, 720)
         self.glwidget.sim = self.sim
-        zoom = -1.2 if self.sim.is_bioloid() else -4.5
-        self.glwidget.zoom = zoom
 
     def initActions(self):
         # Create actions
@@ -93,6 +94,7 @@ class MyWindow(QtGui.QMainWindow):
         self.plotImpactAction = QtGui.QAction('Impact', self)
         self.plotImpactAction.triggered.connect(self.plotImpactEvent)
 
+        # File Menu
         self.loadAction = QtGui.QAction('&Load Plan', self)
         self.loadAction.triggered.connect(self.loadEvent)
 
@@ -104,6 +106,13 @@ class MyWindow(QtGui.QMainWindow):
 
         self.savemAction = QtGui.QAction('&Save Motion', self)
         self.savemAction.triggered.connect(self.savemEvent)
+
+        # Camera Menu
+        self.cam0Action = QtGui.QAction('Camera0', self)
+        self.cam0Action.triggered.connect(self.cam0Event)
+
+        self.printCamAction = QtGui.QAction('Print Camera', self)
+        self.printCamAction.triggered.connect(self.printCamEvent)
 
     def initToolbar(self):
         # Create a toolbar
@@ -131,6 +140,12 @@ class MyWindow(QtGui.QMainWindow):
         fileMenu.addSeparator()
         fileMenu.addAction(self.loadmAction)
         fileMenu.addAction(self.savemAction)
+
+        # Camera menu
+        cameraMenu = menubar.addMenu('&Camera')
+        cameraMenu.addAction(self.cam0Action)
+        cameraMenu.addSeparator()
+        cameraMenu.addAction(self.printCamAction)
 
         # Recording menu
         recordingMenu = menubar.addMenu('&Recording')
@@ -252,6 +267,22 @@ class MyWindow(QtGui.QMainWindow):
         self.sim.save_motion(filename)
         print 'save motion OK'
 
+    def cam0Event(self):
+        print 'cam0Event'
+        self.glwidget.tb = Trackball(phi=2.015, theta=-13.6615, zoom=1,
+                                     rot=[-0.08275830866372329,
+                                          -0.6146332681158156,
+                                          -0.05969151061725115,
+                                          0.7821853563143598],
+                                     trans=[-1.3800000000000008,
+                                            -0.43000000000000016,
+                                            -4.6])
+
+    def printCamEvent(self):
+        print 'printCamEvent'
+        print '----'
+        print repr(self.glwidget.tb)
+        print '----'
 
 glutInit(sys.argv)
 app = QtGui.QApplication(["Falling controller with Pydart"])
