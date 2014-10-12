@@ -14,7 +14,8 @@ class Configure(object):
         # self.config('skate', 10)
         # self.config('back', 3)
         # self.config('side', 10)
-        self.config('atlas_lean', 2000)
+        # self.config('atlas_lean', 2000)
+        self.config('atlas_step', 3000)
 
         self.conditions = None
         # self.conditions = self.generate()
@@ -49,6 +50,8 @@ class Configure(object):
             self.init_state = BioloidGPPoses().side()
         elif class_name == 'atlas_lean':
             self.init_state = AtlasPoses().lean()
+        elif class_name == 'atlas_step':
+            self.init_state = AtlasPoses().step()
         else:
             print 'Invalid class_name:', class_name
             return
@@ -66,7 +69,7 @@ class Configure(object):
         skel = sim.skel
         world = sim.world
         # Reset Pydart
-        self.init_state = AtlasPoses().lean()
+        self.init_state = AtlasPoses().step()
         skel.x = self.init_state
 
         # minimize(self.optimize, np.array([0, 0, 0]))

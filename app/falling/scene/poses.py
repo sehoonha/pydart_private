@@ -145,17 +145,6 @@ class AtlasPoses:
         q[:3] = np.array([2.4, 2.4, 2.4])
         q[3:6] = [1.89, -0.67, -0.406]
 
-        # # q[self.dofs['l_arm_shy']] = -1.5
-        # # q[self.dofs['l_arm_shx']] = -0.5
-        # # q[self.dofs['l_arm_shy']] = 0
-        # # q[self.dofs['l_arm_shx']] = -1.5
-        # # q[self.dofs['l_arm_shy']] = 1.5
-        # # q[self.dofs['l_arm_shx']] = -0.5
-        # x = 1.3
-        # q[self.dofs['l_arm_shy']] = x
-        # # q[self.dofs['l_arm_shx']] = -1.5 + 0.6 * math.fabs(x)
-        # q[self.dofs['l_arm_shx']] = -0.5 - math.cos(x / 1.57)
-
         q[self.dofs['l_arm_shy']] = -0.0
         q[self.dofs['l_arm_shx']] = -1.0
         q[self.dofs['l_arm_elx']] = -0.5
@@ -163,13 +152,28 @@ class AtlasPoses:
         q[self.dofs['r_arm_shx']] = -q[self.dofs['l_arm_shx']]
         q[self.dofs['r_arm_elx']] = -q[self.dofs['l_arm_elx']]
 
-        # q[self.dofs['l_leg_aky']] = -1.0
-        # q[self.dofs['r_leg_aky']] = -1.0
-        # q[self.dofs['l_leg_kny']] = -1.0
-        # q[self.dofs['r_leg_kny']] = -1.0
-        # q[self.dofs['l_leg_hpy']] = -1.0
-        # q[self.dofs['r_leg_hpy']] = -1.0
-        # q[self.dofs['back_bky']] = 1.0
+        return q
+
+    def step_pose(self):
+        q = np.zeros(self.ndofs)
+        q[:3] = np.array([2.4, 2.4, 2.4])
+        q[3:6] = [1.89, -0.67, -0.406]
+
+        q[self.dofs['l_arm_shy']] = -0.2
+        q[self.dofs['l_arm_shx']] = -1.3
+        # q[self.dofs['l_arm_elx']] = -0.5
+        q[self.dofs['r_arm_shy']] = q[self.dofs['l_arm_shy']]
+        q[self.dofs['r_arm_shx']] = -q[self.dofs['l_arm_shx']]
+        q[self.dofs['r_arm_elx']] = -q[self.dofs['l_arm_elx']]
+
+        q[self.dofs['r_leg_hpy']] = -0.1
+        q[self.dofs['r_leg_kny']] = 0.2
+        q[self.dofs['r_leg_aky']] = -0.1
+
+        q[self.dofs['l_leg_hpz']] = -0.0
+        q[self.dofs['l_leg_hpy']] = -1.2
+        q[self.dofs['l_leg_kny']] = 1.5
+
         return q
 
     def zeros(self):
@@ -177,3 +181,6 @@ class AtlasPoses:
 
     def lean(self):
         return np.concatenate((self.lean_pose(), self.zeros()))
+
+    def step(self):
+        return np.concatenate((self.step_pose(), self.zeros()))

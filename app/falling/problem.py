@@ -93,6 +93,16 @@ class Problem(object):
                  [[0.12, 0.0, 0.0], [0.12, 0.0, 0.0]]),
                 ("head", ["mtorso"], [[0.2, 0.0, 0.7]], )
             ]
+        elif self.name == 'atlas_step':
+            defs = [
+                ("toes", ["l_foot", "r_foot"],
+                 [[0.18, 0.0, -0.03], [0.18, 0.0, -0.03]]),
+                ("hands", ["l_hand", "r_hand"],
+                 [[0.0, 0.2, 0.0], [0.0, -0.2, 0.0]]),
+                ("knees", ["l_lleg", "r_lleg"],
+                 [[0.12, 0.0, 0.0], [0.12, 0.0, 0.0]]),
+                ("head", ["mtorso"], [[0.2, 0.0, 0.7]], )
+            ]
 
         self.vertices = [i for i in range(len(defs))]
         self.contacts = [Contact(self.skel, i, n, b, p)
@@ -149,6 +159,13 @@ class Problem(object):
                     ("r_hand", "r_shoulder"),
                     ("r_shoulder", "head"), ]
         elif self.name == 'atlas_lean':
+            defs = [("toes", "knees"),
+                    ("toes", "hands"),
+                    # ("knees", "hands"),
+                    # ("knees", "head"),
+                    # ("hands", "head"), ]
+                    ]
+        elif self.name == 'atlas_step':
             defs = [("toes", "knees"),
                     ("toes", "hands"),
                     # ("knees", "hands"),
