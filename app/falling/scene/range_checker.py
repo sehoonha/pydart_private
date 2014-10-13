@@ -6,6 +6,10 @@ from numpy.linalg import norm
 # from nearpy import Engine
 # from nearpy.hashes import RandomBinaryProjections
 
+# Plotting
+import plotly.plotly as py
+import plotly.graph_objs as pyg
+
 
 THRESHOLD = 0.03
 
@@ -40,6 +44,8 @@ class StopperSet(object):
         self.th2_range = (2 * math.pi, -2 * math.pi)
         self.time_counter = 0.0
 
+        self.states = []
+
         # # load data if necessary
         # if _states is not None:
         #     for x in _states:
@@ -62,6 +68,7 @@ class StopperSet(object):
         if not self.is_valid(index):
             return
         self.data[tuple(index)] += 1
+        # self.states += [x]  # Only for plotting....
         # Other checking
         self.counter += 1
         self.th2_range = (min(self.th2_range[0], x[-1]),
@@ -87,6 +94,18 @@ class StopperSet(object):
     def __repr__(self):
         return 'StopperSet(%r)' % (self.data)
 
+    def get_trace(self, _name):
+        x = []
+        y = []
+        for r1, r2, th2 in self.states:
+            x1 = 0.0
+            y1 = r1
+            x2 = x1 + r2 * math.sin(th2)
+            y2 = y1 + r2 * math.cos(th2)
+            x += [0.0, x1, x2, x1, 0.0]
+            y += [0.0, y1, y2, y1, 0.0]
+        return pyg.Scatter(x=x, y=y, name=_name, opacity=0.5)
+
 
 class RangeChecker(object):
     def __init__(self, _sim):
@@ -111,6 +130,20 @@ class RangeChecker(object):
             print ' th2_range = ', ss.th2_range
             # print ' lo = ', ss.lo
             # print ' hi = ', ss.hi
+        # self.plot()
+
+    def plot(self):
+        traces = []
+        for tip, ss in zip(self.prob.tips, self.stop_sets):
+            print 'Plot TIP ', str(tip),
+            name = str(tip)
+            traces += [ss.get_trace(name)]
+        data = pyg.Data(traces)
+        layout = pyg.Layout(xaxis=pyg.XAxis(range=[-0.1, 1.9]),
+                            yaxis=pyg.YAxis(range=[-0.1, 1.9]))
+        unique_url = py.plot({'data': data, 'layout': layout},
+                             filename='Ranges')
+        print 'url =', unique_url
 
     def check_init_angle(self):
         self.init_angles = [tip.th2 for tip in self.prob.tips]
