@@ -176,6 +176,27 @@ class AtlasPoses:
 
         return q
 
+    def back_pose(self):
+        q = np.zeros(self.ndofs)
+        q[:3] = np.array([2.4, -2.4, -2.4])
+        q[3:6] = [-1.88, -0.71, -0.39]
+
+        q[self.dofs['l_arm_shy']] = 0.2
+        q[self.dofs['l_arm_shx']] = -1.0
+        q[self.dofs['l_arm_elx']] = -0.5
+        q[self.dofs['r_arm_shy']] = q[self.dofs['l_arm_shy']]
+        q[self.dofs['r_arm_shx']] = -q[self.dofs['l_arm_shx']]
+        q[self.dofs['r_arm_elx']] = -q[self.dofs['l_arm_elx']]
+
+        q[self.dofs['l_leg_hpy']] = -0.2
+        q[self.dofs['l_leg_kny']] = 0.2
+        q[self.dofs['r_leg_aky']] = -0.2
+        q[self.dofs['r_leg_hpy']] = q[self.dofs['l_leg_hpy']]
+        q[self.dofs['r_leg_kny']] = q[self.dofs['l_leg_kny']]
+        q[self.dofs['r_leg_aky']] = q[self.dofs['l_leg_aky']]
+
+        return q
+
     def zeros(self):
         return np.zeros(self.ndofs)
 
@@ -184,3 +205,6 @@ class AtlasPoses:
 
     def step(self):
         return np.concatenate((self.step_pose(), self.zeros()))
+
+    def back(self):
+        return np.concatenate((self.back_pose(), self.zeros()))

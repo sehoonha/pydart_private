@@ -7,7 +7,7 @@ from scipy.optimize import minimize
 class Configure(object):
     def __init__(self, _sim):
         self.sim = _sim
-        self.ext_force_steps = 100
+        self.ext_force_steps = 200
         # == A set of configs ==
         # self.config('step', 15)
         # self.config('lean', 10)
@@ -15,7 +15,8 @@ class Configure(object):
         # self.config('back', 3)
         # self.config('side', 10)
         # self.config('atlas_lean', 2000)
-        self.config('atlas_step', 3000)
+        # self.config('atlas_step', 3000)
+        self.config('atlas_back', 1000)
 
         self.conditions = None
         # self.conditions = self.generate()
@@ -52,6 +53,8 @@ class Configure(object):
             self.init_state = AtlasPoses().lean()
         elif class_name == 'atlas_step':
             self.init_state = AtlasPoses().step()
+        elif class_name == 'atlas_back':
+            self.init_state = AtlasPoses().back()
         else:
             print 'Invalid class_name:', class_name
             return
@@ -61,7 +64,7 @@ class Configure(object):
         q = self.skel.q
         q[3:6] = x
         self.skel.q = q
-        v = norm(self.skel.C - np.array([0.0, 1.12, -0.15])) ** 2
+        v = norm(self.skel.C - np.array([0.0, 1.11, -0.15])) ** 2
         print x, v
         return v
 
@@ -69,9 +72,8 @@ class Configure(object):
         skel = sim.skel
         world = sim.world
         # Reset Pydart
-        self.init_state = AtlasPoses().step()
+        # self.init_state = AtlasPoses().back()
         skel.x = self.init_state
-
         # minimize(self.optimize, np.array([0, 0, 0]))
 
         for i in range(self.ext_force_steps):
