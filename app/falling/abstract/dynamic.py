@@ -119,7 +119,7 @@ class DynamicTIP:
         return max([entry.v for entry in self.path])
 
     def plan_initial(self):
-        return self.saved_plan_initial()
+        # return self.saved_plan_initial()
 
         self.upper_bound = g_inf
         # self.upper_bound = 0.52

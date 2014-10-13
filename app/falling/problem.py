@@ -105,13 +105,13 @@ class Problem(object):
             ]
         elif self.name == 'atlas_back':
             defs = [
-                ("toes", ["l_foot", "r_foot"],
-                 [[0.18, 0.0, -0.03], [0.18, 0.0, -0.03]]),
+                ("heels", ["l_foot", "r_foot"],
+                 [[-0.09, 0.0, -0.03], [-0.09, 0.0, -0.03]]),
+                ("hips", ["ltorso"], [[-0.13, 0.0, -0.13]]),
                 ("hands", ["l_hand", "r_hand"],
                  [[0.0, 0.2, 0.0], [0.0, -0.2, 0.0]]),
-                ("knees", ["l_lleg", "r_lleg"],
-                 [[0.12, 0.0, 0.0], [0.12, 0.0, 0.0]]),
-                ("head", ["mtorso"], [[0.2, 0.0, 0.7]], )
+                ("back", ["mtorso"], [[-0.3, 0.0, 0.1]]),
+                ("uback", ["mtorso"], [[-0.3, 0.0, 0.7]]),
             ]
 
         self.vertices = [i for i in range(len(defs))]
@@ -183,11 +183,11 @@ class Problem(object):
                     # ("hands", "head"), ]
                     ]
         elif self.name == 'atlas_back':
-            defs = [("toes", "knees"),
-                    ("toes", "hands"),
-                    # ("knees", "hands"),
-                    # ("knees", "head"),
-                    # ("hands", "head"), ]
+            defs = [("heels", "hips"),
+                    ("heels", "hands"),
+                    ("hips", "hands"),
+                    ("hands", "back"),
+                    ("back", "uback"),
                     ]
 
         self.edges = [(find_index(a), find_index(b)) for a, b in defs]
