@@ -201,3 +201,33 @@ class StateDB(object):
                              filename='Abstract TIP')
         print '==== plot_trace OK : ', unique_url
         print 'collected commands = ', cmds
+
+    def plot_states(self):
+        traces = []
+        for i in range(self.n):
+            offset = i * 0.5
+            x = [offset]
+            y = [0.0]
+            text = [None]
+
+            for state, entry in self.info.iteritems():
+                if state.c1 != i:
+                    continue
+                p0 = get_first_point(state)
+                x += [p0.x1 + offset]
+                y += [p0.y1]
+                text += ['dth1 = %.4f j = %.4f' % (state.dth1, entry.v)]
+
+                x += [offset]
+                y += [0.0]
+                text += [None]
+
+            traces += [pyg.Scatter(x=x, y=y, text=text, name='C%d' % i)]
+        data = pyg.Data(traces)
+        # layout = pyg.Layout(xaxis=pyg.XAxis(range=[-0.1, length]),
+        #                     yaxis=pyg.YAxis(range=[-0.1, length]))
+
+        # unique_url = py.plot({'data': data, 'layout': layout},
+        #                      filename='Abstract TIP')
+        unique_url = py.plot(data, filename='Sampled states')
+        print '==== plot_states OK : ', unique_url

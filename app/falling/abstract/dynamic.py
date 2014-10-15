@@ -138,6 +138,7 @@ class DynamicTIP:
         # self.path = self.db.trace_impacts(x)
         self.path = self.db.trace(x)
         # self.plot()
+        self.db.plot_states()
         return j
 
     def plan(self, x, j):
