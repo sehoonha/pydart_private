@@ -269,14 +269,24 @@ class MyWindow(QtGui.QMainWindow):
 
     def cam0Event(self):
         print 'cam0Event'
-        self.glwidget.tb = Trackball(phi=2.015, theta=-13.6615, zoom=1,
-                                     rot=[-0.08275830866372329,
-                                          -0.6146332681158156,
-                                          -0.05969151061725115,
-                                          0.7821853563143598],
-                                     trans=[-1.3800000000000008,
-                                            -0.43000000000000016,
-                                            -4.6])
+        if self.sim.is_bioloid():
+            self.glwidget.tb = Trackball(phi=2.266, theta=-15.478, zoom=1,
+                                         rot=[-0.09399048175876601,
+                                              -0.612401798950921,
+                                              -0.0675106984290682,
+                                              0.7820307740607462],
+                                         trans=[-0.5100000000000008,
+                                                -0.060000000000000005,
+                                                -1.320000000000003])
+        else:
+            self.glwidget.tb = Trackball(phi=2.015, theta=-13.6615, zoom=1,
+                                         rot=[-0.08275830866372329,
+                                              -0.6146332681158156,
+                                              -0.05969151061725115,
+                                              0.7821853563143598],
+                                         trans=[-1.3800000000000008,
+                                                -0.43000000000000016,
+                                                -4.6])
 
     def printCamEvent(self):
         print 'printCamEvent'

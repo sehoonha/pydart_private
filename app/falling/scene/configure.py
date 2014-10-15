@@ -9,14 +9,14 @@ class Configure(object):
         self.sim = _sim
         self.ext_force_steps = 200
         # == A set of configs ==
-        # self.config('step', 15)
+        self.config('step', 8)
         # self.config('lean', 10)
         # self.config('skate', 10)
         # self.config('back', 3)
         # self.config('side', 10)
         # self.config('atlas_lean', 2000)
         # self.config('atlas_step', 3000)
-        self.config('atlas_back', 1000)
+        # self.config('atlas_back', 1000)
 
         self.conditions = None
         # self.conditions = self.generate()
@@ -76,12 +76,17 @@ class Configure(object):
         skel.x = self.init_state
         # minimize(self.optimize, np.array([0, 0, 0]))
 
+        # During the reset, we use the initial pose as a target pose
+        saved_target = self.sim.tip_controller.pd.target
+        self.sim.tip_controller.pd.target = skel.q
+
         for i in range(self.ext_force_steps):
             (b, f, p) = self.ext_force
             body = skel.body(b)
             body.add_ext_force_at(f, p)
             skel.tau = self.sim.tip_controller.control()
             world.step()
+        self.sim.tip_controller.pd.target = saved_target
 
         # Reset the sim except the state
         state_after_pushed = skel.x

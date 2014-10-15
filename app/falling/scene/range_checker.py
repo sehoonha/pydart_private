@@ -139,8 +139,10 @@ class RangeChecker(object):
             name = str(tip)
             traces += [ss.get_trace(name)]
         data = pyg.Data(traces)
-        layout = pyg.Layout(xaxis=pyg.XAxis(range=[-0.1, 1.9]),
-                            yaxis=pyg.YAxis(range=[-0.1, 1.9]))
+        lo = -0.01 if self.sim.is_bioloid() else -0.1
+        hi = 0.39 if self.sim.is_bioloid() else 1.9
+        layout = pyg.Layout(xaxis=pyg.XAxis(range=[lo, hi]),
+                            yaxis=pyg.YAxis(range=[lo, hi]))
         unique_url = py.plot({'data': data, 'layout': layout},
                              filename='Ranges')
         print 'url =', unique_url
