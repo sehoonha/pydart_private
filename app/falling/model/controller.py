@@ -69,9 +69,21 @@ class Controller(object):
         self.update_target()
 
     def check_next(self):  # Proceed to the next step
-        contacts = self.skel.contacted_body_names()
-        return (set(contacts) - self.pivots()) and \
-            (self.tip_index < len(self.tips))
+        if self.tip_index >= len(self.tips):
+            return False
+
+        contacts = set(self.skel.contacted_body_names())
+        pivots = self.pivots()
+
+        # Special case: l_heel to l_toe
+        if 'l_foot' in self.tip().c1.bodynames and \
+           'l_foot' in self.tip().c2.bodynames:
+            lfoot_contacts = self.skel.body('l_foot').contacts()
+            print '!!!!', len(lfoot_contacts)
+            return (len(lfoot_contacts) >= 6)
+
+        # Generally, proceed to next if there's new contacts
+        return (contacts - pivots)
 
     def proceed(self):
         self.tip_index += 1

@@ -81,6 +81,8 @@ class Simulation(object):
         return self.tip_controller.tip()
 
     def do_plan(self):
+        return self.do_ik()  # Just testing IK
+
         # Plan with Dynamic TIP
         self.abstract_tip.set_x0(self.tip_controller.tips)
         self.abstract_tip.plan_initial()
@@ -95,11 +97,14 @@ class Simulation(object):
         # time.sleep(5)
         self.plan = abstract.plan.Plan(x0, path)
         print 'new plan is generated'
-        # self.plan.plot()
         self.tip_controller = model.controller.Controller(self.skel,
                                                           self.prob,
                                                           self.plan)
         print 'new tip controller is generated'
+        self.do_ik()
+
+    def do_ik(self):
+        # self.plan.plot()
 
         self.ik = IKMulti(self, self.plan)
         self.ik.optimize(restore=False)
@@ -185,9 +190,9 @@ class Simulation(object):
         status += "Impulse = %.4f (max %.4f) " % (data['impulse'],
                                                   data['max_impulse'])
         status += "I = %.4f " % self.skel.approx_inertia_x()
-        # status += "TIP = " + str(data['tip']) + " "
-        tip = self.tip_controller.tip()
-        status += "TIP = " + str(tip)
+        status += "TIP = " + str(data['tip']) + " "
+        # tip = self.tip_controller.tip()
+        # status += "TIP = " + str(tip)
         status += "Contacted = %s " % str(data['contactedBodies'])
 
         return status

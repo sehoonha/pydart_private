@@ -144,11 +144,11 @@ class DynamicTIP:
     def plan(self, x, j):
         # If the current state has negative velocity
         if self.is_stopped(x):
-            return x, j
-            # if int(x.c1) == 2:  # If this is the second contact
-            #     return (x, j)
-            # else:
-            #     return (x, g_inf)  # If this is not the second
+            # return x, j
+            if int(x.c1) == 5:  # Only designated contacts
+                return (x, j)
+            else:
+                return (x, g_inf)  # If this is not the second
 
         if self.is_grounded(x):  # If the rod falls to the ground
             return (x, g_inf)

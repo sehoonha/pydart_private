@@ -46,6 +46,7 @@ class MyWindow(QtGui.QMainWindow):
         self.renderTimer.start(25)
 
         self.cam0Event()
+        self.sim.load('gp_front_head.plan')
 
     def initUI(self):
         self.setGeometry(0, 0, 1280, 720)
