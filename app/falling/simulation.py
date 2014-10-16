@@ -53,7 +53,8 @@ class Simulation(object):
         self.history = History(self)
 
         # # ### Now, configure the controllers
-        self.tip_controller = model.controller.Controller(self.skel, self.prob)
+        self.tip_controller = model.controller.Controller(self,
+                                                          self.skel, self.prob)
         self.event_handler = events.Handler()
 
         # Reset to the initial state
@@ -97,7 +98,8 @@ class Simulation(object):
         # time.sleep(5)
         self.plan = abstract.plan.Plan(x0, path)
         print 'new plan is generated'
-        self.tip_controller = model.controller.Controller(self.skel,
+        self.tip_controller = model.controller.Controller(self,
+                                                          self.skel,
                                                           self.prob,
                                                           self.plan)
         print 'new tip controller is generated'
@@ -222,6 +224,7 @@ class Simulation(object):
         with open(filename, 'r') as fp:
             self.plan = pickle.load(fp)
             self.tip_controller = pickle.load(fp)
+            self.tip_controller.sim = self
         print self.plan
 
     def save_motion(self, filename):

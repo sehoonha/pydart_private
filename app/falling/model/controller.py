@@ -1,9 +1,11 @@
 import numpy as np
 import pd
+from copy import deepcopy
 
 
 class Controller(object):
-    def __init__(self, _skel, _prob, _plan=None):
+    def __init__(self, _sim, _skel, _prob, _plan=None):
+        self.sim = _sim
         self.skel = _skel
         self.prob = _prob
 
@@ -23,9 +25,11 @@ class Controller(object):
 
     def __init_default(self):
         self.tips = [self.prob.tips[0]]
+        self.executed_path = []
 
     def __init_plan(self, _plan):
         self.plan = _plan
+        self.executed_plan = deepcopy(self.plan)
         n = self.plan.n
         self.tips = []
         for i in range(n):
@@ -79,15 +83,38 @@ class Controller(object):
         if 'l_foot' in self.tip().c1.bodynames and \
            'l_foot' in self.tip().c2.bodynames:
             lfoot_contacts = self.skel.body('l_foot').contacts()
-            print '!!!!', len(lfoot_contacts)
+            # print '!!!!', len(lfoot_contacts)
             return (len(lfoot_contacts) >= 6)
 
         # Generally, proceed to next if there's new contacts
         return (contacts - pivots)
 
     def proceed(self):
+        self.update_executed_plan()
         self.tip_index += 1
         self.update_target()
+
+    def update_executed_plan(self):
+        """ Ugly codes... :) """
+        if not hasattr(self, 'executed_plan'):
+            self.executed_plan = deepcopy(self.plan)
+
+        tip = self.tip()
+        print '>>', tip.th1, tip.dth1, tip.r1, tip.th2, tip.r2
+        if self.tip_index > len(self.executed_plan.path):
+            print '>>', 'failed_to_update'
+            return
+        entry = self.executed_plan.path[self.tip_index]
+        new_nx_0 = entry.nx_0._replace(th1=tip.th1, dth1=tip.dth1, r1=tip.r1)
+        new_u = entry.u._replace(th2=tip.th2, r2=tip.r2)
+        data = self.sim.history.get_frame()
+        new_j = data['impulse']
+        new_j_max = data['max_impulse']
+        new_entry = entry._replace(nx_0=new_nx_0, u=new_u,
+                                   v=new_j, v_max=new_j_max)
+        self.executed_plan.path[self.tip_index] = new_entry
+        self.executed_plan.initialize()
+        print self.executed_plan.path[self.tip_index]
 
     def is_terminated(self):
         return (self.tip_index >= len(self.tips))

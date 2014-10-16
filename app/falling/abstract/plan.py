@@ -10,8 +10,11 @@ class Plan:
     def __init__(self, _x0, _path):
         self.x0 = _x0
         self.path = _path
-        self.states = [_x0] + [entry.nx_0 for entry in _path]
-        self.controls = [entry.u for entry in _path]
+        self.initialize()
+
+    def initialize(self):
+        self.states = [self.x0] + [entry.nx_0 for entry in self.path]
+        self.controls = [entry.u for entry in self.path]
 
     @property
     def n(self):
@@ -58,6 +61,10 @@ class Plan:
         p = get_points(x, u)
         return np.array([p.x2, p.y2])
 
+    def J(self, index):
+        impulses = [entry.v for entry in self.path]
+        return impulses[index]
+
     def contact1(self, index):
         return int(self.states[index + 1].c1)
 
@@ -85,8 +92,10 @@ class Plan:
         for i in range(self.n):
             c = self.C(i)
             p = self.P(i)
-            x = np.array([0.0, c[0], p[0]]) + x_offset
-            y = np.array([0.0, c[1], p[1]])
+            j = self.J(i)
+            x = np.array([0.0, c[0], p[0], p[0]]) + x_offset
+            y = np.array([0.0, c[1], p[1], j * 0.1])
+            text = [None, None, None, "%.4f" % j]
             x_offset = x[-1]
 
             max_offset = max(max_offset, max(x))
@@ -94,7 +103,7 @@ class Plan:
             min_offset = min(min_offset, min(x))
             min_offset = min(min_offset, min(y))
 
-            traces += [pyg.Scatter(x=x, y=y, name='L%d' % i)]
+            traces += [pyg.Scatter(x=x, y=y, text=text, name='L%d' % i)]
         data = pyg.Data(traces)
 
         origin = min_offset - 0.05

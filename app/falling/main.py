@@ -89,6 +89,9 @@ class MyWindow(QtGui.QMainWindow):
         self.plotAction = QtGui.QAction('Plot', self)
         self.plotAction.triggered.connect(self.plotEvent)
 
+        self.plotExeAction = QtGui.QAction('Plot Executed', self)
+        self.plotExeAction.triggered.connect(self.plotExeEvent)
+
         self.plotCOMAction = QtGui.QAction('COM', self)
         self.plotCOMAction.triggered.connect(self.plotCOMEvent)
 
@@ -158,6 +161,7 @@ class MyWindow(QtGui.QMainWindow):
         # Plot menu
         plotMenu = menubar.addMenu('&Plot')
         plotMenu.addAction(self.plotAction)
+        plotMenu.addAction(self.plotExeAction)
         plotMenu.addAction(self.plotCOMAction)
         plotMenu.addAction(self.plotImpactAction)
 
@@ -215,6 +219,9 @@ class MyWindow(QtGui.QMainWindow):
 
     def plotEvent(self):
         self.sim.plan.plot()
+
+    def plotExeEvent(self):
+        self.sim.tip_controller.executed_plan.plot()
 
     def plotCOMEvent(self):
         self.sim.history.plotCOM()
