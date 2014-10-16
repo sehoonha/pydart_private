@@ -27,7 +27,7 @@ class Plan:
             # x1 = self.states[index + 1]
             # return State(x0.th1, 0, x1.r1, 0, 0, 0)
             x1 = self.states[index + 1]
-            return State(x1.th1, 0, x1.r1, 0, 0, 0)
+            return State(x1.th1, x1.dth1, x1.r1, 0, 0, 0)
         else:
             # x0 = self.states[index]
             # x1 = self.states[index + 1]
@@ -35,7 +35,7 @@ class Plan:
             # th1 = x0.th1 + u0.th2 - math.pi
             # return State(th1, 0, x1.r1, 0, 0, 0)
             x1 = self.states[index + 1]
-            return State(x1.th1, 0, x1.r1, 0, 0, 0)
+            return State(x1.th1, x1.dth1, x1.r1, 0, 0, 0)
 
     def control(self, index):
         return self.controls[index]
@@ -60,6 +60,9 @@ class Plan:
         (x, u) = self.state(index), self.control(index)
         p = get_points(x, u)
         return np.array([p.x2, p.y2])
+
+    def DTH1(self, index):
+        return self.state(index).dth1
 
     def J(self, index):
         impulses = [entry.v for entry in self.path]
@@ -93,9 +96,10 @@ class Plan:
             c = self.C(i)
             p = self.P(i)
             j = self.J(i)
+            dth1 = self.DTH1(i)
             x = np.array([0.0, c[0], p[0], p[0]]) + x_offset
             y = np.array([0.0, c[1], p[1], j * 0.1])
-            text = [None, None, None, "%.4f" % j]
+            text = [None, None, None, "j=%.4f" % j]
             x_offset = x[-1]
 
             max_offset = max(max_offset, max(x))
@@ -103,13 +107,19 @@ class Plan:
             min_offset = min(min_offset, min(x))
             min_offset = min(min_offset, min(y))
 
-            traces += [pyg.Scatter(x=x, y=y, text=text, name='L%d' % i)]
+            traces += [pyg.Scatter(x=x, y=y, text=text,
+                                   name='L%d(dth1:%.4f,j:%.4f)' % (i, dth1, j),
+                                   textfont=pyg.Font(size=20),
+                                   mode='lines+markers+text')]
         data = pyg.Data(traces)
 
         origin = min_offset - 0.05
         size = (max_offset - min_offset) + 0.1
         layout = pyg.Layout(xaxis=pyg.XAxis(range=[origin, size]),
-                            yaxis=pyg.YAxis(range=[origin, size]))
+                            yaxis=pyg.YAxis(range=[origin, size]),
+                            legend=pyg.Legend(x=1, y=1,
+                                              font=pyg.Font(size=20),),
+                            )
 
         unique_url = py.plot({'data': data, 'layout': layout},
                              filename='TIP Pose')
