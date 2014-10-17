@@ -82,7 +82,7 @@ class Simulation(object):
         return self.tip_controller.tip()
 
     def do_plan(self):
-        return self.do_ik()  # Just testing IK
+        # return self.do_ik()  # Just testing IK
 
         # Plan with Dynamic TIP
         self.abstract_tip.set_x0(self.tip_controller.tips)

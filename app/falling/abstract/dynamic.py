@@ -1,6 +1,6 @@
 import sys
 import math
-from math import sin, cos
+from math import sin, cos, fabs
 import numpy as np
 # from collections import namedtuple
 # from scipy.integrate import odeint
@@ -56,6 +56,9 @@ class DynamicTIP:
     def is_stopped(self, x):
         # return (x.c1 != 0)
         return (x.dth1 < 0)
+
+    def is_stopped_at_peak(self, x):
+        return fabs(x.th1) < 0.1 and fabs(x.dth1) < 1.0
 
     def is_grounded(self, x):
         return (x.th1 < -0.5 * math.pi) or (0.5 * math.pi < x.th1)
@@ -144,11 +147,12 @@ class DynamicTIP:
     def plan(self, x, j):
         # If the current state has negative velocity
         if self.is_stopped(x):
-            # return x, j
-            if int(x.c1) == 5:  # Only designated contacts
-                return (x, j)
-            else:
-                return (x, g_inf)  # If this is not the second
+            # # return x, j
+            # if int(x.c1) == 5:  # Only designated contacts
+            #     return (x, j)
+            # else:
+            #     return (x, g_inf)  # If this is not the second
+            return (x, g_inf)  # If this is not the second
 
         if self.is_grounded(x):  # If the rod falls to the ground
             return (x, g_inf)
@@ -186,6 +190,17 @@ class DynamicTIP:
         best_entry = PathEntry(x, None, None, g_inf, g_inf, None)
         for n_dr1 in np.linspace(self.lo_dr, self.hi_dr, self.N_GRID):
             x_now = State(x.th1, x.dth1, x.r1, n_dr1, x.c1, x.t)
+            # if self.is_stopped_at_peak(x_now) and x_now.c1 == 3:
+            if self.is_stopped_at_peak(x_now):
+                best_j = j
+                # u = Control(0.0, 0.0, x_now.c1 + 1)
+                # best_entry = PathEntry(x, x_now, x_now, 0.0, j, u)
+                # self.db.add(x, best_entry)
+                print
+                print 'stop!! x:', x, best_j
+                print
+                return (x, best_j)
+
             while not self.is_grounded(x_now):
                 for u in self.stoppers(x_now):
                     x_impact, j_impact = self.impact(x_now, u)

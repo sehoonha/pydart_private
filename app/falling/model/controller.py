@@ -125,6 +125,12 @@ class Controller(object):
         data['tip_pivot_nodes'] = self.pivots()
         self.tip().push(history)
 
+    def prev_target(self):
+        print 'tip_controller.prev_target:', self.target_index
+        n = len(self.targets)
+        self.skel.q = self.targets[self.target_index]
+        self.target_index = (self.target_index - 1) % n
+
     def next_target(self):
         print 'tip_controller.next_target:', self.target_index
         n = len(self.targets)
