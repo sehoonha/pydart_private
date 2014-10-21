@@ -37,6 +37,18 @@ class Plan:
             x1 = self.states[index + 1]
             return State(x1.th1, x1.dth1, x1.r1, 0, 0, 0)
 
+    def r1(self, index):
+        return self.state(index).r1
+
+    def th1(self, index):
+        return self.state(index).th1
+
+    def r2(self, index):
+        return self.control(index).r2
+
+    def th2(self, index):
+        return self.control(index).th2
+
     def control(self, index):
         return self.controls[index]
 

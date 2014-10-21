@@ -60,17 +60,14 @@ class TIP(object):
         d = norm(u_)
         return d
 
-    @property
     def r1(self):
         """Returns the distance between origin and COM """
         return norm(self.p1 - self.C)
 
-    @property
     def r2(self):
         """Returns the distance between COM and End Effector """
         return norm(self.p2 - self.C)
 
-    @property
     def th1(self):
         d = self.C - self.p1
         return math.atan2(d[2], d[1])
@@ -84,13 +81,11 @@ class TIP(object):
         # print v, u, np.dot(v, u), v - np.dot(v, u) * u
         return v - np.dot(v, u) * u
 
-    @property
     def dth1(self):
         v1 = norm(self.projected_Cdot())
         # |v| = r dtheta
-        return v1 / self.r1
+        return v1 / self.r1()
 
-    @property
     def th2(self):
         """Returns the angle between p1-C-p2"""
         a = self.C - self.p1
@@ -100,7 +95,7 @@ class TIP(object):
         return pi - np.sign(-d) * math.acos(a.dot(b) / (norm(a) * norm(b)))
 
     def pose(self):
-        return np.array([self.r1, self.r2, self.th2])
+        return np.array([self.r1(), self.r2(), self.th2()])
 
     def push(self, history):
         data = history.histories[-1]
@@ -129,5 +124,5 @@ class TIP(object):
         # values = [self.th1, self.dth1, self.r1,
         #           self.th2, self.r2]
         return "[%s, %s: (%.3f %.1f) %.3f (%.3f) %.3f]" % \
-            (self.c1.name, self.c2.name, self.th1, self.dth1, self.r1,
-             self.th2, self.r2)
+            (self.c1.name, self.c2.name, self.th1(), self.dth1(), self.r1(),
+             self.th2(), self.r2())

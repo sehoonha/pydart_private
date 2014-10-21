@@ -5,32 +5,85 @@ from numpy.linalg import norm
 import scipy.optimize
 
 
-class ObjPt(object):
-    def __init__(self, _con, _target):
-        self.con = _con
-        self.target = _target
+class Obj(object):
+    def __init__(self, _name, _pi, _f, _v, _w=1.0):
+        self.name = _name
+        self.pose_index = _pi
+        self.f = _f
+        self.v = _v
+        self.w = _w
 
-    @property
-    def P(self):
-        return self.con.p
-
-    def cost(self):
-        diff = self.con.p - self.target
-        return 0.5 * diff.dot(diff)
-
-    def gradient(self):
-        diff = self.con.p - self.target
-        J = self.con.world_derivative()
-        return diff.dot(J)
+    def __str__(self):
+        return '[%s : (%.4f %.4f)]' % (self.name, self.f(), self.v)
 
 
 class IKJac(object):
     def __init__(self, _sim, _plan):
         self.sim = _sim
         self.plan = _plan
+        # Parameter descriptions
+        # param_desc: ( [{dof_index or dof_name}, {weight}] )
+        desc = []
+        cfg_name = self.sim.cfg.name
+        leg_symmetry = cfg_name in ['lean', 'back']
+        print 'leg_symmetry:', leg_symmetry
+
+        if self.sim.is_bioloid():
+            desc.append([('l_shoulder', 1.0), ('r_shoulder', 1.0), ])
+            desc.append([('l_hand', 1.0), ('r_hand', 1.0), ])
+            if leg_symmetry:
+                desc.append([('l_thigh', 1.0), ('r_thigh', 1.0), ])
+                desc.append([('l_shin', 0.5), ('r_shin', 0.5), ])
+                desc.append([('l_heel', 0.05), ('r_heel', 0.05), ])
+            else:
+                desc.append([('l_thigh', 1.0), ])
+                desc.append([('r_thigh', 1.0), ])
+                desc.append([('l_shin', 0.5), ])
+                desc.append([('r_shin', 0.5), ])
+                desc.append([('l_heel', 0.05), ])
+                desc.append([('r_heel', 0.05), ])
+        else:
+            desc.append([('l_arm_shy', 1.0), ('r_arm_shy', 1.0),
+                         ('l_arm_shx', 0.0), ('r_arm_shx', 0.0), ])
+            desc.append([('back_bky', 1.0), ])
+            desc.append([('l_leg_hpy', 1.0), ('r_leg_hpy', 1.0), ])
+            desc.append([('l_leg_kny', 1.0), ('r_leg_kny', 1.0), ])
+            desc.append([('l_leg_aky', 1.0), ('r_leg_aky', 1.0), ])
+        self.desc = desc
+
+        # Dimensions
+        self.n = self.plan.n
+        self.n = 2
+        self.dim = len(self.desc)
+        self.totaldim = len(self.desc) * self.n
+        print 'n=', self.n,
+        print 'dim=', self.dim,
+        print 'totaldim=', self.totaldim
+
+        # Initialize the objectives and constraints
         self.objs = []
-        self.objs += [ObjPt(self.prob.contact(2),
-                            np.array([0.0, 0.3, 0.3]))]
+        self.con_eqs = []
+        self.con_ineqs = []
+
+        for i in range(self.n):
+            print '== %d th impact' % i
+            c1 = self.plan.contact1(i)
+            c2 = self.plan.contact2(i)
+            e = self.prob.next_e[c1][c2]
+            tip = self.prob.tips[e]
+
+            r1 = self.plan.r1(i)
+            r2 = self.plan.r2(i)
+            th2 = self.plan.th2(i)
+            print 'target r1, r2, th2: ', r1, r2, th2
+
+            # Put objectives related to TIPs
+            self.con_eqs += [Obj("r1_%d" % i, i, tip.r1, r1)]
+            self.con_eqs += [Obj("r2_%d" % i, i, tip.r2, r2)]
+            self.objs += [Obj("th2_%d" % i, i, tip.th2, th2)]
+
+        # Summarize objectives and constraints
+        self.print_objs()
 
     @property
     def prob(self):
@@ -40,50 +93,84 @@ class IKJac(object):
     def skel(self):
         return self.sim.skel
 
-    def cost(self, x):
-        self.skel.q = x
-        costs = [o.cost() for o in self.objs]
-        return sum(costs)
+    def print_objs(self):
+        print 'Objectives: '
+        for o in self.objs:
+            print o
+        print 'Equality constraints: '
+        for o in self.con_eqs:
+            result = 'O' if math.fabs(o.f() - o.v) < 1e-4 else 'X'
+            print o, result
 
-    def gradient(self, x):
-        self.skel.q = x
-        gradients = [o.gradient() for o in self.objs]
-        return sum(gradients)
+    def expand(self, x):
+        q = self.sim.skel.q
+        for i, dofs in enumerate(self.desc):
+            x_i = x[i]
+            for (d, w) in dofs:
+                index = d if isinstance(d, int) else self.skel.dof_index(d)
+                if d == 'l_arm_shx':
+                    q[index] = -0.5 - math.cos(x_i / 1.57)
+                elif d == 'r_arm_shx':
+                    q[index] = 0.5 + math.cos(x_i / 1.57)
+                else:
+                    q[index] = w * x_i
+        return q
+
+    def expand_all(self, x):
+        poses = []
+        for i in range(self.n):
+            x_i = x[i * self.dim:(i + 1) * self.dim]
+            q_i = self.expand(x_i)
+            poses.append(q_i)
+        return poses
+
+    def update_pose(self, x, pose_index):
+        poses = self.expand_all(x)
+        q = poses[pose_index]
+        diff = norm(self.skel.q - q)
+        if diff > 1e-16:
+            # print 'update pose!!'
+            self.skel.q = q
+
+    def obj(self, x):
+        value = 0.0
+        for obj in self.objs:
+            self.update_pose(x, obj.pose_index)
+            value_now = 0.5 * (obj.f() - obj.v) ** 2
+            value += obj.w * value_now
+        # print 'obj:', obj, x, value
+        return value
+
+    def constraint(self, x, obj):
+        self.update_pose(x, obj.pose_index)
+        # print 'eq:', obj, x, obj.pose_index, obj.f() - obj.v
+        return obj.f() - obj.v
 
     def optimize(self, restore=True):
-        self.x0 = self.skel.x
-        self.q0 = self.skel.q
+        saved_state = self.skel.x
 
-        self.check_gradient()
+        cons = []
+        for i, o in enumerate(self.con_eqs):
+            print 'objective:', i, o
+            cons += [{'type': 'eq', 'fun': self.constraint, 'args': [o]}]
 
         print "==== ik.IKJac optimize...."
-        self.res = scipy.optimize.minimize(self.cost, self.q0,
-                                           jac=self.gradient,
-                                           method='SLSQP')
+        x0 = (np.random.rand(self.totaldim) - 0.5) * 3.14
+        options = {'maxiter': 100000, 'maxfev': 100000,
+                   'xtol': 10e-8, 'ftol': 10e-8}
+        self.res = scipy.optimize.minimize(self.obj, x0,
+                                           method='SLSQP',
+                                           constraints=cons,
+                                           options=options)
+
         print "==== result"
         print self.res
+        self.print_objs()
         print "==== ik.IKJac optimize....OK"
 
         if restore:
-            self.skel.x = self.x0
-        self.targets = [self.skel.q]
-        return self.targets
+            self.skel.x = saved_state
 
-    def check_gradient(self):
-        np.set_printoptions(formatter={'float': '{: 0.6f}'.format})
-        dim = len(self.q0)
-        errors = []
-        for i in range(5):
-            x = (np.random.rand(dim) - 0.5) * 2.0
-            g0 = self.gradient(x)
-            g1 = scipy.optimize.approx_fprime(x, self.cost, 1e-6)
-            g2 = scipy.optimize.approx_fprime(x, self.cost, 1e-9)
-            err = scipy.optimize.check_grad(self.cost, self.gradient, x)
-            errors += [err]
-            print '---'
-            print g0
-            print g1
-            print g2
-            print err
-            print
-        print 'average error = ', sum(errors) / len(errors)
+        x = self.res['x']
+        self.targets = self.expand_all(x)
+        return self.targets

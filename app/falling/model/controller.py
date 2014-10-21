@@ -105,8 +105,9 @@ class Controller(object):
             print '>>', 'failed_to_update'
             return
         entry = self.executed_plan.path[self.tip_index]
-        new_nx_0 = entry.nx_0._replace(th1=tip.th1, dth1=tip.dth1, r1=tip.r1)
-        new_u = entry.u._replace(th2=tip.th2, r2=tip.r2)
+        new_nx_0 = entry.nx_0._replace(th1=tip.th1(), dth1=tip.dth1(),
+                                       r1=tip.r1())
+        new_u = entry.u._replace(th2=tip.th2(), r2=tip.r2())
         data = self.sim.history.get_frame()
         new_j = data['impulse']
         new_j_max = data['max_impulse']
