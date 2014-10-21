@@ -14,7 +14,13 @@ class Obj(object):
         self.w = _w
 
     def __str__(self):
-        return '[%s : (%.4f %.4f)]' % (self.name, self.f(), self.v)
+        if isinstance(self.v, float):
+            return '[%s (%d): (%.4f %.4f)]' % (self.name, self.pose_index,
+                                               self.f(), self.v)
+        else:
+            diff = self.f() - self.v
+            return '[%s (%d): %.4f]' % (self.name, self.pose_index,
+                                        0.5 * norm(diff) ** 2)
 
 
 class IKJac(object):
@@ -53,7 +59,6 @@ class IKJac(object):
 
         # Dimensions
         self.n = self.plan.n
-        self.n = 2
         self.dim = len(self.desc)
         self.totaldim = len(self.desc) * self.n
         print 'n=', self.n,
@@ -81,9 +86,12 @@ class IKJac(object):
             self.con_eqs += [Obj("r1_%d" % i, i, tip.r1, r1)]
             self.con_eqs += [Obj("r2_%d" % i, i, tip.r2, r2)]
             self.objs += [Obj("th2_%d" % i, i, tip.th2, th2)]
+            if i > 0:
+                self.objs += [Obj("r2_%d" % i, i - 1, tip.r2, r2, 0.5)]
+                self.objs += [Obj("th2_%d" % i, i - 1, tip.th2, th2)]
 
         # Summarize objectives and constraints
-        self.print_objs()
+        self.print_objs(self.objs, self.con_eqs)
 
     @property
     def prob(self):
@@ -93,12 +101,15 @@ class IKJac(object):
     def skel(self):
         return self.sim.skel
 
-    def print_objs(self):
+    def pose(self):
+        return self.skel.q
+
+    def print_objs(self, objs, con_eqs):
         print 'Objectives: '
-        for o in self.objs:
+        for o in objs:
             print o
         print 'Equality constraints: '
-        for o in self.con_eqs:
+        for o in con_eqs:
             result = 'O' if math.fabs(o.f() - o.v) < 1e-4 else 'X'
             print o, result
 
@@ -116,61 +127,74 @@ class IKJac(object):
                     q[index] = w * x_i
         return q
 
-    def expand_all(self, x):
-        poses = []
-        for i in range(self.n):
-            x_i = x[i * self.dim:(i + 1) * self.dim]
-            q_i = self.expand(x_i)
-            poses.append(q_i)
-        return poses
-
-    def update_pose(self, x, pose_index):
-        poses = self.expand_all(x)
-        q = poses[pose_index]
+    def update_pose(self, x):
+        q = self.expand(x)
         diff = norm(self.skel.q - q)
         if diff > 1e-16:
             # print 'update pose!!'
             self.skel.q = q
 
-    def obj(self, x):
+    def obj(self, x, objs):
         value = 0.0
-        for obj in self.objs:
-            self.update_pose(x, obj.pose_index)
-            value_now = 0.5 * (obj.f() - obj.v) ** 2
+        for obj in objs:
+            self.update_pose(x)
+            if isinstance(obj.v, float):
+                value_now = 0.5 * (obj.f() - obj.v) ** 2
+            else:
+                value_now = 0.5 * norm(obj.f() - obj.v) ** 2
             value += obj.w * value_now
         # print 'obj:', obj, x, value
         return value
 
     def constraint(self, x, obj):
-        self.update_pose(x, obj.pose_index)
+        self.update_pose(x)
         # print 'eq:', obj, x, obj.pose_index, obj.f() - obj.v
         return obj.f() - obj.v
+
+    def optimize_index(self, index):
+        print
+        print '======== optimize_index', index
+        objs = [o for o in self.objs if o.pose_index == index]
+        con_eqs = [o for o in self.con_eqs if o.pose_index == index]
+
+        # # Add pose constraint
+        # obj_pose = Obj("q%d" % index, index, self.pose,
+        # self.prev_target, 0.1)
+        # objs += [obj_pose]
+
+        # Make constraints
+        cons = []
+        for i, o in enumerate(con_eqs):
+            cons += [{'type': 'eq', 'fun': self.constraint, 'args': [o]}]
+        x0 = (np.random.rand(self.dim) - 0.5) * 3.14
+        options = {'maxiter': 100000, 'maxfev': 100000,
+                   'xtol': 10e-8, 'ftol': 10e-8}
+        print "==== ik.IKJac optimize...."
+        res = scipy.optimize.minimize(self.obj, x0,
+                                      args=(objs,),
+                                      method='SLSQP',
+                                      constraints=cons,
+                                      options=options)
+        print "==== result"
+        print res
+        self.print_objs(objs, con_eqs)
+        print "==== ik.IKJac optimize....OK"
+        x = res['x']
+        target = self.expand(x)
+        # print 'target:', target
+        return target
 
     def optimize(self, restore=True):
         saved_state = self.skel.x
 
-        cons = []
-        for i, o in enumerate(self.con_eqs):
-            print 'objective:', i, o
-            cons += [{'type': 'eq', 'fun': self.constraint, 'args': [o]}]
-
-        print "==== ik.IKJac optimize...."
-        x0 = (np.random.rand(self.totaldim) - 0.5) * 3.14
-        options = {'maxiter': 100000, 'maxfev': 100000,
-                   'xtol': 10e-8, 'ftol': 10e-8}
-        self.res = scipy.optimize.minimize(self.obj, x0,
-                                           method='SLSQP',
-                                           constraints=cons,
-                                           options=options)
-
-        print "==== result"
-        print self.res
-        self.print_objs()
-        print "==== ik.IKJac optimize....OK"
+        self.targets = []
+        self.prev_target = self.skel.q
+        for i in range(self.n):
+            target = self.optimize_index(i)
+            self.targets += [target]
+            self.prev_target = target
 
         if restore:
             self.skel.x = saved_state
 
-        x = self.res['x']
-        self.targets = self.expand_all(x)
         return self.targets
