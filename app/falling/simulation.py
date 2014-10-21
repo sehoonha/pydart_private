@@ -15,7 +15,9 @@ import gltools
 
 from history import History
 import events
-from ik.ik_multi import IKMulti
+import ik
+# from ik.ik_multi import IKMulti
+# from ik.ik_jac import IKJac
 import scene.configure
 import scene.range_checker
 import problem
@@ -82,7 +84,7 @@ class Simulation(object):
         return self.tip_controller.tip()
 
     def do_plan(self):
-        # return self.do_ik()  # Just testing IK
+        return self.do_ik()  # Just testing IK
 
         # Plan with Dynamic TIP
         self.abstract_tip.set_x0(self.tip_controller.tips)
@@ -108,7 +110,8 @@ class Simulation(object):
     def do_ik(self):
         # self.plan.plot()
 
-        self.ik = IKMulti(self, self.plan)
+        # self.ik = IKMulti(self, self.plan)
+        self.ik = ik.IKJac(self, self.plan)
         self.ik.optimize(restore=False)
         self.tip_controller.targets = self.ik.targets
 

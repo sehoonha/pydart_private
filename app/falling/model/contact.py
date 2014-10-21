@@ -23,6 +23,14 @@ class Contact(object):
         avg = (sum(positions) / len(positions))
         return avg
 
+    def world_derivative(self):
+        n = len(self.bodies)
+        J = np.zeros((3, self.skel.ndofs))
+        for i in range(n):
+            offset = self.local_positions[i]
+            J += self.bodies[i].world_linear_jacobian(offset)
+        return J / n
+
     def angle(self, _o):
         p = self.p - _o.p
         return math.atan2(p[2], p[1])

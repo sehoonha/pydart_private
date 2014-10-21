@@ -331,9 +331,12 @@ class Body(object):
     def T(self):
         return self.transformation()
 
-    def world_linear_jacobian(self):
+    def world_linear_jacobian(self, offset=None):
+        if offset is None:
+            offset = np.zeros(3)
         J = np.zeros((3, self.skel.ndofs))
-        papi.getBodyNodeWorldLinearJacobian(self.wid, self.sid, self.id, J)
+        papi.getBodyNodeWorldLinearJacobian(self.wid, self.sid,
+                                            self.id, offset, J)
         return J
 
     @property

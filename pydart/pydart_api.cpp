@@ -501,16 +501,17 @@ void getBodyNodeTransformation(int wid, int skid, int bid, double outv44[4][4]) 
     }
 }
 
-void getBodyNodeWorldLinearJacobian(int wid, int skid, int bid, double* array2, int nrows, int ncols) {
+void getBodyNodeWorldLinearJacobian(int wid, int skid, int bid, double inv3[3], double* array2, int nrows, int ncols) {
     using namespace dart::dynamics;
     Skeleton* skel = Manager::skeleton(wid, skid);
     BodyNode* body = skel->getBodyNode(bid);
     if (!body) {
         cerr << "cannot find the body : " << bid << endl;
     }
-
+    Eigen::Vector3d offset(inv3[0], inv3[1], inv3[2]);
+    
     int N = skel->getNumDofs();
-    Eigen::MatrixXd J = body->getWorldLinearJacobian();
+    Eigen::MatrixXd J = body->getWorldLinearJacobian(offset);
     Eigen::MatrixXd JF = Eigen::MatrixXd::Zero(3, N);
 
     for (int i = 0; i < J.cols(); i++) {
