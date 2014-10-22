@@ -32,7 +32,7 @@ class DynamicTIP:
 
     def set_x0(self, tips):
         t0 = tips[0]
-        self.x0 = State(t0.th1, t0.dth1, t0.r1, 0, 0, 0.0)
+        self.x0 = State(t0.th1(), t0.dth1(), t0.r1(), 0, 0, 0.0)
         print 'set abstract.DynamicTIP.x0 = ', self.x0
 
     def deriv(self, _state, _t):
@@ -147,12 +147,12 @@ class DynamicTIP:
     def plan(self, x, j):
         # If the current state has negative velocity
         if self.is_stopped(x):
-            # # return x, j
+            return x, j
             # if int(x.c1) == 5:  # Only designated contacts
             #     return (x, j)
             # else:
             #     return (x, g_inf)  # If this is not the second
-            return (x, g_inf)  # If this is not the second
+            # return (x, g_inf)  # If this is not the second
 
         if self.is_grounded(x):  # If the rod falls to the ground
             return (x, g_inf)
@@ -190,16 +190,16 @@ class DynamicTIP:
         best_entry = PathEntry(x, None, None, g_inf, g_inf, None)
         for n_dr1 in np.linspace(self.lo_dr, self.hi_dr, self.N_GRID):
             x_now = State(x.th1, x.dth1, x.r1, n_dr1, x.c1, x.t)
-            # if self.is_stopped_at_peak(x_now) and x_now.c1 == 3:
-            if self.is_stopped_at_peak(x_now):
-                best_j = j
-                # u = Control(0.0, 0.0, x_now.c1 + 1)
-                # best_entry = PathEntry(x, x_now, x_now, 0.0, j, u)
-                # self.db.add(x, best_entry)
-                print
-                print 'stop!! x:', x, best_j
-                print
-                return (x, best_j)
+
+            # if self.is_stopped_at_peak(x_now):
+            #     best_j = j
+            #     # u = Control(0.0, 0.0, x_now.c1 + 1)
+            #     # best_entry = PathEntry(x, x_now, x_now, 0.0, j, u)
+            #     # self.db.add(x, best_entry)
+            #     print
+            #     print 'stop!! x:', x, best_j
+            #     print
+            #     return (x, best_j)
 
             while not self.is_grounded(x_now):
                 for u in self.stoppers(x_now):

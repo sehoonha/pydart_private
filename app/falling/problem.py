@@ -215,3 +215,6 @@ class Problem(object):
             return self.contacts[index]
         else:
             return next(x for x in self.contacts if x.name == _name)
+
+    def contact_names(self):
+        return [x.name for x in self.contacts]

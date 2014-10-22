@@ -84,7 +84,7 @@ class Simulation(object):
         return self.tip_controller.tip()
 
     def do_plan(self):
-        return self.do_ik()  # Just testing IK
+        # return self.do_ik()  # Just testing IK
 
         # Plan with Dynamic TIP
         self.abstract_tip.set_x0(self.tip_controller.tips)
@@ -99,6 +99,7 @@ class Simulation(object):
         # print 'sleep 5 seconds'
         # time.sleep(5)
         self.plan = abstract.plan.Plan(x0, path)
+        self.plan.names = self.prob.contact_names()
         print 'new plan is generated'
         self.tip_controller = model.controller.Controller(self,
                                                           self.skel,

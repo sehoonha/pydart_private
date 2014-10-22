@@ -26,6 +26,7 @@ class Controller(object):
     def __init_default(self):
         self.tips = [self.prob.tips[0]]
         self.executed_path = []
+        self.plan = None
 
     def __init_plan(self, _plan):
         self.plan = _plan
@@ -96,6 +97,8 @@ class Controller(object):
 
     def update_executed_plan(self):
         """ Ugly codes... :) """
+        if self.plan is None:
+            return
         if not hasattr(self, 'executed_plan'):
             self.executed_plan = deepcopy(self.plan)
 

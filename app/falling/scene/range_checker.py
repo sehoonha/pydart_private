@@ -148,7 +148,7 @@ class RangeChecker(object):
         print 'url =', unique_url
 
     def check_init_angle(self):
-        self.init_angles = [tip.th2 for tip in self.prob.tips]
+        self.init_angles = [tip.th2() for tip in self.prob.tips]
         print self.init_angles
 
     def check_kinematic(self, generate_cache=True):

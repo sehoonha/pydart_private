@@ -9,7 +9,7 @@ class Configure(object):
         self.sim = _sim
         self.ext_force_steps = 200
         # == A set of configs ==
-        self.config('step', 8)
+        self.config('step', 5)
         # self.config('lean', 10)
         # self.config('skate', 10)
         # self.config('back', 3)

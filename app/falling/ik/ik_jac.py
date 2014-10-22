@@ -83,15 +83,15 @@ class IKJac(object):
             print 'target r1, r2, th2: ', r1, r2, th2
 
             # Put objectives related to TIPs
-            self.con_eqs += [Obj("r1_%d" % i, i, tip.r1, r1)]
-            self.con_eqs += [Obj("r2_%d" % i, i, tip.r2, r2)]
-            self.objs += [Obj("th2_%d" % i, i, tip.th2, th2)]
+            self.objs += [Obj("r1_%d" % i, i, tip.r1, r1)]
+            self.con_eqs += [Obj("r2_%d" % i, i, tip.r2, r2 * 1.1, 2.0)]
+            self.con_eqs += [Obj("th2_%d" % i, i, tip.th2, th2)]
             if i > 0:
                 self.objs += [Obj("r2_%d" % i, i - 1, tip.r2, r2, 0.5)]
-                self.objs += [Obj("th2_%d" % i, i - 1, tip.th2, th2)]
+                self.objs += [Obj("th2_%d" % i, i - 1, tip.th2, th2, 0.1)]
 
         # Summarize objectives and constraints
-        self.print_objs(self.objs, self.con_eqs)
+        self.print_objs(self.objs, self.con_eqs, self.con_ineqs)
 
     @property
     def prob(self):
@@ -104,13 +104,17 @@ class IKJac(object):
     def pose(self):
         return self.skel.q
 
-    def print_objs(self, objs, con_eqs):
+    def print_objs(self, objs, con_eqs, con_ineqs):
         print 'Objectives: '
         for o in objs:
             print o
         print 'Equality constraints: '
         for o in con_eqs:
             result = 'O' if math.fabs(o.f() - o.v) < 1e-4 else 'X'
+            print o, result
+        print 'Inequality constraints: '
+        for o in con_ineqs:
+            result = 'O' if o.f() > o.v else 'X'
             print o, result
 
     def expand(self, x):
@@ -142,6 +146,8 @@ class IKJac(object):
                 value_now = 0.5 * (obj.f() - obj.v) ** 2
             else:
                 value_now = 0.5 * norm(obj.f() - obj.v) ** 2
+            # if 'r2' in obj.name and obj.f() < obj.v:
+            #     value_now *= 4.0
             value += obj.w * value_now
         # print 'obj:', obj, x, value
         return value
@@ -156,6 +162,7 @@ class IKJac(object):
         print '======== optimize_index', index
         objs = [o for o in self.objs if o.pose_index == index]
         con_eqs = [o for o in self.con_eqs if o.pose_index == index]
+        con_ineqs = [o for o in self.con_ineqs if o.pose_index == index]
 
         # # Add pose constraint
         # obj_pose = Obj("q%d" % index, index, self.pose,
@@ -166,18 +173,25 @@ class IKJac(object):
         cons = []
         for i, o in enumerate(con_eqs):
             cons += [{'type': 'eq', 'fun': self.constraint, 'args': [o]}]
-        x0 = (np.random.rand(self.dim) - 0.5) * 3.14
+        for i, o in enumerate(con_ineqs):
+            cons += [{'type': 'ineq', 'fun': self.constraint, 'args': [o]}]
         options = {'maxiter': 100000, 'maxfev': 100000,
                    'xtol': 10e-8, 'ftol': 10e-8}
         print "==== ik.IKJac optimize...."
-        res = scipy.optimize.minimize(self.obj, x0,
-                                      args=(objs,),
-                                      method='SLSQP',
-                                      constraints=cons,
-                                      options=options)
+        res = None
+        for i in range(5):
+            x0 = (np.random.rand(self.dim) - 0.5) * 3.14
+            now = scipy.optimize.minimize(self.obj, x0,
+                                          args=(objs,),
+                                          method='SLSQP',
+                                          constraints=cons,
+                                          options=options)
+            if res is None or now['fun'] < res['fun']:
+                res = now
+            print i, res['fun']
         print "==== result"
         print res
-        self.print_objs(objs, con_eqs)
+        self.print_objs(objs, con_eqs, con_ineqs)
         print "==== ik.IKJac optimize....OK"
         x = res['x']
         target = self.expand(x)
@@ -190,9 +204,9 @@ class IKJac(object):
         self.targets = []
         self.prev_target = self.skel.q
         for i in range(self.n):
-            target = self.optimize_index(i)
-            self.targets += [target]
-            self.prev_target = target
+            t = self.optimize_index(i)
+            self.targets += [t]
+            self.prev_target = t
 
         if restore:
             self.skel.x = saved_state

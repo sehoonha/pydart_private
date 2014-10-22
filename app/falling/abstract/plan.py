@@ -11,6 +11,8 @@ class Plan:
         self.x0 = _x0
         self.path = _path
         self.initialize()
+        max_contact = max([u.c2 for u in self.controls])
+        self.names = ["C%d" % c for c in range(max_contact + 1)]
 
     def initialize(self):
         self.states = [self.x0] + [entry.nx_0 for entry in self.path]
@@ -108,19 +110,20 @@ class Plan:
             c = self.C(i)
             p = self.P(i)
             j = self.J(i)
+            con_name = self.names[self.control(i).c2]
             dth1 = self.DTH1(i)
             x = np.array([0.0, c[0], p[0], p[0]]) + x_offset
             y = np.array([0.0, c[1], p[1], j * 0.1])
             text = [None, None, None, "j=%.4f" % j]
             x_offset = x[-1]
-
+            name = 'L%d at %s (dth1:%.4f,j:%.4f)' % (i, con_name, dth1, j),
             max_offset = max(max_offset, max(x))
             max_offset = max(max_offset, max(y))
             min_offset = min(min_offset, min(x))
             min_offset = min(min_offset, min(y))
 
             traces += [pyg.Scatter(x=x, y=y, text=text,
-                                   name='L%d(dth1:%.4f,j:%.4f)' % (i, dth1, j),
+                                   name=name,
                                    textfont=pyg.Font(size=20),
                                    mode='lines+markers+text')]
         data = pyg.Data(traces)
@@ -129,7 +132,7 @@ class Plan:
         size = (max_offset - min_offset) + 0.1
         layout = pyg.Layout(xaxis=pyg.XAxis(range=[origin, size]),
                             yaxis=pyg.YAxis(range=[origin, size]),
-                            legend=pyg.Legend(x=1, y=1,
+                            legend=pyg.Legend(x=0.5, y=1,
                                               font=pyg.Font(size=20),),
                             )
 
