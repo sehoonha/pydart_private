@@ -107,7 +107,11 @@ class IKJac(object):
     def print_objs(self, objs, con_eqs, con_ineqs):
         print 'Objectives: '
         for o in objs:
-            print o
+            if isinstance(o.v, float):
+                value_now = 0.5 * (o.f() - o.v) ** 2
+            else:
+                value_now = 0.5 * norm(o.f() - o.v) ** 2
+            print o, o.w * value_now
         print 'Equality constraints: '
         for o in con_eqs:
             result = 'O' if math.fabs(o.f() - o.v) < 1e-4 else 'X'
@@ -164,10 +168,10 @@ class IKJac(object):
         con_eqs = [o for o in self.con_eqs if o.pose_index == index]
         con_ineqs = [o for o in self.con_ineqs if o.pose_index == index]
 
-        # # Add pose constraint
-        # obj_pose = Obj("q%d" % index, index, self.pose,
-        # self.prev_target, 0.1)
-        # objs += [obj_pose]
+        # Add pose constraint
+        obj_pose = Obj("q%d" % index, index, self.pose,
+                       self.prev_target, 0.01)
+        objs += [obj_pose]
 
         # Make constraints
         cons = []

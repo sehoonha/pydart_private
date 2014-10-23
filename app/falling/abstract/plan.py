@@ -139,3 +139,5 @@ class Plan:
         unique_url = py.plot({'data': data, 'layout': layout},
                              filename='TIP Pose')
         print '==== plot_trace OK : ', unique_url
+        # py.image.save_as({'data': data, 'layout': layout},
+        #                  'plan.png', height=900, width=1000)
