@@ -1,4 +1,3 @@
-
 import sys
 import config
 sys.path.append(config.PYDART_PATH)
@@ -7,6 +6,7 @@ import os
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(ROOT_DIR)
 import cPickle as pickle
+# import jsonpickle
 
 import pydart
 # import numpy as np
@@ -55,8 +55,7 @@ class Simulation(object):
         self.history = History(self)
 
         # # ### Now, configure the controllers
-        self.tip_controller = model.controller.Controller(self,
-                                                          self.skel, self.prob)
+        self.tip_controller = model.controller.Controller(self.skel, self.prob)
         self.event_handler = events.Handler()
 
         # Reset to the initial state
@@ -101,8 +100,7 @@ class Simulation(object):
         self.plan = abstract.plan.Plan(x0, path)
         self.plan.names = self.prob.contact_names()
         print 'new plan is generated'
-        self.tip_controller = model.controller.Controller(self,
-                                                          self.skel,
+        self.tip_controller = model.controller.Controller(self.skel,
                                                           self.prob,
                                                           self.plan)
         print 'new tip controller is generated'
@@ -139,7 +137,7 @@ class Simulation(object):
         for e in self.event_handler.pop():
             # print 'New Event: ', e.name, 'at', self.world.nframes
             if e.name == "proceed":
-                self.tip_controller.proceed()
+                self.tip_controller.proceed(self)
                 # print 'proceed:', self.tip_controller.is_terminated()
                 if self.tip_controller.is_terminated():
                     self.event_handler.push("terminate", 0)
@@ -222,14 +220,16 @@ class Simulation(object):
         # protocol = 0
         with open(filename, 'w+') as fp:
             pickle.dump(self.plan, fp, protocol)
-            pickle.dump(self.tip_controller, fp, protocol)
+            pickle.dump(self.tip_controller.targets, fp, protocol)
 
     def load(self, filename):
         with open(filename, 'r') as fp:
             self.plan = pickle.load(fp)
-            self.tip_controller = pickle.load(fp)
-            self.tip_controller.sim = self
-        print self.plan
+            self.tip_controller = model.controller.Controller(self.skel,
+                                                              self.prob,
+                                                              self.plan)
+            targets = pickle.load(fp)
+            self.tip_controller.targets = targets
 
     def save_motion(self, filename):
         protocol = pickle.HIGHEST_PROTOCOL

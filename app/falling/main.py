@@ -46,7 +46,7 @@ class MyWindow(QtGui.QMainWindow):
         self.renderTimer.start(25)
 
         self.cam0Event()
-        # self.sim.load('gp_front_head.plan')
+        # self.sim.load('gp_step_5.plan')
 
     def initUI(self):
         self.setGeometry(0, 0, 1280, 720)
@@ -60,6 +60,9 @@ class MyWindow(QtGui.QMainWindow):
         # Create actions
         self.planAction = QtGui.QAction('Plan', self)
         self.planAction.triggered.connect(self.planEvent)
+
+        self.ikAction = QtGui.QAction('IK', self)
+        self.ikAction.triggered.connect(self.ikEvent)
 
         self.prevAction = QtGui.QAction('Prev', self)
         self.prevAction.triggered.connect(self.prevEvent)
@@ -125,6 +128,7 @@ class MyWindow(QtGui.QMainWindow):
         # Create a toolbar
         self.toolbar = self.addToolBar('Control')
         self.toolbar.addAction(self.planAction)
+        self.toolbar.addAction(self.ikAction)
         self.toolbar.addAction(self.prevAction)
         self.toolbar.addAction(self.nextAction)
         self.toolbar.addSeparator()
@@ -215,6 +219,9 @@ class MyWindow(QtGui.QMainWindow):
 
     def planEvent(self):
         self.sim.do_plan()
+
+    def ikEvent(self):
+        self.sim.do_ik()
 
     def prevEvent(self):
         self.sim.tip_controller.prev_target()

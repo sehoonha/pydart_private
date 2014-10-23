@@ -4,8 +4,7 @@ from copy import deepcopy
 
 
 class Controller(object):
-    def __init__(self, _sim, _skel, _prob, _plan=None):
-        self.sim = _sim
+    def __init__(self, _skel, _prob, _plan=None):
         self.skel = _skel
         self.prob = _prob
 
@@ -90,12 +89,12 @@ class Controller(object):
         # Generally, proceed to next if there's new contacts
         return (contacts - pivots)
 
-    def proceed(self):
-        self.update_executed_plan()
+    def proceed(self, sim):
+        self.update_executed_plan(sim)
         self.tip_index += 1
         self.update_target()
 
-    def update_executed_plan(self):
+    def update_executed_plan(self, sim):
         """ Ugly codes... :) """
         if self.plan is None:
             return
@@ -111,7 +110,7 @@ class Controller(object):
         new_nx_0 = entry.nx_0._replace(th1=tip.th1(), dth1=tip.dth1(),
                                        r1=tip.r1())
         new_u = entry.u._replace(th2=tip.th2(), r2=tip.r2())
-        data = self.sim.history.get_frame()
+        data = sim.history.get_frame()
         new_j = data['impulse']
         new_j_max = data['max_impulse']
         new_entry = entry._replace(nx_0=new_nx_0, u=new_u,
@@ -140,3 +139,6 @@ class Controller(object):
         n = len(self.targets)
         self.skel.q = self.targets[self.target_index]
         self.target_index = (self.target_index + 1) % n
+
+    def target_as_list(self):
+        return [tar.tolist() for tar in self.targets]
