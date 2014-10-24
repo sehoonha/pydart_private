@@ -103,7 +103,6 @@ class DynamicTIP:
                 r2 = r1 * cos(th1) / -cos(th1 + th2)
                 # Check the dynamics
                 if not self.rng.query_dynamics(t, c1, c2, th2):
-                    # print 'reject the bad dynamics'
                     continue
                 # Check the kinematics
                 query = (r1, r2, th2)
@@ -191,17 +190,8 @@ class DynamicTIP:
         for n_dr1 in np.linspace(self.lo_dr, self.hi_dr, self.N_GRID):
             x_now = State(x.th1, x.dth1, x.r1, n_dr1, x.c1, x.t)
 
-            # if self.is_stopped_at_peak(x_now):
-            #     best_j = j
-            #     # u = Control(0.0, 0.0, x_now.c1 + 1)
-            #     # best_entry = PathEntry(x, x_now, x_now, 0.0, j, u)
-            #     # self.db.add(x, best_entry)
-            #     print
-            #     print 'stop!! x:', x, best_j
-            #     print
-            #     return (x, best_j)
-
             while not self.is_grounded(x_now):
+                # print 'n_dr1:', n_dr1, x_now.th1, x_now.dth1
                 for u in self.stoppers(x_now):
                     x_impact, j_impact = self.impact(x_now, u)
                     # print u, x_impact, j_impact

@@ -19,7 +19,7 @@ class Controller(object):
         if self.skel.m < 10.0:
             self.pd = pd.PDController(self.skel, 60.0, 1.0, 0.5 * 1.5)
         else:
-            self.pd = pd.PDController(self.skel, 600.0, 40.0, 500.0)
+            self.pd = pd.PDController(self.skel, 600.0, 40.0, 0.1 * 500.0)
         self.update_target()
 
     def __init_default(self):

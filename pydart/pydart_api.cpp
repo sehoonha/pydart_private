@@ -359,6 +359,36 @@ void setSkeletonForces(int wid, int skid, double* intorque, int ndofs) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Skeleton Limit Functions
+void getSkeletonPositionLowerLimit(int wid, int skid, double* outpose, int ndofs) {
+    dart::dynamics::Skeleton* skel = Manager::skeleton(wid, skid);
+    for (int i = 0; i < ndofs; i++) {
+        outpose[i] = skel->getPositionLowerLimit(i);
+    }
+}
+
+void getSkeletonPositionUpperLimit(int wid, int skid, double* outpose, int ndofs) {
+    dart::dynamics::Skeleton* skel = Manager::skeleton(wid, skid);
+    for (int i = 0; i < ndofs; i++) {
+        outpose[i] = skel->getPositionUpperLimit(i);
+    }
+}
+
+void getSkeletonForceLowerLimit(int wid, int skid, double* outpose, int ndofs) {
+    dart::dynamics::Skeleton* skel = Manager::skeleton(wid, skid);
+    for (int i = 0; i < ndofs; i++) {
+        outpose[i] = skel->getForceLowerLimit(i);
+    }
+}
+
+void getSkeletonForceUpperLimit(int wid, int skid, double* outpose, int ndofs) {
+    dart::dynamics::Skeleton* skel = Manager::skeleton(wid, skid);
+    for (int i = 0; i < ndofs; i++) {
+        outpose[i] = skel->getForceUpperLimit(i);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // Skeleton Momentum Functions
 void getSkeletonWorldCOM(int wid, int skid, double outv3[3]) {
     using namespace dart::dynamics;

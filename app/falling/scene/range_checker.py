@@ -30,9 +30,9 @@ class StopperSet(object):
             self.hi = [0.20, 0.20, 3.0]
             self.step = [0.005, 0.005, 0.1]
         else:
-            self.lo = [0.50, 0.50, 0.0]
+            self.lo = [0.30, 0.30, 0.0]
             self.hi = [1.20, 1.20, 3.0]
-            self.step = [0.05, 0.05, 0.1]
+            self.step = [0.02, 0.02, 0.1]
 
         self.num = [int((self.hi[i] - self.lo[i]) / self.step[i])
                     for i in range(self.dim)]

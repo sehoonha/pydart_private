@@ -110,10 +110,12 @@ class Plan:
             c = self.C(i)
             p = self.P(i)
             j = self.J(i)
+            j_value = j * 0.005 if j > 10.0 else j * 0.1
+
             con_name = self.names[self.control(i).c2]
             dth1 = self.DTH1(i)
             x = np.array([0.0, c[0], p[0], p[0]]) + x_offset
-            y = np.array([0.0, c[1], p[1], j * 0.1])
+            y = np.array([0.0, c[1], p[1], j_value])
             text = [None, None, None, "j=%.4f" % j]
             x_offset = x[-1]
             name = 'L%d at %s (dth1:%.4f,j:%.4f)' % (i, con_name, dth1, j),

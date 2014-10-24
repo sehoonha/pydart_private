@@ -47,6 +47,12 @@ void setSkeletonPositions(int wid, int skid, double* inpose, int ndofs);
 void setSkeletonVelocities(int wid, int skid, double* inpose, int ndofs);
 void setSkeletonForces(int wid, int skid, double* intorque, int ndofs);
 
+// Skeleton Limit Functions
+void getSkeletonPositionLowerLimit(int wid, int skid, double* outpose, int ndofs);
+void getSkeletonPositionUpperLimit(int wid, int skid, double* outpose, int ndofs);
+void getSkeletonForceLowerLimit(int wid, int skid, double* outpose, int ndofs);
+void getSkeletonForceUpperLimit(int wid, int skid, double* outpose, int ndofs);
+
 // Skeleton Momentum Functions
 void getSkeletonWorldCOM(int wid, int skid, double outv3[3]);
 void getSkeletonWorldCOMVelocity(int wid, int skid, double outv3[3]);

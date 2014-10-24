@@ -138,6 +138,22 @@ class Skeleton(object):
         """ Setter also updates the internal skeleton kinematics """
         self.set_positions(_q)
 
+    def position_lower_limit(self):
+        return papi.getSkeletonPositionLowerLimit(self.world.id,
+                                                  self.id, self.ndofs)
+
+    def position_upper_limit(self):
+        return papi.getSkeletonPositionUpperLimit(self.world.id,
+                                                  self.id, self.ndofs)
+
+    @property
+    def q_lo(self):
+        return self.position_lower_limit()
+
+    @property
+    def q_hi(self):
+        return self.position_upper_limit()
+
     def velocities(self):
         return papi.getSkeletonVelocities(self.world.id, self.id, self.ndofs)
 
@@ -219,6 +235,22 @@ class Skeleton(object):
     def tau(self, _tau):
         self.set_forces(_tau)
 
+    def force_lower_limit(self):
+        return papi.getSkeletonForceLowerLimit(self.world.id,
+                                               self.id, self.ndofs)
+
+    def force_upper_limit(self):
+        return papi.getSkeletonForceUpperLimit(self.world.id,
+                                               self.id, self.ndofs)
+
+    @property
+    def tau_lo(self):
+        return self.force_lower_limit()
+
+    @property
+    def tau_hi(self):
+        return self.force_upper_limit()
+
     def approx_inertia(self, axis):
         """Calculates the point-masses approximated inertia
         with respect to the given axis """
@@ -236,10 +268,10 @@ class Skeleton(object):
         return self.approx_inertia([1, 0, 0])
 
     def approx_inertia_y(self):
-        return self.approx_inertia([1, 0, 0])
+        return self.approx_inertia([0, 1, 0])
 
     def approx_inertia_z(self):
-        return self.approx_inertia([1, 0, 0])
+        return self.approx_inertia([0, 0, 1])
 
     def external_contacts_and_body_id(self):
         cid_cnt = dict()

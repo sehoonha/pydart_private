@@ -38,12 +38,18 @@ class Simulation(object):
         self.world = pydart.create_world(1.0 / 2000.0)
         self.world.add_skeleton(config.DATA_PATH + "sdf/ground.urdf",
                                 control=False)
-        self.world.add_skeleton(config.DATA_PATH +
-                                "urdf/BioloidGP/BioloidGP.URDF")
         # self.world.add_skeleton(config.DATA_PATH +
-        #                         "urdf/atlas/atlas_v3_no_head.urdf")
+        #                         "urdf/BioloidGP/BioloidGP.URDF")
+        self.world.add_skeleton(config.DATA_PATH +
+                                "urdf/atlas/atlas_v3_no_head.urdf")
 
         self.skel = self.world.skel  # shortcut for the control skeleton
+
+        print 'q_lo', self.skel.q_lo
+        print 'q_hi', self.skel.q_hi
+        print 'tau_lo', self.skel.tau_lo
+        print 'tau_hi', self.skel.tau_hi
+
         for i, dof in enumerate(self.skel.dofs):
             print i, dof
 
