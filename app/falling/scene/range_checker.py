@@ -30,7 +30,7 @@ class StopperSet(object):
             self.hi = [0.20, 0.20, 3.0]
             self.step = [0.005, 0.005, 0.1]
         else:
-            self.lo = [0.30, 0.30, 0.0]
+            self.lo = [0.40, 0.40, 0.0]
             self.hi = [1.20, 1.20, 3.0]
             self.step = [0.02, 0.02, 0.1]
 
@@ -166,7 +166,6 @@ class RangeChecker(object):
                 if x[-1] > math.pi:
                     continue
                 ss.insert_if_new(x)
-
         if generate_cache:
             fp = open('cached_stopper_sets.py', 'w+')
             fp.write('from range_checker import StopperSet\n')
@@ -185,6 +184,17 @@ class RangeChecker(object):
         vel = 1.57  # maximum velocity of the th2
         lo, hi = (th2_0 - t * vel, th2_0 + t * vel)
         return (lo < th2) and (th2 < hi)
+
+    def is_valid_pose(self):
+        """ For debuging """
+        q = self.skel.q
+        lo = self.skel.q_lo
+        hi = self.skel.q_hi
+
+        for i in range(6, self.skel.ndofs):
+            if q[i] < lo[i] or hi[i] < q[i]:
+                return False
+        return True
 
     def set_random_pose(self):
         if self.sim.is_bioloid():
@@ -209,45 +219,36 @@ class RangeChecker(object):
             # Validity check?
             self.skel.q = q
         else:
-            # param_desc = [(0, 'l_arm_shy', 1.0),
-            #               (0, 'r_arm_shy', 1.0),
-            #               (1, 'l_arm_shx', 1.0),
-            #               (1, 'r_arm_shx', -1.0),
-            #               (2, 'l_arm_elx', 1.0),
-            #               (2, 'r_arm_elx', -1.0),
-            param_desc = [(0, 'multi', 1.0),
-                          (1, 'back_bky', 1.0),
-                          (2, 'l_leg_hpy', 1.0),
-                          (2, 'r_leg_hpy', 1.0),
-                          (3, 'l_leg_kny', 0.5),
-                          (3, 'r_leg_kny', 0.5),
-                          (4, 'l_leg_aky', 0.1),
-                          (4, 'r_leg_aky', 0.1), ]
-
-            dim = max([i for i, dof, w in param_desc]) + 1
-            lo = np.array([-1.57] * dim)
-            hi = np.array([1.57] * dim)
-            x = lo + np.random.rand(dim) * (hi - lo)
             q = self.skel.q
+            lo = self.skel.q_lo
+            hi = self.skel.q_hi
+            param_desc = [(0, 'back_bky', 1.0),
+                          (1, 'l_leg_hpy', 1.0),
+                          (1, 'r_leg_hpy', 1.0),
+                          (2, 'l_leg_kny', 1.0),
+                          (2, 'r_leg_kny', 1.0),
+                          (3, 'l_leg_aky', 1.0),
+                          (3, 'r_leg_aky', 1.0),
+                          (4, 'l_arm_shx', 1.0),
+                          (4, 'r_arm_shx', -1.0),
+                          (5, 'l_arm_shy', 1.0),
+                          (5, 'r_arm_shy', 1.0),
+                          (6, 'l_arm_elx', 1.0),
+                          (6, 'r_arm_elx', -1.0), ]
+            params = np.random.rand(7)
             for x_i, dof_name, w in param_desc:
-                if dof_name == 'multi':
-                    v = w * x[x_i]
-                    i0 = self.skel.dof_index('l_arm_shy')
-                    i1 = self.skel.dof_index('l_arm_shx')
-                    i2 = self.skel.dof_index('r_arm_shy')
-                    i3 = self.skel.dof_index('r_arm_shx')
-                    q[i0] = v
-                    q[i1] = -0.5 - math.cos(v / 1.57)
-                    q[i2] = q[i0]
-                    q[i3] = -q[i1]
-                else:
-                    dof_i = self.skel.dof_index(dof_name)
-                    q[dof_i] = w * x[x_i]
-            # Validity check?
+                v = params[x_i]
+                if w < 0.0:
+                    v = 1.0 - v
+                i = self.skel.dof_index(dof_name)
+                # print dof_name, i, v
+                q[i] = lo[i] + (hi[i] - lo[i]) * v
             self.skel.q = q
 
         # else:
         #     q = self.skel.q
-        #     rand_q = (np.random.rand(len(q)) - 0.5) * math.pi
+        #     lo = self.skel.q_lo
+        #     hi = self.skel.q_hi
+        #     rand_q = np.random.rand(len(q)) * (hi - lo) + lo
         #     q[6:] = rand_q[6:]
         #     self.skel.q = q

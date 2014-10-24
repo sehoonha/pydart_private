@@ -9,7 +9,7 @@ import cPickle as pickle
 # import jsonpickle
 
 import pydart
-# import numpy as np
+import numpy as np
 from OpenGL.GL import glPushMatrix, glPopMatrix, glColor
 import gltools
 

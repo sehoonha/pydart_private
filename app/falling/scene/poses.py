@@ -147,10 +147,12 @@ class AtlasPoses:
 
         q[self.dofs['l_arm_shy']] = -0.0
         q[self.dofs['l_arm_shx']] = -1.0
-        q[self.dofs['l_arm_elx']] = -0.5
+        q[self.dofs['l_arm_elx']] = 0.3
+        q[self.dofs['l_arm_ely']] = 0.1
         q[self.dofs['r_arm_shy']] = q[self.dofs['l_arm_shy']]
         q[self.dofs['r_arm_shx']] = -q[self.dofs['l_arm_shx']]
         q[self.dofs['r_arm_elx']] = -q[self.dofs['l_arm_elx']]
+        q[self.dofs['r_arm_ely']] = q[self.dofs['l_arm_ely']]
 
         return q
 

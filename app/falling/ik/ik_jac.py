@@ -49,12 +49,13 @@ class IKJac(object):
                 desc.append([('l_heel', 0.05), ])
                 desc.append([('r_heel', 0.05), ])
         else:
-            desc.append([('l_arm_shy', 1.0), ('r_arm_shy', 1.0),
-                         ('l_arm_shx', 0.0), ('r_arm_shx', 0.0), ])
             desc.append([('back_bky', 1.0), ])
             desc.append([('l_leg_hpy', 1.0), ('r_leg_hpy', 1.0), ])
             desc.append([('l_leg_kny', 1.0), ('r_leg_kny', 1.0), ])
             desc.append([('l_leg_aky', 1.0), ('r_leg_aky', 1.0), ])
+            desc.append([('l_arm_shx', 1.0), ('r_arm_shx', -1.0), ])
+            desc.append([('l_arm_shy', 1.0), ('r_arm_shy', 1.0), ])
+            desc.append([('l_arm_elx', 1.0), ('r_arm_elx', -1.0), ])
         self.desc = desc
 
         # Dimensions
@@ -123,16 +124,14 @@ class IKJac(object):
 
     def expand(self, x):
         q = self.sim.skel.q
+        lo = self.skel.q_lo
+        hi = self.skel.q_hi
         for i, dofs in enumerate(self.desc):
-            x_i = x[i]
+            v = x[i]
             for (d, w) in dofs:
                 index = d if isinstance(d, int) else self.skel.dof_index(d)
-                if d == 'l_arm_shx':
-                    q[index] = -0.5 - math.cos(x_i / 1.57)
-                elif d == 'r_arm_shx':
-                    q[index] = 0.5 + math.cos(x_i / 1.57)
-                else:
-                    q[index] = w * x_i
+                vv = v if w > 0.0 else 1.0 - v
+                q[index] = lo[index] + (hi[index] - lo[index]) * vv
         return q
 
     def update_pose(self, x):
@@ -181,6 +180,8 @@ class IKJac(object):
             cons += [{'type': 'ineq', 'fun': self.constraint, 'args': [o]}]
         options = {'maxiter': 100000, 'maxfev': 100000,
                    'xtol': 10e-8, 'ftol': 10e-8}
+        bnds = [(0.0, 1.0)] * self.dim
+
         print "==== ik.IKJac optimize...."
         res = None
         for i in range(5):
@@ -188,6 +189,7 @@ class IKJac(object):
             now = scipy.optimize.minimize(self.obj, x0,
                                           args=(objs,),
                                           method='SLSQP',
+                                          bounds=bnds,
                                           constraints=cons,
                                           options=options)
             if res is None or now['fun'] < res['fun']:
@@ -209,6 +211,7 @@ class IKJac(object):
         self.prev_target = self.skel.q
         for i in range(self.n):
             t = self.optimize_index(i)
+            print 'check_validity:', self.is_valid_pose(t)
             self.targets += [t]
             self.prev_target = t
 
@@ -216,3 +219,13 @@ class IKJac(object):
             self.skel.x = saved_state
 
         return self.targets
+
+    def is_valid_pose(self, q):
+        """ For debuging """
+        lo = self.skel.q_lo
+        hi = self.skel.q_hi
+
+        for i in range(6, self.skel.ndofs):
+            if q[i] < lo[i] or hi[i] < q[i]:
+                return False
+        return True
