@@ -19,7 +19,7 @@ class Controller(object):
         if self.skel.m < 10.0:
             self.pd = pd.PDController(self.skel, 60.0, 1.0, 0.5 * 1.5)
         else:
-            self.pd = pd.PDController(self.skel, 600.0, 40.0, 0.1 * 500.0)
+            self.pd = pd.PDController(self.skel, 600.0, 60.0, 0.25)
             # self.pd = pd.PDController(self.skel, 600.0, 1.0, 0.1 * 500.0)
         self.update_target()
 
@@ -103,7 +103,7 @@ class Controller(object):
             self.executed_plan = deepcopy(self.plan)
 
         tip = self.tip()
-        print '>>', tip.th1, tip.dth1, tip.r1, tip.th2, tip.r2
+        print '>>', tip.th1(), tip.dth1(), tip.r1(), tip.th2(), tip.r2()
         if self.tip_index > len(self.executed_plan.path):
             print '>>', 'failed_to_update'
             return
@@ -118,7 +118,7 @@ class Controller(object):
                                    v=new_j, v_max=new_j_max)
         self.executed_plan.path[self.tip_index] = new_entry
         self.executed_plan.initialize()
-        print self.executed_plan.path[self.tip_index]
+        # print self.executed_plan.path[self.tip_index]
 
     def is_terminated(self):
         return (self.tip_index >= len(self.tips))

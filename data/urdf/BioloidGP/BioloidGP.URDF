@@ -93,7 +93,7 @@
     <axis
         xyz="0 0 -1" />
     <dynamics damping="0.1" friction="0" />
-    <limit effort="0.75" velocity="12" lower="-2.6180" upper="2.6180" />
+    <limit effort="1.50" velocity="12" lower="-2.6180" upper="2.6180" />
     <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.6981" soft_upper_limit="10.6981" />
   </joint>
   <link
@@ -149,7 +149,7 @@
     <axis
         xyz="0 0 1" />
     <dynamics damping="0.1" friction="0" />
-    <limit effort="0.75" velocity="12" lower="-2.6180" upper="2.6180" />
+    <limit effort="1.50" velocity="12" lower="-2.6180" upper="2.6180" />
     <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.6981" soft_upper_limit="10.6981" />
   </joint>
 
@@ -206,7 +206,7 @@
     <axis
         xyz="1 0 0" />
     <dynamics damping="0.1" friction="0" />
-    <limit effort="0.75" velocity="12" lower="-2.6180" upper="2.6180" />
+    <limit effort="1.50" velocity="12" lower="-2.6180" upper="2.6180" />
     <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.6981" soft_upper_limit="10.6981" />
   </joint>
 
@@ -263,7 +263,7 @@
     <axis
         xyz="0 0 -1" />
     <dynamics damping="0.1" friction="0" />
-    <limit effort="0.75" velocity="12" lower="-2.6180" upper="2.6180" />
+    <limit effort="1.50" velocity="12" lower="-2.6180" upper="2.6180" />
     <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.6981" soft_upper_limit="10.6981" />
   </joint>
 
@@ -320,7 +320,7 @@
     <axis
         xyz="1 0 0" />
     <dynamics damping="0.1" friction="0" />
-    <limit effort="0.75" velocity="12" lower="-2.6180" upper="2.6180" />
+    <limit effort="1.50" velocity="12" lower="-2.6180" upper="2.6180" />
     <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.6981" soft_upper_limit="10.6981" />
   </joint>
 
@@ -377,7 +377,7 @@
     <axis
         xyz="0 0 -1" />
     <dynamics damping="0.1" friction="0" />
-    <limit effort="0.75" velocity="12" lower="-2.6180" upper="2.6180" />
+    <limit effort="1.50" velocity="12" lower="-2.6180" upper="2.6180" />
     <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.6981" soft_upper_limit="10.6981" />
   </joint>
 
@@ -434,7 +434,7 @@
     <axis
         xyz="0 0 -1" />
     <dynamics damping="0.1" friction="0" />
-    <limit effort="0.75" velocity="12" lower="-2.6180" upper="2.6180" />
+    <limit effort="1.50" velocity="12" lower="-2.6180" upper="2.6180" />
     <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.6981" soft_upper_limit="10.6981" />
   </joint>
 
@@ -491,7 +491,7 @@
     <axis
         xyz="1 0 0" />
     <dynamics damping="0.1" friction="0" />
-    <limit effort="0.75" velocity="12" lower="-2.6180" upper="2.6180" />
+    <limit effort="1.50" velocity="12" lower="-2.6180" upper="2.6180" />
     <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.6981" soft_upper_limit="10.6981" />
   </joint>
 
@@ -548,7 +548,7 @@
     <axis
         xyz="0 0 -1" />
     <dynamics damping="0.1" friction="0" />
-    <limit effort="0.75" velocity="12" lower="-2.6180" upper="2.6180" />
+    <limit effort="1.50" velocity="12" lower="-2.6180" upper="2.6180" />
     <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.6981" soft_upper_limit="10.6981" />
   </joint>
 
@@ -605,7 +605,7 @@
     <axis
         xyz="1 0 0" />
     <dynamics damping="0.1" friction="0" />
-    <limit effort="0.75" velocity="12" lower="-2.6180" upper="2.6180" />
+    <limit effort="1.50" velocity="12" lower="-2.6180" upper="2.6180" />
     <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.6981" soft_upper_limit="10.6981" />
   </joint>
 
@@ -662,7 +662,7 @@
     <axis
         xyz="0 1 0" />
     <dynamics damping="0.1" friction="0" />
-    <limit effort="0.75" velocity="12" lower="-2.6180" upper="2.6180" />
+    <limit effort="1.50" velocity="12" lower="-2.6180" upper="2.6180" />
     <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.6981" soft_upper_limit="10.6981" />
   </joint>
 
@@ -719,7 +719,7 @@
     <axis
         xyz="0 0 -1" />
     <dynamics damping="0.1" friction="0" />
-    <limit effort="0.75" velocity="12" lower="-2.6180" upper="2.6180" />
+    <limit effort="1.50" velocity="12" lower="-2.6180" upper="2.6180" />
     <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.6981" soft_upper_limit="10.6981" />
   </joint>
 
@@ -776,7 +776,7 @@
     <axis
         xyz="1 0 0" />
     <dynamics damping="0.1" friction="0" />
-    <limit effort="0.75" velocity="12" lower="-2.6180" upper="2.6180" />
+    <limit effort="1.50" velocity="12" lower="-2.6180" upper="2.6180" />
     <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.6981" soft_upper_limit="10.6981" />
   </joint>
 
@@ -833,7 +833,7 @@
     <axis
         xyz="0 -1 0" />
     <dynamics damping="0.1" friction="0" />
-    <limit effort="0.75" velocity="12" lower="-2.6180" upper="2.6180" />
+    <limit effort="1.50" velocity="12" lower="-2.6180" upper="2.6180" />
     <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.6981" soft_upper_limit="10.6981" />
   </joint>
 
@@ -890,7 +890,7 @@
     <axis
         xyz="0 0 -1" />
     <dynamics damping="0.1" friction="0" />
-    <limit effort="0.75" velocity="12" lower="-2.6180" upper="2.6180" />
+    <limit effort="1.50" velocity="12" lower="-2.6180" upper="2.6180" />
     <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.6981" soft_upper_limit="10.6981" />
   </joint>
 
@@ -947,7 +947,7 @@
     <axis
         xyz="1 0 0" />
     <dynamics damping="0.1" friction="0" />
-    <limit effort="0.75" velocity="12" lower="-2.6180" upper="2.6180" />
+    <limit effort="1.50" velocity="12" lower="-2.6180" upper="2.6180" />
     <safety_controller k_position="100" k_velocity="100" soft_lower_limit="-10.6981" soft_upper_limit="10.6981" />
   </joint>
 
