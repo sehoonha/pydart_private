@@ -28,6 +28,8 @@ import abstract.dynamic
 import abstract.plan
 import model.controller
 # import cProfile
+import plotly.plotly as py
+import plotly.graph_objs as pyg
 
 
 class Simulation(object):
@@ -44,11 +46,6 @@ class Simulation(object):
                                 "urdf/atlas/atlas_v3_no_head.urdf")
 
         self.skel = self.world.skel  # shortcut for the control skeleton
-
-        print 'q_lo', self.skel.q_lo
-        print 'q_hi', self.skel.q_hi
-        print 'tau_lo', self.skel.tau_lo
-        print 'tau_hi', self.skel.tau_hi
 
         for i, dof in enumerate(self.skel.dofs):
             print i, dof
@@ -248,3 +245,13 @@ class Simulation(object):
         with open(filename, 'r') as fp:
             self.history = pickle.load(fp)
         print 'load #', len(self.history), 'frames'
+
+    def plot_com(self):
+        traces = []
+        traces += self.history.com_traces()
+        traces += self.plan.com_traces()
+
+        data = pyg.Data(traces)
+        unique_url = py.plot({'data': data},
+                             filename='COM Trajectories')
+        print '==== com_trajectory OK : ', unique_url

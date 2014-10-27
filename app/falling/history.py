@@ -1,5 +1,6 @@
 import numpy as np
 import plotly.plotly as py
+import plotly.graph_objs as pyg
 from plotly.graph_objs import *
 import csv
 
@@ -86,16 +87,30 @@ class History:
         # py.image.save_as({'data': data}, 'trajectories.png', height=900, width=1200)
         unique_url = py.plot(data, filename = 'Simulation history')
 
-    def plotCOM(self):
-        return self.plotTwoCsv()
-        x = [ data['t'] for data in self.histories ]
-        traces = []
+    def com_traces(self):
+        t = [data['t'] for data in self.histories]
+        x = [data['C.x'] for data in self.histories]
+        y = [data['C.y'] for data in self.histories]
 
-        for name in ['C.x', 'C.y', 'P.x', 'P.y']:
-            y = [ data[name] for data in self.histories ]
-            traces += [ Scatter(x=x,y=y,name=name) ]
-        data = Data(traces)
-        unique_url = py.plot(data, filename = 'Simulation COM history')
+        traces = []
+        for i in range(5):  # Maximum traces = 5
+            isgood = lambda data: data['nframes'] % 200 == 0 \
+                and data['tip_index'] == i
+
+            t = [data['t'] for data in self.histories if isgood(data)]
+            x = [data['C.x'] for data in self.histories if isgood(data)]
+            y = [data['C.y'] for data in self.histories if isgood(data)]
+            text = ["%.4f" % t_i for t_i in t]
+            if len(x) == 0:
+                continue
+            print 'Generate com trace for contact', i
+            traces += [pyg.Scatter(x=x, y=y, text=text,
+                                   mode='lines+markers+text')]
+        return traces
+        # data = pyg.Data(traces)
+        # unique_url = py.plot({'data': data},
+        #                      filename='COM Trajectories')
+        # print '==== com_trajectory OK : ', unique_url
 
     def plotImpact(self):
         x = [ data['t'] for data in self.histories ]

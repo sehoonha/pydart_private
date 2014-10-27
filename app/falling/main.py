@@ -99,11 +99,8 @@ class MyWindow(QtGui.QMainWindow):
         self.plotExeAction = QtGui.QAction('Plot Executed', self)
         self.plotExeAction.triggered.connect(self.plotExeEvent)
 
-        self.plotCOMAction = QtGui.QAction('COM', self)
+        self.plotCOMAction = QtGui.QAction('Plot COM', self)
         self.plotCOMAction.triggered.connect(self.plotCOMEvent)
-
-        self.plotImpactAction = QtGui.QAction('Impact', self)
-        self.plotImpactAction.triggered.connect(self.plotImpactEvent)
 
         # File Menu
         self.loadAction = QtGui.QAction('&Load Plan', self)
@@ -173,7 +170,6 @@ class MyWindow(QtGui.QMainWindow):
         plotMenu.addAction(self.plotAction)
         plotMenu.addAction(self.plotExeAction)
         plotMenu.addAction(self.plotCOMAction)
-        plotMenu.addAction(self.plotImpactAction)
 
     def idleTimerEvent(self):
         doCapture = False
@@ -240,10 +236,9 @@ class MyWindow(QtGui.QMainWindow):
         self.sim.tip_controller.executed_plan.plot()
 
     def plotCOMEvent(self):
-        self.sim.history.plotCOM()
-
-    def plotImpactEvent(self):
-        self.sim.history.plotImpact()
+        # self.sim.plan.com_trajectory()
+        # self.sim.history.plotCOM()
+        self.sim.plot_com()
 
     def loadEvent(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open file',

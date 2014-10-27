@@ -1,6 +1,7 @@
 import numpy as np
 import math
-from state_db import State, get_points
+from math import sin
+from state_db import State, get_points, get_first_point
 # Plotting
 import plotly.plotly as py
 import plotly.graph_objs as pyg
@@ -24,20 +25,13 @@ class Plan:
         return len(self.controls)
 
     def state(self, index):
-        if index == 0:
-            # x0 = self.states[index]
-            # x1 = self.states[index + 1]
-            # return State(x0.th1, 0, x1.r1, 0, 0, 0)
-            x1 = self.states[index + 1]
-            return State(x1.th1, x1.dth1, x1.r1, 0, 0, 0)
-        else:
-            # x0 = self.states[index]
-            # x1 = self.states[index + 1]
-            # u0 = self.controls[index - 1]
-            # th1 = x0.th1 + u0.th2 - math.pi
-            # return State(th1, 0, x1.r1, 0, 0, 0)
-            x1 = self.states[index + 1]
-            return State(x1.th1, x1.dth1, x1.r1, 0, 0, 0)
+        return self.states[index + 1]
+
+    def state_0(self, index):
+        x0 = self.path[index].x
+        x1 = self.path[index].nx_0
+        x = State(x0.th1, x0.dth1, x0.r1, x1.dr1, x0.c1, x0.t)
+        return x
 
     def r1(self, index):
         return self.state(index).r1
@@ -143,3 +137,65 @@ class Plan:
         print '==== plot_trace OK : ', unique_url
         # py.image.save_as({'data': data, 'layout': layout},
         #                  'plan.png', height=900, width=1000)
+
+    def deriv(self, _state, _t):
+        x = State(*_state)
+        (th1, dth1, r1, dr1) = (x.th1, x.dth1, x.r1, x.dr1)
+
+        (m, g) = (self.m, self.g)
+        ddth1 = (m * r1 * (2 * dr1 * dth1 - g * sin(th1))) / (m * (r1 ** 2))
+        return np.array([dth1, ddth1, dr1, 0, 0, 1.0])
+
+    def step(self, x):
+        # time = np.array([0.0, 0.005])
+        # x0 = np.array(x)
+        # X = odeint(self.deriv, x0, time)
+        # return State(*X[-1])
+        x0 = np.array(x)
+        dx = self.deriv(x0, 0.0)
+        x1 = x0 + 0.005 * dx
+        return State(*x1)
+
+    def com_traces(self):
+        print 'generate com_trajectory'
+        self.m = 149.55
+        self.I = 25.7
+        self.g = -9.8
+
+        for i, x in enumerate(self.states):
+            print 'Plan', i, x
+
+        traces = []
+        offset = 0.0
+        cnt = 0
+        for i in range(len(self.states) - 1):
+            print
+            print 'collision', i, 'offset=', offset
+            x = self.state_0(i)
+            x1 = self.states[i + 1]
+            next_t = x1.t
+            Cx = [offset]
+            Cy = [0.0]
+            text = [None]
+            while x.t < next_t:
+                if cnt % 20 == 0:
+                    pts = get_first_point(x)
+                    Cx += [pts.x1 + offset]
+                    Cy += [pts.y1]
+                    text += ["%.4f" % x.t]
+                    print x, pts.x1, pts.y1
+                cnt += 1
+                x = self.step(x)
+            offset = self.P(i)[0]
+            print 'Checking the result'
+            print 'x = ', x
+            print 'x1 = ', x1
+            print
+            traces += [pyg.Scatter(x=Cx, y=Cy, text=text,
+                                   # textfont=pyg.Font(size=20),
+                                   mode='lines+markers+text')]
+        # data = pyg.Data(traces)
+        # unique_url = py.plot({'data': data},
+        #                      filename='COM Trajectories')
+        # print '==== com_trajectory OK : ', unique_url
+        return traces
