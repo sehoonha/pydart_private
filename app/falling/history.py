@@ -88,9 +88,12 @@ class History:
         unique_url = py.plot(data, filename = 'Simulation history')
 
     def com_traces(self):
-        t = [data['t'] for data in self.histories]
-        x = [data['C.x'] for data in self.histories]
-        y = [data['C.y'] for data in self.histories]
+        x0 = self.get_frame_at(0)['O.x']
+        y0 = self.get_frame_at(0)['O.y']
+        print 'initial origin offset:', y0
+        # t = [data['t'] for data in self.histories]
+        # x = [data['C.x'] - x0 for data in self.histories]
+        # y = [data['C.y'] - y0 for data in self.histories]
 
         traces = []
         for i in range(5):  # Maximum traces = 5
@@ -98,8 +101,8 @@ class History:
                 and data['tip_index'] == i
 
             t = [data['t'] for data in self.histories if isgood(data)]
-            x = [data['C.x'] for data in self.histories if isgood(data)]
-            y = [data['C.y'] for data in self.histories if isgood(data)]
+            x = [data['C.x'] - x0 for data in self.histories if isgood(data)]
+            y = [data['C.y'] - y0 for data in self.histories if isgood(data)]
             text = ["%.4f" % t_i for t_i in t]
             if len(x) == 0:
                 continue

@@ -100,6 +100,8 @@ class TIP(object):
     def push(self, history):
         data = history.histories[-1]
         data['tip'] = str(self)
+        data['O.x'] = self.p1[2]
+        data['O.y'] = self.p1[1]
 
     def render(self):
         glLineWidth(3.0)
