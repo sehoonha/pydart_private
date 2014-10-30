@@ -84,8 +84,8 @@ class IKJac(object):
             print 'target r1, r2, th2: ', r1, r2, th2
 
             # Put objectives related to TIPs
-            self.con_eqs += [Obj("r1_%d" % i, i, tip.r1, r1)]
-            self.con_eqs += [Obj("r2_%d" % i, i, tip.r2, r2 * 1.1, 2.0)]
+            self.con_eqs += [Obj("r1_%d" % i, i, tip.r1, r1 + 0.03)]
+            self.con_eqs += [Obj("r2_%d" % i, i, tip.r2, r2, 2.0)]
             self.objs += [Obj("th2_%d" % i, i, tip.th2, th2)]
             if i > 0:
                 self.objs += [Obj("r2_%d" % i, i - 1, tip.r2, r2, 0.5)]

@@ -249,7 +249,8 @@ class Simulation(object):
     def plot_com(self):
         traces = []
         traces += self.history.com_traces()
-        traces += self.plan.com_traces()
+        if hasattr(self, 'plan') and self.plan is not None:
+            traces += self.plan.com_traces()
 
         data = pyg.Data(traces)
         unique_url = py.plot({'data': data},

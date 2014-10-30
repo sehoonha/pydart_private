@@ -123,6 +123,6 @@ class TIP(object):
     def __str__(self):
         # values = [self.th1, self.dth1, self.r1,
         #           self.th2, self.r2]
-        return "[%s, %s: (%.3f %.1f) %.3f (%.3f) %.3f]" % \
+        return "[%s, %s: (%.3f %.3f) %.3f (%.3f) %.3f]" % \
             (self.c1.name, self.c2.name, self.th1(), self.dth1(), self.r1(),
              self.th2(), self.r2())

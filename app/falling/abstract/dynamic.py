@@ -29,6 +29,8 @@ class DynamicTIP:
             self.I = 25.7
         self.g = -9.8
         (self.lo_dr, self.hi_dr) = (-0.1, 0.1)
+        # (self.lo_dr, self.hi_dr) = (-0.01, 0.01)
+        # (self.lo_dr, self.hi_dr) = (-0.140, -0.130)
 
     def set_x0(self, tips):
         t0 = tips[0]
@@ -101,9 +103,9 @@ class DynamicTIP:
             for th2 in np.linspace(min_th2, max_th2, self.N_GRID):
                 # Condition  y2 = r1 * cos(th1) + r2 * cos(th1 + th2) = 0
                 r2 = r1 * cos(th1) / -cos(th1 + th2)
-                # Check the dynamics
-                if not self.rng.query_dynamics(t, c1, c2, th2):
-                    continue
+                # # Check the dynamics
+                # if not self.rng.query_dynamics(t, c1, c2, th2):
+                #     continue
                 # Check the kinematics
                 query = (r1, r2, th2)
                 if ss.is_new(query):
@@ -146,11 +148,11 @@ class DynamicTIP:
     def plan(self, x, j):
         # If the current state has negative velocity
         if self.is_stopped(x):
-            return x, j
-            # if int(x.c1) == 5:  # Only designated contacts
-            #     return (x, j)
-            # else:
-            #     return (x, g_inf)  # If this is not the second
+            # return x, j
+            if int(x.c1) == 1:  # Only designated contacts
+                return (x, j)
+            else:
+                return (x, g_inf)  # If this is not the second
             # return (x, g_inf)  # If this is not the second
 
         if self.is_grounded(x):  # If the rod falls to the ground
@@ -189,7 +191,6 @@ class DynamicTIP:
         best_entry = PathEntry(x, None, None, g_inf, g_inf, None)
         for n_dr1 in np.linspace(self.lo_dr, self.hi_dr, self.N_GRID):
             x_now = State(x.th1, x.dth1, x.r1, n_dr1, x.c1, x.t)
-
             while not self.is_grounded(x_now):
                 # print 'n_dr1:', n_dr1, x_now.th1, x_now.dth1
                 for u in self.stoppers(x_now):
