@@ -46,6 +46,7 @@ class MyWindow(QtGui.QMainWindow):
         self.renderTimer.start(25)
 
         self.cam0Event()
+        self.sim.load('gp_step_1.5.plan')
         # self.sim.load('gp_step_5.plan')
         # self.sim.load('test.plan')
 
@@ -119,6 +120,9 @@ class MyWindow(QtGui.QMainWindow):
         self.cam0Action = QtGui.QAction('Camera0', self)
         self.cam0Action.triggered.connect(self.cam0Event)
 
+        self.cam1Action = QtGui.QAction('Camera1', self)
+        self.cam1Action.triggered.connect(self.cam1Event)
+
         self.printCamAction = QtGui.QAction('Print Camera', self)
         self.printCamAction.triggered.connect(self.printCamEvent)
 
@@ -155,6 +159,7 @@ class MyWindow(QtGui.QMainWindow):
         # Camera menu
         cameraMenu = menubar.addMenu('&Camera')
         cameraMenu.addAction(self.cam0Action)
+        cameraMenu.addAction(self.cam1Action)
         cameraMenu.addSeparator()
         cameraMenu.addAction(self.printCamAction)
 
@@ -306,6 +311,20 @@ class MyWindow(QtGui.QMainWindow):
                                          trans=[-1.3800000000000008,
                                                 -0.43000000000000016,
                                                 -4.6])
+
+    def cam1Event(self):
+        print 'cam1Event: frontview'
+        if self.sim.is_bioloid():
+            self.glwidget.tb = Trackball(phi=3.2785, theta=-28.967, zoom=1,
+                                         rot=[-0.2488669109614876,
+                                              -0.04137340091750815,
+                                              0.018840288369721358,
+                                              0.9674701782789754],
+                                         trans=[-0.290000000000001,
+                                                -0.05000000000000002,
+                                                -1.2100000000000029])
+        else:
+            pass
 
     def printCamEvent(self):
         print 'printCamEvent'

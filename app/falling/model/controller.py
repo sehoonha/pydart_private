@@ -17,7 +17,7 @@ class Controller(object):
             self.__init_plan(_plan)
         # PD Control
         if self.skel.m < 10.0:
-            self.pd = pd.PDController(self.skel, 60.0, 1.0, 0.5 * 1.5)
+            self.pd = pd.PDController(self.skel, 60.0, 1.0, 0.5)
         else:
             self.pd = pd.PDController(self.skel, 600.0, 60.0, 0.3)
             # self.pd = pd.PDController(self.skel, 600.0, 1.0, 0.1 * 500.0)
@@ -75,6 +75,9 @@ class Controller(object):
 
     def check_next(self):  # Proceed to the next step
         if self.tip_index >= len(self.tips):
+            # Debug code for the supporting arm
+            self.pd.target[11] -= 0.001
+            self.pd.target[15] -= 0.4
             return False
 
         contacts = set(self.skel.contacted_body_names())

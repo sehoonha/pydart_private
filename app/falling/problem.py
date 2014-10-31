@@ -85,6 +85,8 @@ class Problem(object):
             ]
         elif self.name == 'atlas_lean':
             defs = [
+                # ("toes", ["l_foot", "r_foot"],  # Originally heels
+                #  [[-0.09, 0.0, -0.03], [-0.09, 0.0, -0.03]]),
                 ("toes", ["l_foot", "r_foot"],
                  [[0.18, 0.0, -0.03], [0.18, 0.0, -0.03]]),
                 ("hands", ["l_hand", "r_hand"],

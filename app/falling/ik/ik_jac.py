@@ -218,10 +218,10 @@ class IKJac(object):
         if restore:
             self.skel.x = saved_state
 
-        # Debug routine
-        self.skel.x = saved_state
-        print 'ignore ik and return the intial pose....'
-        self.targets = [self.skel.q]
+        # # Debug routine
+        # self.skel.x = saved_state
+        # print 'ignore ik and return the intial pose....'
+        # self.targets = [self.skel.q]
 
         return self.targets
 

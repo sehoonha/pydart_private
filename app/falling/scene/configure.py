@@ -7,15 +7,16 @@ from scipy.optimize import minimize
 class Configure(object):
     def __init__(self, _sim):
         self.sim = _sim
-        self.ext_force_steps = 1000
+        self.ext_force_steps = 200
         # == A set of configs ==
-        # self.config('step', 1.5)
+        self.config('step', 1.5)
         # self.config('step', 5)
         # self.config('lean', 10)
         # self.config('skate', 10)
         # self.config('back', 3)
         # self.config('side', 10)
-        self.config('atlas_lean', 300)
+        # self.config('atlas_lean', 300)
+        # self.config('atlas_lean', 300)
         # self.config('atlas_step', 3000)
         # self.config('atlas_back', 1000)
 
