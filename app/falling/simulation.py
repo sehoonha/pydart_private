@@ -30,10 +30,15 @@ import model.controller
 # import cProfile
 import plotly.plotly as py
 import plotly.graph_objs as pyg
+import gp
 
 
 class Simulation(object):
     def __init__(self):
+        # Debug..
+        mm = gp.MotorMap()
+        mm.load(config.DATA_PATH +
+                "urdf/BioloidGP/BioloidGPMotorMap.xml")
 
         # Init api
         pydart.init()
@@ -77,6 +82,7 @@ class Simulation(object):
         # For handle callbacks properly..
         self.history.clear()
         self.history.push()
+
 
     def is_bioloid(self):
         return ("BioloidGP" in self.skel.filename)
