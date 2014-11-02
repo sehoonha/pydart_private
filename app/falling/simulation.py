@@ -39,6 +39,11 @@ class Simulation(object):
         mm = gp.MotorMap()
         mm.load(config.DATA_PATH +
                 "urdf/BioloidGP/BioloidGPMotorMap.xml")
+        m = gp.Motion()
+        m.fill_with_empty_pages()
+        print m
+        m.save('test.mtn')
+        exit(0)
 
         # Init api
         pydart.init()

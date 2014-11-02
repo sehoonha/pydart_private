@@ -51,7 +51,6 @@ class MotorMap(object):
             self.ndofs = ndofs
         print 'nmotors = ', self.nmotors
         print 'ndofs = ', self.ndofs
-        # exit(0)
 
     def load_motor(self, tag):
         # tag = <motor ...> ... </motor>
