@@ -64,9 +64,9 @@ class Motion(object):
         self.motormap = _motormap
 
         self.pages = []
-        pg = Page("Init")
-        pg.steps += [Step([512] * 19, 0.0, 1.0)]
-        self.pages += [pg]
+        # pg = Page("Init")
+        # pg.steps += [Step([512] * 19, 0.0, 1.0)]
+        # self.pages += [pg]
 
     def header(self):
         ret = ""
@@ -76,12 +76,12 @@ class Motion(object):
         ret += "motor_type=" + "0 " * 25 + "0\n"
         return ret
 
-    def add_page(self, poses, durations):
+    def add_page(self, name, poses, durations):
         if len(poses) != len(durations):
             print 'add_page Error!! lengths %d != %d' % \
                 (len(poses), len(durations))
 
-        pg = Page("MyFall")
+        pg = Page(name)
         for i, (q, t) in enumerate(zip(poses, durations)):
             print
             print 'Pose:', i

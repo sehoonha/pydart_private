@@ -236,7 +236,8 @@ class Simulation(object):
         transition_times = [e.nx_0.t for e in self.plan.path]
         durations = np.diff([0.0] + transition_times)
         poses = self.tip_controller.targets
-        m.add_page(poses, durations)
+        m.add_page('Init', [self.cfg.init_pose()], [1.0])
+        m.add_page('Falling', poses, durations)
         m.fill_with_empty_pages()
         m.save('test.mtn')
         print 'export_motion OK'

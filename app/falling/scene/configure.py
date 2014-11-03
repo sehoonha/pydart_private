@@ -70,6 +70,9 @@ class Configure(object):
         print x, v
         return v
 
+    def init_pose(self):
+        return self.init_state[:self.skel.ndofs]
+
     def reset_simulation(self, sim):
         skel = sim.skel
         world = sim.world
