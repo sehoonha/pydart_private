@@ -23,7 +23,13 @@ class Motor(object):
         return np.interp(mv, [0, 1024], [self.min_angle, self.max_angle])
 
     def to_motor(self, v):
-        return np.interp(v, [self.min_angle, self.max_angle], [0, 1024])
+        if self.min_angle < self.max_angle:
+            ret = np.interp(v, [self.min_angle, self.max_angle], [0, 1024])
+        else:
+            ret = np.interp(v, [self.max_angle, self.min_angle], [1024, 0])
+        print 'v: %.4f -> %d for %s' % (v, ret, str(self))
+        return ret
+        # return np.interp(v, [self.min_angle, self.max_angle], [0, 1024])
 
     def __str__(self):
         ret = "Motor(%d, id:%d, %s)" % (self.index, self.id, self.name)
@@ -62,7 +68,7 @@ class MotorMap(object):
         return m
 
     def to_motor_pose(self, v):
-        mtv = np.zeros(self.nmotors)
+        mtv = np.array([512] * self.nmotors)
         for m in self.motors:
             mtv[m.id] = m.to_motor(v[m.index])
         return mtv

@@ -60,10 +60,12 @@ class Page(object):
 
 
 class Motion(object):
-    def __init__(self):
+    def __init__(self, _motormap):
+        self.motormap = _motormap
+
         self.pages = []
         pg = Page("Init")
-        pg.steps += [Step([512] * 18, 0.0, 1.0)]
+        pg.steps += [Step([512] * 19, 0.0, 1.0)]
         self.pages += [pg]
 
     def header(self):
@@ -73,6 +75,24 @@ class Motion(object):
         ret += "enable=0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0\n"
         ret += "motor_type=" + "0 " * 25 + "0\n"
         return ret
+
+    def add_page(self, poses, durations):
+        if len(poses) != len(durations):
+            print 'add_page Error!! lengths %d != %d' % \
+                (len(poses), len(durations))
+
+        pg = Page("MyFall")
+        for i, (q, t) in enumerate(zip(poses, durations)):
+            print
+            print 'Pose:', i
+            motor_q = self.motormap.to_motor_pose(q).tolist()
+            print 'Time:', t
+            print 'Pose :', q.tolist()
+            print 'Motor:', motor_q
+            pg.steps += [Step(motor_q, 0.0, t)]
+        print 'Add page OK'
+        self.pages += [pg]
+        return pg
 
     def fill_with_empty_pages(self):
         while len(self.pages) < 255:

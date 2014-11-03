@@ -110,6 +110,9 @@ class MyWindow(QtGui.QMainWindow):
         self.saveAction = QtGui.QAction('&Save Plan', self)
         self.saveAction.triggered.connect(self.saveEvent)
 
+        self.exportMtnAction = QtGui.QAction('&Export Plan as .mtn', self)
+        self.exportMtnAction.triggered.connect(self.exportMtnEvent)
+
         self.loadmAction = QtGui.QAction('&Load Motion', self)
         self.loadmAction.triggered.connect(self.loadmEvent)
 
@@ -152,6 +155,8 @@ class MyWindow(QtGui.QMainWindow):
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(self.loadAction)
         fileMenu.addAction(self.saveAction)
+        fileMenu.addSeparator()
+        fileMenu.addAction(self.exportMtnAction)
         fileMenu.addSeparator()
         fileMenu.addAction(self.loadmAction)
         fileMenu.addAction(self.savemAction)
@@ -266,6 +271,9 @@ class MyWindow(QtGui.QMainWindow):
         print 'save:', filename
         self.sim.save(filename)
         print 'save OK'
+
+    def exportMtnEvent(self):
+        self.sim.export_motion()
 
     def loadmEvent(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open file',

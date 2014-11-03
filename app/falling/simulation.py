@@ -35,15 +35,6 @@ import gp
 
 class Simulation(object):
     def __init__(self):
-        # Debug..
-        mm = gp.MotorMap()
-        mm.load(config.DATA_PATH +
-                "urdf/BioloidGP/BioloidGPMotorMap.xml")
-        m = gp.Motion()
-        m.fill_with_empty_pages()
-        print m
-        m.save('test.mtn')
-        exit(0)
 
         # Init api
         pydart.init()
@@ -87,7 +78,6 @@ class Simulation(object):
         # For handle callbacks properly..
         self.history.clear()
         self.history.push()
-
 
     def is_bioloid(self):
         return ("BioloidGP" in self.skel.filename)
@@ -235,6 +225,21 @@ class Simulation(object):
         with open(filename, 'w+') as fp:
             pickle.dump(self.plan, fp, protocol)
             pickle.dump(self.tip_controller.targets, fp, protocol)
+
+    def export_motion(self):
+        # Load motor map data
+        mm = gp.MotorMap()
+        mm.load(config.DATA_PATH +
+                "urdf/BioloidGP/BioloidGPMotorMap.xml")
+        # Translate plan into .mtn
+        m = gp.Motion(mm)
+        transition_times = [e.nx_0.t for e in self.plan.path]
+        durations = np.diff([0.0] + transition_times)
+        poses = self.tip_controller.targets
+        m.add_page(poses, durations)
+        m.fill_with_empty_pages()
+        m.save('test.mtn')
+        print 'export_motion OK'
 
     def load(self, filename):
         with open(filename, 'r') as fp:
