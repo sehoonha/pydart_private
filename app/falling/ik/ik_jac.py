@@ -39,15 +39,15 @@ class IKJac(object):
             desc.append([('l_hand', 1.0), ('r_hand', 1.0), ])
             if leg_symmetry:
                 desc.append([('l_thigh', 1.0), ('r_thigh', 1.0), ])
-                desc.append([('l_shin', 0.5), ('r_shin', 0.5), ])
-                desc.append([('l_heel', 0.05), ('r_heel', 0.05), ])
+                desc.append([('l_shin', 1.0), ('r_shin', 1.0), ])
+                desc.append([('l_heel', 1.0), ('r_heel', 1.0), ])
             else:
                 desc.append([('l_thigh', 1.0), ])
                 desc.append([('r_thigh', 1.0), ])
-                desc.append([('l_shin', 0.5), ])
-                desc.append([('r_shin', 0.5), ])
-                desc.append([('l_heel', 0.05), ])
-                desc.append([('r_heel', 0.05), ])
+                desc.append([('l_shin', 1.0), ])
+                desc.append([('r_shin', 1.0), ])
+                desc.append([('l_heel', 1.0), ])
+                desc.append([('r_heel', 1.0), ])
         else:
             desc.append([('back_bky', 1.0), ])
             desc.append([('l_leg_hpy', 1.0), ('r_leg_hpy', 1.0), ])
@@ -84,9 +84,9 @@ class IKJac(object):
             print 'target r1, r2, th2: ', r1, r2, th2
 
             # Put objectives related to TIPs
-            self.con_eqs += [Obj("r1_%d" % i, i, tip.r1, r1 + 0.10)]
-            self.con_eqs += [Obj("r2_%d" % i, i, tip.r2, r2, 2.0)]
-            self.objs += [Obj("th2_%d" % i, i, tip.th2, th2)]
+            self.con_eqs += [Obj("r1_%d" % i, i, tip.r1, r1)]
+            self.con_eqs += [Obj("r2_%d" % i, i, tip.r2, r2)]
+            self.objs += [Obj("th2_%d" % i, i, tip.th2, th2, 5.0)]
             if i > 0:
                 self.objs += [Obj("r2_%d" % i, i - 1, tip.r2, r2, 0.5)]
                 self.objs += [Obj("th2_%d" % i, i - 1, tip.th2, th2, 0.1)]
@@ -194,7 +194,7 @@ class IKJac(object):
                                           options=options)
             if res is None or now['fun'] < res['fun']:
                 res = now
-            print i, res['fun']
+            print i, res['fun'], res['success']
         print "==== result"
         print res
         self.print_objs(objs, con_eqs, con_ineqs)

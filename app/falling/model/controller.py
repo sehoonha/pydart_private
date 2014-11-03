@@ -75,9 +75,9 @@ class Controller(object):
 
     def check_next(self):  # Proceed to the next step
         if self.tip_index >= len(self.tips):
-            # Debug code for the supporting arm
-            self.pd.target[11] -= 0.001
-            self.pd.target[15] -= 0.4
+            # # Debug code for the supporting arm
+            # self.pd.target[11] -= 0.001
+            # self.pd.target[15] -= 0.4
             return False
 
         contacts = set(self.skel.contacted_body_names())
