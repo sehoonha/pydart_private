@@ -211,7 +211,7 @@ class RangeChecker(object):
                           (3, 'r_shin', 1.0),
                           (4, 'l_heel', 1.0),
                           (4, 'r_heel', 1.0) ]
-            params = np.random.rand(5)
+            params = 0.2 + (1.0 - 2 * 0.2) * np.random.rand(5)
             for x_i, dof_name, w in param_desc:
                 v = params[x_i]
                 if w < 0.0:

@@ -23,7 +23,7 @@ class DynamicTIP:
         # self.m = 1.08
         if self.prob.sim.is_bioloid():
             self.m = 1.08
-            self.I = 0.0080
+            self.I = 0.0093
         else:
             self.m = 149.55
             self.I = 25.7
@@ -68,14 +68,15 @@ class DynamicTIP:
     def impact(self, x, u):
         # Fetch the required quantities
         p = get_points(x, u)
-        (x1, x2, dy2) = (p.x1, p.x2, p.dy2)
+        (_x1, x2, dy2) = (p.x1, p.x2, p.dy2)
         (m, I) = (self.m, self.I)
         # Estimate the impulse
-        j = (-dy2) / ((1 / m) + (1 / I) * ((x2 - x1) ** 2))
+        # j = (-dy2) / ((1 / m) + (1 / I) * ((x2 - x1) ** 2))
+        j = (-dy2) / ((1 / m) + (1 / I) * ((x2 - 0.0) ** 2))
 
         # Estimate the next velocity
         n_th1 = x.th1 + u.th2 - math.pi
-        n_dth1 = x.dth1 - (1 / I) * (x2 - x1) * j
+        n_dth1 = x.dth1 - (1 / I) * (x2 - 0.0) * j
         n_r1 = u.r2
         # n_c = x.c1 + 1
         n_c = u.c2
@@ -103,9 +104,9 @@ class DynamicTIP:
             for th2 in np.linspace(min_th2, max_th2, self.N_GRID):
                 # Condition  y2 = r1 * cos(th1) + r2 * cos(th1 + th2) = 0
                 r2 = r1 * cos(th1) / -cos(th1 + th2)
-                # # Check the dynamics
-                # if not self.rng.query_dynamics(t, c1, c2, th2):
-                #     continue
+                # Check the dynamics
+                if not self.rng.query_dynamics(t, c1, c2, th2):
+                    continue
                 # Check the kinematics
                 query = (r1, r2, th2)
                 if ss.is_new(query):
@@ -153,13 +154,12 @@ class DynamicTIP:
             #     return (x, j)
             # else:
             #     return (x, g_inf)  # If this is not the second
-            # return (x, g_inf)  # If this is not the second
 
         if self.is_grounded(x):  # If the rod falls to the ground
             return (x, g_inf)
 
-        # if int(x.c1) >= 2:  # Exceed the maximum contacts
-        #     return (x, g_inf)
+        # if int(x.c1) >= 1:  # Exceed the maximum contacts
+        #     return (x, j if int(x.c1) == 1 else g_inf)
 
         if j > self.upper_bound:  # Not promising state
             return (x, g_inf)

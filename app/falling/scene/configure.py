@@ -11,7 +11,8 @@ class Configure(object):
         # == A set of configs ==
         # self.config('step', 1.5)
         # self.config('step', 5)
-        self.config('lean', 0.0)
+        # self.config('lean', 0.0)
+        self.config('lean', 1.0)
         # self.config('skate', 10)
         # self.config('back', 3)
         # self.config('side', 10)
