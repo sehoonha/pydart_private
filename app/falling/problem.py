@@ -89,10 +89,10 @@ class Problem(object):
                 #  [[-0.09, 0.0, -0.03], [-0.09, 0.0, -0.03]]),
                 ("toes", ["l_foot", "r_foot"],
                  [[0.18, 0.0, -0.03], [0.18, 0.0, -0.03]]),
-                ("hands", ["l_hand", "r_hand"],
-                 [[0.0, 0.2, 0.0], [0.0, -0.2, 0.0]]),
                 ("knees", ["l_lleg", "r_lleg"],
                  [[0.12, 0.0, 0.0], [0.12, 0.0, 0.0]]),
+                ("hands", ["l_hand", "r_hand"],
+                 [[0.0, 0.2, 0.0], [0.0, -0.2, 0.0]]),
                 ("head", ["mtorso"], [[0.2, 0.0, 0.7]], )
             ]
         elif self.name == 'atlas_step':
@@ -151,11 +151,13 @@ class Problem(object):
                     ("l_toe", "head"),
                     ("hands", "head"), ]
         elif self.name == 'lean':
-            defs = [("toes", "knees"),
-                    ("toes", "hands"),
-                    ("knees", "hands"),
-                    ("knees", "head"),
-                    ("hands", "head"), ]
+            defs = [
+                ("toes", "knees"),
+                # ("toes", "hands"),
+                # ("knees", "hands"),
+                # ("knees", "head"),
+                # ("hands", "head"),
+            ]
         elif self.name == 'skate':
             defs = [("l_toe", "hands"),
                     ("hands", "head"),
@@ -171,12 +173,13 @@ class Problem(object):
                     ("r_hand", "r_shoulder"),
                     ("r_shoulder", "head"), ]
         elif self.name == 'atlas_lean':
-            defs = [("toes", "knees"),
-                    ("toes", "hands"),
-                    # ("knees", "hands"),
-                    # ("knees", "head"),
-                    # ("hands", "head"),
-                    ]
+            defs = [
+                ("toes", "knees"),
+                # ("toes", "hands"),
+                ("knees", "hands"),
+                # ("knees", "head"),
+                # ("hands", "head"),
+            ]
         elif self.name == 'atlas_step':
             defs = [("toes", "knees"),
                     ("toes", "hands"),

@@ -18,7 +18,7 @@ class DynamicTIP:
         # member variables
         self.eval_counter = 0
         self.kill_counter = 0
-        self.N_GRID = 11
+        self.N_GRID = 21
         # math quantities
         # self.m = 1.08
         if self.prob.sim.is_bioloid():
@@ -68,15 +68,16 @@ class DynamicTIP:
     def impact(self, x, u):
         # Fetch the required quantities
         p = get_points(x, u)
-        (_x1, x2, dy2) = (p.x1, p.x2, p.dy2)
+        (x1, x2, dy2) = (p.x1, p.x2, p.dy2)
         (m, I) = (self.m, self.I)
         # Estimate the impulse
-        # j = (-dy2) / ((1 / m) + (1 / I) * ((x2 - x1) ** 2))
-        j = (-dy2) / ((1 / m) + (1 / I) * ((x2 - 0.0) ** 2))
+        j = (-dy2) / ((1 / m) + (1 / I) * ((x2 - x1) ** 2))
+        # j = (-dy2) / ((1 / m) + (1 / I) * ((x2 - 0.0) * (x2 - x1)))
 
         # Estimate the next velocity
         n_th1 = x.th1 + u.th2 - math.pi
-        n_dth1 = x.dth1 - (1 / I) * (x2 - 0.0) * j
+        n_dth1 = x.dth1 - (1 / I) * (x2 - x1) * j
+        # n_dth1 = x.dth1 - (1 / I) * (x2 - 0.0) * j
         n_r1 = u.r2
         # n_c = x.c1 + 1
         n_c = u.c2
@@ -104,13 +105,14 @@ class DynamicTIP:
             for th2 in np.linspace(min_th2, max_th2, self.N_GRID):
                 # Condition  y2 = r1 * cos(th1) + r2 * cos(th1 + th2) = 0
                 r2 = r1 * cos(th1) / -cos(th1 + th2)
-                # Check the dynamics
-                if not self.rng.query_dynamics(t, c1, c2, th2):
-                    continue
+                # # Check the dynamics
+                # if not self.rng.query_dynamics(t, c1, c2, th2):
+                #     # print 'reject the bad dynamics'
+                #     continue
                 # Check the kinematics
                 query = (r1, r2, th2)
                 if ss.is_new(query):
-                    # print 'reject the bad kinematics'
+                    # print 'reject the bad kinematics', query
                     continue
                 stoppers += [Control(th2, r2, c2)]
                 # print 'stopper:', stoppers[-1]
@@ -118,14 +120,7 @@ class DynamicTIP:
         # exit(0)
         return stoppers
 
-    def saved_plan_initial(self):
-        self.x0 =  State(-0.1776, 0.5371, 1.0636, None, 0, 0.000)
-        self.path =  [PathEntry(x=State(th1=-0.1775902009188819, dth1=0.5371288141189724, r1=1.0636041337291517, dr1=None, c1=0, t=0.0), nx_0=State(th1=1.0334004995687891, dth1=2.9551631548844317, r1=1.1149041337291461, dr1=0.01999999999999999, c1=0.0, t=2.5649999999999675), nx_1=State(th1=-0.59426785187963294, dth1=-1.8084545245694739, r1=0.68881077520685596, dr1=None, c1=1, t=2.5649999999999675), v=317.43722638935162, v_max=317.43722638935162, u=Control(th2=1.5139243021413713, r2=0.68881077520685596, c2=1))]
-        return max([entry.v for entry in self.path])
-
     def plan_initial(self):
-        # return self.saved_plan_initial()
-
         self.upper_bound = g_inf
         # self.upper_bound = 0.52
         x = State(self.x0.th1, self.x0.dth1, self.x0.r1, None, 0, 0.0)
@@ -146,20 +141,21 @@ class DynamicTIP:
         # self.db.plot_states()
         return j
 
-    def plan(self, x, j):
+    def plan(self, x, j, depth=0):
         # If the current state has negative velocity
         if self.is_stopped(x):
-            return x, j
-            # if int(x.c1) == 1:  # Only designated contacts
-            #     return (x, j)
-            # else:
-            #     return (x, g_inf)  # If this is not the second
+            # print "  " * depth, self.eval_counter, 'stop()', x, j
+            # return x, j
+            if int(x.c1) == 2:  # Only designated contacts
+                return (x, j)
+            else:
+                return (x, g_inf)  # If this is not the second
+
+        # if int(x.c1) >= 1:  # Exceed the maximum contacts
+        #     return (x, g_inf)
 
         if self.is_grounded(x):  # If the rod falls to the ground
             return (x, g_inf)
-
-        # if int(x.c1) >= 1:  # Exceed the maximum contacts
-        #     return (x, j if int(x.c1) == 1 else g_inf)
 
         if j > self.upper_bound:  # Not promising state
             return (x, g_inf)
@@ -184,7 +180,8 @@ class DynamicTIP:
                 print
 
         self.eval_counter += 1
-        print self.eval_counter, 'plan()', x, j, len(self.db)
+        print "  " * depth,
+        print self.eval_counter, 'plan()', x, j, self.upper_bound
 
         # (best_x, best_max_j, best_now_j, best_u) = (None, g_inf, None, None)
         best_j = g_inf
@@ -195,8 +192,12 @@ class DynamicTIP:
                 # print 'n_dr1:', n_dr1, x_now.th1, x_now.dth1
                 for u in self.stoppers(x_now):
                     x_impact, j_impact = self.impact(x_now, u)
-                    # print u, x_impact, j_impact
-                    (x_, j_) = self.plan(x_impact, max(j, j_impact))
+                    # print 'impact!!'
+                    # print u
+                    # print x_now
+                    # print x_impact
+                    # print j_impact
+                    (x_, j_) = self.plan(x_impact, max(j, j_impact), depth + 1)
                     if j_ < best_j:
                         best_j = j_
                         best_entry = PathEntry(x, x_now, x_,

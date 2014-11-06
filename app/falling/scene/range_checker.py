@@ -87,6 +87,8 @@ class StopperSet(object):
     def insert_if_new(self, x):
         if self.is_new(x):
             self.insert(x)
+            return True
+        return False
 
     def __len__(self):
         return self.counter
@@ -165,7 +167,8 @@ class RangeChecker(object):
                 x = tip.pose()
                 if x[-1] > math.pi:
                     continue
-                ss.insert_if_new(x)
+                inserted = ss.insert_if_new(x)
+                # print 'insert', x, inserted
         if generate_cache:
             fp = open('cached_stopper_sets.py', 'w+')
             fp.write('from range_checker import StopperSet\n')
