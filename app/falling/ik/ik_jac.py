@@ -202,6 +202,7 @@ class IKJac(object):
         self.print_objs(objs, con_eqs, con_ineqs)
         print "==== ik.IKJac optimize....OK"
         x = res['x']
+        self.update_pose(x)
         target = self.expand(x)
         # print 'target:', target
         return target

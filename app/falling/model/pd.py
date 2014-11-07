@@ -26,6 +26,10 @@ class PDController:
         tau = np.zeros(self.ndofs)
         tau_lo = self.skel.tau_lo * self.effort_ratio
         tau_hi = self.skel.tau_hi * self.effort_ratio
+        for i in range(self.skel.ndofs):
+            tau_lo[i] = min(-100.0, tau_lo[i])
+            tau_hi[i] = max(100.0, tau_hi[i])
+
         if self.verbose():
             print 'step!!!'
         for i in range(6, self.ndofs):

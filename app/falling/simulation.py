@@ -49,7 +49,7 @@ class Simulation(object):
         self.skel = self.world.skel  # shortcut for the control skeleton
 
         for i, dof in enumerate(self.skel.dofs):
-            print i, dof
+            print i, dof, 'efforts:', self.skel.tau_lo[i], self.skel.tau_hi[i]
 
         self.skel.set_joint_damping(0.15)
 

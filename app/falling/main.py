@@ -48,7 +48,7 @@ class MyWindow(QtGui.QMainWindow):
         self.cam0Event()
         # self.sim.load('gp_step_1.5.plan')
         # self.sim.load('gp_step_5.plan')
-        # self.sim.load('test.plan')
+        self.sim.load('test.plan')
 
     def initUI(self):
         self.setGeometry(0, 0, 1280, 720)
