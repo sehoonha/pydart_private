@@ -97,8 +97,8 @@ class Problem(object):
             ]
         elif self.name == 'atlas_step':
             defs = [
-                ("toes", ["l_foot", "r_foot"],
-                 [[0.18, 0.0, -0.03], [0.18, 0.0, -0.03]]),
+                ("r_toe", ["r_foot"], [[0.18, 0.0, -0.03]]),
+                ("l_toe", ["l_foot"], [[0.18, 0.0, -0.03]]),
                 ("hands", ["l_hand", "r_hand"],
                  [[0.0, 0.2, 0.0], [0.0, -0.2, 0.0]]),
                 ("knees", ["l_lleg", "r_lleg"],
@@ -181,12 +181,14 @@ class Problem(object):
                 ("hands", "head"),
             ]
         elif self.name == 'atlas_step':
-            defs = [("toes", "knees"),
-                    ("toes", "hands"),
-                    # ("knees", "hands"),
-                    # ("knees", "head"),
-                    # ("hands", "head"), ]
-                    ]
+            defs = [
+                ("r_toe", "l_toe"),
+                ("r_toe", "hands"),
+                ("r_toe", "head"),
+                ("l_toe", "hands"),
+                ("l_toe", "head"),
+                ("hands", "head"),
+            ]
         elif self.name == 'atlas_back':
             defs = [("heels", "hips"),
                     ("heels", "hands"),

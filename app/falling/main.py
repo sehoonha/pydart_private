@@ -190,7 +190,7 @@ class MyWindow(QtGui.QMainWindow):
                 self.rangeSlider.setValue(v)
             else:
                 self.animAction.setChecked(False)
-            doCapture = (v % 20 == 1)
+            doCapture = (v % 4 == 1)
         # Do play
         elif self.playAction.isChecked():
             result = self.sim.step()

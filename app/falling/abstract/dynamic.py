@@ -105,10 +105,10 @@ class DynamicTIP:
             for th2 in np.linspace(min_th2, max_th2, self.N_GRID):
                 # Condition  y2 = r1 * cos(th1) + r2 * cos(th1 + th2) = 0
                 r2 = r1 * cos(th1) / -cos(th1 + th2)
-                # # Check the dynamics
-                # if not self.rng.query_dynamics(t, c1, c2, th2):
-                #     # print 'reject the bad dynamics'
-                #     continue
+                # Check the dynamics
+                if not self.rng.query_dynamics(t, c1, c2, th2):
+                    # print 'reject the bad dynamics'
+                    continue
                 # Check the kinematics
                 query = (r1, r2, th2)
                 if ss.is_new(query):
@@ -145,11 +145,11 @@ class DynamicTIP:
         # If the current state has negative velocity
         if self.is_stopped(x):
             # print "  " * depth, self.eval_counter, 'stop()', x, j
-            # return x, j
-            if int(x.c1) == 2:  # Only designated contacts
-                return (x, j)
-            else:
-                return (x, g_inf)  # If this is not the second
+            return x, j
+            # if int(x.c1) == 2:  # Only designated contacts
+            #     return (x, j)
+            # else:
+            #     return (x, g_inf)  # If this is not the second
 
         # if int(x.c1) >= 1:  # Exceed the maximum contacts
         #     return (x, g_inf)

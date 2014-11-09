@@ -227,20 +227,34 @@ class RangeChecker(object):
             q = self.skel.q
             lo = self.skel.q_lo
             hi = self.skel.q_hi
+            # param_desc = [(0, 'back_bky', 1.0),
+            #               (1, 'l_leg_hpy', 1.0),
+            #               (1, 'r_leg_hpy', 1.0),
+            #               (2, 'l_leg_kny', 1.0),
+            #               (2, 'r_leg_kny', 1.0),
+            #               (3, 'l_leg_aky', 1.0),
+            #               (3, 'r_leg_aky', 1.0),
+            #               (4, 'l_arm_shx', 1.0),
+            #               (4, 'r_arm_shx', -1.0),
+            #               (5, 'l_arm_shy', 1.0),
+            #               (5, 'r_arm_shy', 1.0),
+            #               (6, 'l_arm_elx', 1.0),
+            #               (6, 'r_arm_elx', -1.0), ]
             param_desc = [(0, 'back_bky', 1.0),
                           (1, 'l_leg_hpy', 1.0),
-                          (1, 'r_leg_hpy', 1.0),
-                          (2, 'l_leg_kny', 1.0),
-                          (2, 'r_leg_kny', 1.0),
-                          (3, 'l_leg_aky', 1.0),
-                          (3, 'r_leg_aky', 1.0),
-                          (4, 'l_arm_shx', 1.0),
-                          (4, 'r_arm_shx', -1.0),
-                          (5, 'l_arm_shy', 1.0),
-                          (5, 'r_arm_shy', 1.0),
-                          (6, 'l_arm_elx', 1.0),
-                          (6, 'r_arm_elx', -1.0), ]
-            params = np.random.rand(7)
+                          (2, 'r_leg_hpy', 1.0),
+                          (3, 'l_leg_kny', 1.0),
+                          (4, 'r_leg_kny', 1.0),
+                          (5, 'l_leg_aky', 1.0),
+                          (6, 'r_leg_aky', 1.0),
+                          (7, 'l_arm_shx', 1.0),
+                          (7, 'r_arm_shx', -1.0),
+                          (8, 'l_arm_shy', 1.0),
+                          (8, 'r_arm_shy', 1.0),
+                          (9, 'l_arm_elx', 1.0),
+                          (9, 'r_arm_elx', -1.0), ]
+            dim = max([d[0] for d in param_desc]) + 1
+            params = np.random.rand(dim)
             for x_i, dof_name, w in param_desc:
                 v = params[x_i]
                 if w < 0.0:

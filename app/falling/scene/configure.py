@@ -9,7 +9,7 @@ class Configure(object):
         self.sim = _sim
         # == A set of configs ==
         # self.config('step', 1.5, 200)
-        self.config('step', 5, 200)
+        # self.config('step', 5, 200)
         # self.config('lean', 0.0)
         # self.config('lean', 1.0)
         # self.config('skate', 10)
@@ -17,7 +17,7 @@ class Configure(object):
         # self.config('side', 10)
         # self.config('atlas_lean', 250.0, 1000)
         # self.config('atlas_lean', 300)
-        # self.config('atlas_step', 3000)
+        self.config('atlas_step', 250, 1000)  # Need -150 x force as well
         # self.config('atlas_back', 1000)
 
         self.conditions = None
@@ -39,7 +39,7 @@ class Configure(object):
         if self.sim.is_bioloid():
             self.ext_force = ("torso", [0, 0, force], [0, 0, 0.03])
         else:
-            self.ext_force = ("mtorso", [0, 0, force], [0, 0, 0.4])
+            self.ext_force = ("mtorso", [-150, 0, force], [0, 0, 0.4])
 
     def set_pose(self, class_name):
         if class_name == 'step':
