@@ -144,7 +144,7 @@ class Problem(object):
         #         ("l_toe", "hands"), ]
         if self.name == 'step':
             defs = [("r_toe", "l_heel"),
-                    ("r_toe", "l_toe"),
+                    # ("r_toe", "l_toe"),
                     # ("r_toe", "hands"),
                     # ("r_toe", "head"),
                     ("l_heel", "l_toe"),

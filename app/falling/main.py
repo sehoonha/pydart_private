@@ -48,7 +48,7 @@ class MyWindow(QtGui.QMainWindow):
         self.cam0Event()
         # self.sim.load('gp_step_1.5.plan')
         # self.sim.load('gp_step_5.plan')
-        # self.sim.load('test.plan')
+        self.sim.load('test.plan')
 
     def initUI(self):
         self.setGeometry(0, 0, 1280, 720)
@@ -65,6 +65,9 @@ class MyWindow(QtGui.QMainWindow):
 
         self.ikAction = QtGui.QAction('IK', self)
         self.ikAction.triggered.connect(self.ikEvent)
+
+        self.ikCurrAction = QtGui.QAction('Fix', self)
+        self.ikCurrAction.triggered.connect(self.ikCurrEvent)
 
         self.prevAction = QtGui.QAction('Prev', self)
         self.prevAction.triggered.connect(self.prevEvent)
@@ -136,6 +139,7 @@ class MyWindow(QtGui.QMainWindow):
         self.toolbar.addAction(self.ikAction)
         self.toolbar.addAction(self.prevAction)
         self.toolbar.addAction(self.nextAction)
+        self.toolbar.addAction(self.ikCurrAction)
         self.toolbar.addSeparator()
         self.toolbar.addAction(self.resetAction)
         self.toolbar.addAction(self.playAction)
@@ -229,6 +233,9 @@ class MyWindow(QtGui.QMainWindow):
 
     def ikEvent(self):
         self.sim.do_ik()
+
+    def ikCurrEvent(self):
+        self.sim.do_ik_curr()
 
     def prevEvent(self):
         self.sim.tip_controller.prev_target()

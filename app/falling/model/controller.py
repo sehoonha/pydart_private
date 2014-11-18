@@ -134,16 +134,16 @@ class Controller(object):
         self.tip().push(history)
 
     def prev_target(self):
-        print 'tip_controller.prev_target:', self.target_index
         n = len(self.targets)
-        self.skel.q = self.targets[self.target_index]
         self.target_index = (self.target_index - 1) % n
+        self.skel.q = self.targets[self.target_index]
+        print 'tip_controller.prev_target:', self.target_index
 
     def next_target(self):
-        print 'tip_controller.next_target:', self.target_index
         n = len(self.targets)
-        self.skel.q = self.targets[self.target_index]
         self.target_index = (self.target_index + 1) % n
+        self.skel.q = self.targets[self.target_index]
+        print 'tip_controller.next_target:', self.target_index
 
     def target_as_list(self):
         return [tar.tolist() for tar in self.targets]

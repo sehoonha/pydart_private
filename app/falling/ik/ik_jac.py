@@ -24,9 +24,12 @@ class Obj(object):
 
 
 class IKJac(object):
-    def __init__(self, _sim, _plan):
+    def __init__(self, _sim, _plan, _ik_index=None, _saved_targets=None):
         self.sim = _sim
         self.plan = _plan
+
+        self.ik_index = _ik_index
+        self.saved_targets = _saved_targets
         # Parameter descriptions
         # param_desc: ( [{dof_index or dof_name}, {weight}] )
         desc = []
@@ -90,14 +93,14 @@ class IKJac(object):
             print 'target r1, r2, th2: ', r1, r2, th2
 
             # Put objectives related to TIPs
-            self.con_eqs += [Obj("r1_%d" % i, i, tip.r1, r1)]
-            self.con_eqs += [Obj("r2_%d" % i, i, tip.r2, r2)]
-            # self.objs += [Obj("r1_%d" % i, i, tip.r1, r1, 2.0)]
-            # self.objs += [Obj("r2_%d" % i, i, tip.r2, r2, 2.0)]
+            # self.con_eqs += [Obj("r1_%d" % i, i, tip.r1, r1)]
+            # self.con_eqs += [Obj("r2_%d" % i, i, tip.r2, r2)]
+            self.objs += [Obj("r1_%d" % i, i, tip.r1, r1, 100.0)]
+            self.objs += [Obj("r2_%d" % i, i, tip.r2, r2, 100.0)]
             self.objs += [Obj("th2_%d" % i, i, tip.th2, th2, 2.0)]
-            if i > 0:
-                self.objs += [Obj("r2_%d" % i, i - 1, tip.r2, r2, 0.5)]
-                self.objs += [Obj("th2_%d" % i, i - 1, tip.th2, th2, 0.1)]
+            # if i > 0:
+            #     self.objs += [Obj("r2_%d" % i, i - 1, tip.r2, r2, 0.5)]
+            #     self.objs += [Obj("th2_%d" % i, i - 1, tip.th2, th2, 0.1)]
 
         # Summarize objectives and constraints
         self.print_objs(self.objs, self.con_eqs, self.con_ineqs)
@@ -169,6 +172,8 @@ class IKJac(object):
         return obj.f() - obj.v
 
     def optimize_index(self, index):
+        if self.ik_index is not None and index != self.ik_index:
+            return self.saved_targets[index]
         print
         print '======== optimize_index', index
         objs = [o for o in self.objs if o.pose_index == index]
@@ -177,7 +182,7 @@ class IKJac(object):
 
         # Add pose constraint
         obj_pose = Obj("q%d" % index, index, self.pose,
-                       self.prev_target, 0.0001)
+                       self.prev_target, 0.01)
         objs += [obj_pose]
 
         # Make constraints
@@ -193,10 +198,12 @@ class IKJac(object):
         print "==== ik.IKJac optimize...."
         res = None
         for i in range(5):
-            x0 = (np.random.rand(self.dim) - 0.5) * 3.14
+            # x0 = (np.random.rand(self.dim) - 0.5) * 3.14
+            x0 = (np.random.rand(self.dim) - 0.5)
             now = scipy.optimize.minimize(self.obj, x0,
                                           args=(objs,),
                                           method='SLSQP',
+                                          # method='L-BFGS-B',
                                           bounds=bnds,
                                           constraints=cons,
                                           options=options)
@@ -204,12 +211,12 @@ class IKJac(object):
                 res = now
             print i, res['fun'], res['success']
         print "==== result"
-        print res
-        self.print_objs(objs, con_eqs, con_ineqs)
-        print "==== ik.IKJac optimize....OK"
         x = res['x']
         self.update_pose(x)
         target = self.expand(x)
+        print res
+        self.print_objs(objs, con_eqs, con_ineqs)
+        print "==== ik.IKJac optimize....OK"
         # print 'target:', target
         return target
 

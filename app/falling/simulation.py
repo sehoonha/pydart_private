@@ -118,6 +118,17 @@ class Simulation(object):
         self.ik.optimize(restore=False)
         self.tip_controller.targets = self.ik.targets
 
+    def do_ik_curr(self):
+        curr = self.tip_controller.target_index
+        print 'IK_curr:', curr
+        # self.plan.plot()
+
+        # # self.ik = IKMulti(self, self.plan)
+        targets = self.tip_controller.targets
+        self.ik = ik.IKJac(self, self.plan, curr, targets)
+        self.ik.optimize(restore=False)
+        self.tip_controller.targets = self.ik.targets
+
     def reset(self):
         self.cfg.reset_simulation(self)
 
