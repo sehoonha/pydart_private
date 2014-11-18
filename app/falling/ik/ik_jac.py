@@ -182,7 +182,7 @@ class IKJac(object):
 
         # Add pose constraint
         obj_pose = Obj("q%d" % index, index, self.pose,
-                       self.prev_target, 0.01)
+                       self.prev_target, 0.0001)
         objs += [obj_pose]
 
         # Make constraints
