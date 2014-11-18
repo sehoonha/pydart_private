@@ -145,11 +145,11 @@ class DynamicTIP:
         # If the current state has negative velocity
         if self.is_stopped(x):
             # print "  " * depth, self.eval_counter, 'stop()', x, j
-            return x, j
-            # if int(x.c1) == 2:  # Only designated contacts
-            #     return (x, j)
-            # else:
-            #     return (x, g_inf)  # If this is not the second
+            # return x, j
+            if int(x.c1) == 6:  # Only designated contacts
+                return (x, j)
+            else:
+                return (x, g_inf)  # If this is not the second
 
         # if int(x.c1) >= 1:  # Exceed the maximum contacts
         #     return (x, g_inf)

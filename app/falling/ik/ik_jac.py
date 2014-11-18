@@ -90,14 +90,14 @@ class IKJac(object):
             print 'target r1, r2, th2: ', r1, r2, th2
 
             # Put objectives related to TIPs
-            # self.con_eqs += [Obj("r1_%d" % i, i, tip.r1, r1)]
-            # self.con_eqs += [Obj("r2_%d" % i, i, tip.r2, r2)]
-            self.objs += [Obj("r1_%d" % i, i, tip.r1, r1, 2.0)]
-            self.objs += [Obj("r2_%d" % i, i, tip.r2, r2, 2.0)]
+            self.con_eqs += [Obj("r1_%d" % i, i, tip.r1, r1)]
+            self.con_eqs += [Obj("r2_%d" % i, i, tip.r2, r2)]
+            # self.objs += [Obj("r1_%d" % i, i, tip.r1, r1, 2.0)]
+            # self.objs += [Obj("r2_%d" % i, i, tip.r2, r2, 2.0)]
             self.objs += [Obj("th2_%d" % i, i, tip.th2, th2, 2.0)]
-            # if i > 0:
-            #     self.objs += [Obj("r2_%d" % i, i - 1, tip.r2, r2, 0.5)]
-            #     self.objs += [Obj("th2_%d" % i, i - 1, tip.th2, th2, 0.1)]
+            if i > 0:
+                self.objs += [Obj("r2_%d" % i, i - 1, tip.r2, r2, 0.5)]
+                self.objs += [Obj("th2_%d" % i, i - 1, tip.th2, th2, 0.1)]
 
         # Summarize objectives and constraints
         self.print_objs(self.objs, self.con_eqs, self.con_ineqs)

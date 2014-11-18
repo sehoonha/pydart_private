@@ -29,6 +29,7 @@ class StopperSet(object):
             self.lo = [0.05, 0.05, 0.0]
             self.hi = [0.20, 0.20, 3.0]
             self.step = [0.005, 0.005, 0.1]
+            # self.step = [0.01, 0.01, 0.1]
         else:
             self.lo = [0.40, 0.40, 0.0]
             self.hi = [1.20, 1.20, 3.0]
@@ -204,17 +205,28 @@ class RangeChecker(object):
             q = self.skel.q
             lo = self.skel.q_lo
             hi = self.skel.q_hi
+            # param_desc = [(0, 'l_shoulder', 1.0),
+            #               (0, 'r_shoulder', 1.0),
+            #               (1, 'l_hand', 1.0),
+            #               (1, 'r_hand', 1.0),
+            #               (2, 'l_thigh', 1.0),
+            #               (2, 'r_thigh', 1.0),
+            #               (3, 'l_shin', 1.0),
+            #               (3, 'r_shin', 1.0),
+            #               (4, 'l_heel', 1.0),
+            #               (4, 'r_heel', 1.0) ]
             param_desc = [(0, 'l_shoulder', 1.0),
                           (0, 'r_shoulder', 1.0),
                           (1, 'l_hand', 1.0),
                           (1, 'r_hand', 1.0),
                           (2, 'l_thigh', 1.0),
-                          (2, 'r_thigh', 1.0),
-                          (3, 'l_shin', 1.0),
-                          (3, 'r_shin', 1.0),
-                          (4, 'l_heel', 1.0),
-                          (4, 'r_heel', 1.0) ]
-            params = 0.2 + (1.0 - 2 * 0.2) * np.random.rand(5)
+                          (3, 'r_thigh', 1.0),
+                          (4, 'l_shin', 1.0),
+                          (5, 'r_shin', 1.0),
+                          (6, 'l_heel', 1.0),
+                          (7, 'r_heel', 1.0) ]
+            dim = max([d[0] for d in param_desc]) + 1
+            params = 0.2 + (1.0 - 2 * 0.2) * np.random.rand(dim)
             for x_i, dof_name, w in param_desc:
                 v = params[x_i]
                 if w < 0.0:

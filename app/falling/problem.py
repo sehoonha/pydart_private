@@ -48,6 +48,7 @@ class Problem(object):
                  [[0, -0.11, 0.01], [0, 0.11, -0.01]]),
                 ("knees", ["l_shin", "r_shin"], [[0, 0, 0], [0, 0, 0]]),
                 ("head", ["torso"], [[0.0, 0.0, 0.03]]),
+                ("r_heel", ["r_foot"], [[0.05, 0.025, 0.0]]),
             ]
         elif self.name == 'lean':
             defs = [
@@ -144,12 +145,13 @@ class Problem(object):
         if self.name == 'step':
             defs = [("r_toe", "l_heel"),
                     ("r_toe", "l_toe"),
-                    ("r_toe", "hands"),
-                    ("r_toe", "head"),
+                    # ("r_toe", "hands"),
+                    # ("r_toe", "head"),
                     ("l_heel", "l_toe"),
                     ("l_toe", "hands"),
-                    ("l_toe", "head"),
-                    ("hands", "head"), ]
+                    # ("l_toe", "head"),
+                    ("hands", "head"),
+                    ("head", "r_heel"), ]
         elif self.name == 'lean':
             defs = [
                 ("toes", "knees"),
