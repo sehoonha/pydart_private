@@ -45,9 +45,13 @@ const char* getSkeletonDofName(int wid, int skid, int dofid);
 // Skeleton Pose Functions
 void getSkeletonPositions(int wid, int skid, double* outpose, int ndofs);
 void getSkeletonVelocities(int wid, int skid, double* outpose, int ndofs);
+void getSkeletonMassMatrix(int wid, int skid, double* array2, int nrows, int ncols);
+void getSkeletonCoriolisAndGravityForces(int wid, int skid, double* outpose, int ndofs);
+void getSkeletonConstraintForces(int wid, int skid, double* outpose, int ndofs);
 void setSkeletonPositions(int wid, int skid, double* inpose, int ndofs);
 void setSkeletonVelocities(int wid, int skid, double* inpose, int ndofs);
 void setSkeletonForces(int wid, int skid, double* intorque, int ndofs);
+
 
 // Skeleton Limit Functions
 void getSkeletonPositionLowerLimit(int wid, int skid, double* outpose, int ndofs);

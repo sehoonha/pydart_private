@@ -348,6 +348,38 @@ void getSkeletonVelocities(int wid, int skid, double* outpose, int ndofs) {
     }
 }
 
+void getSkeletonMassMatrix(int wid, int skid, double* array2, int nrows, int ncols) {
+    using namespace dart::dynamics;
+    Skeleton* skel = Manager::skeleton(wid, skid);
+    const Eigen::MatrixXd& M = skel->getMassMatrix();
+    
+    int ptr = 0;
+    for (int i = 0; i < M.rows(); i++) {
+        for (int j = 0; j < M.cols(); j++) {
+            array2[ptr++] = M(i, j);
+        }
+    }
+}
+
+void getSkeletonCoriolisAndGravityForces(int wid, int skid, double* outpose, int ndofs) {
+    using namespace dart::dynamics;
+    Skeleton* skel = Manager::skeleton(wid, skid);
+    const Eigen::VectorXd& C = skel->getCoriolisAndGravityForces();
+    for (int i = 0; i < C.size(); i++) {
+        outpose[i] = C(i);
+    }
+}
+
+void getSkeletonConstraintForces(int wid, int skid, double* outpose, int ndofs) {
+    using namespace dart::dynamics;
+    Skeleton* skel = Manager::skeleton(wid, skid);
+    const Eigen::VectorXd& F = skel->getConstraintForces();
+    for (int i = 0; i < F.size(); i++) {
+        outpose[i] = F(i);
+    }
+}
+
+
 void setSkeletonPositions(int wid, int skid, double* inpose, int ndofs) {
     using namespace dart::dynamics;
     Skeleton* skel = Manager::skeleton(wid, skid);
