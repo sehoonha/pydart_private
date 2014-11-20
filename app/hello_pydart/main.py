@@ -148,10 +148,11 @@ def renderTimer(timer):
 
 # Initialize PyDart
 pydart.init()
-world = pydart.create_world(1.0 / 2000.0)
-world.add_skeleton(DATA_PATH + "sdf/ground.urdf", control=False)
-# world.add_skeleton(DATA_PATH + "urdf/BioloidGP/BioloidGP.URDF")
-world.add_skeleton(DATA_PATH + "urdf/atlas/atlas_v3_no_head.urdf")
+# world = pydart.create_world(1.0 / 2000.0)
+# world.add_skeleton(DATA_PATH + "sdf/ground.urdf", control=False)
+# # world.add_skeleton(DATA_PATH + "urdf/BioloidGP/BioloidGP.URDF")
+# world.add_skeleton(DATA_PATH + "urdf/atlas/atlas_v3_no_head.urdf")
+world = pydart.create_world(1.0 / 2000.0, DATA_PATH + "skel/fullbody1.skel")
 world.skels[-1].set_joint_damping(0.15)
 
 # Set the skeleton pose.

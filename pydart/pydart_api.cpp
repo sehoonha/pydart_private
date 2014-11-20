@@ -46,6 +46,7 @@ public:
     static dart::dynamics::Skeleton* skeleton(int index);
     static dart::dynamics::Skeleton* skeleton(int wid, int skid);
     static int createWorld(double timestep);
+    static int createWorldFromSkel(const char* const path);
     
 protected:
     static Manager* g_manager;
@@ -101,6 +102,18 @@ int Manager::createWorld(double timestep) {
     return id;
 }
 
+int Manager::createWorldFromSkel(const char* const path) {
+    Manager* manager = getInstance();
+
+    dart::simulation::World* w = dart::utils::SkelParser::readWorld(path);
+    // w->setTimeStep(timestep);
+    // w->setGravity(Eigen::Vector3d(0.0, -9.81, 0.0));
+    int id = manager->worlds.size();
+    manager->worlds.push_back(w);
+    return id;
+}
+
+
 // class Manager
 ////////////////////////////////////////////////////////////
 
@@ -128,6 +141,12 @@ int createWorld(double timestep) {
     return Manager::createWorld(timestep);
 }
 
+int createWorldFromSkel(const char* const path) {
+    int wid = Manager::createWorldFromSkel(path);
+    std::cout << "# Skeletons in " << path << " = " << numSkeletons(wid) << std::endl;
+    return wid;
+}
+
 void destroyWorld(int wid) {
 }
 
@@ -146,6 +165,12 @@ int addSkeleton(int wid, const char* const path, double frictionCoeff) {
     int id = world->getNumSkeletons();
     world->addSkeleton(skel);
     return id;
+}
+
+int numSkeletons(int wid) {
+    using namespace dart::simulation;
+    World* world = Manager::world(wid);
+    return world->getNumSkeletons();
 }
 
 void setSkeletonJointDamping(int wid, int skid, double damping) {

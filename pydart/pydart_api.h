@@ -14,8 +14,10 @@ void destroy();
 
 // Manipulation Functions
 int createWorld(double timestep);
+int createWorldFromSkel(const char* const path);
 void destroyWorld(int wid);
 int addSkeleton(int wid, const char* const path, double frictionCoeff = 1.0);
+int numSkeletons(int wid);
 void setSkeletonJointDamping(int wid, int skid, double damping);
 
 // Simulation Functions
