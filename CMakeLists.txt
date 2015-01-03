@@ -66,6 +66,16 @@ else (GLUT_FOUND)
   message(STATUS "GLUT NOT FOUND")
 endif ()
 
+find_package(Bullet)
+if (BULLET_FOUND)
+  message(STATUS "Bullet Found")
+  message(STATUS "Bullet include directories = ${BULLET_INCLUDE_DIRS}")
+  message(STATUS "Bullet Libraries = ${BULLET_LIBRARIES}")
+  include_directories(${BULLET_INCLUDE_DIRS})
+else (BULLET_FOUND)
+  message(STATUS "Bullet NOT Found")
+endif ()
+
 ################################################################################
 # Configure the project
 #### Directories
@@ -92,6 +102,7 @@ swig_add_module(pydart_api python ${pydart_py} ${pydart_srcs} ${pydart_hdrs} ${p
 # SWIG_ADD_MODULE(pydart python ${pydart_interfaces} ${pydart_srcs})
 swig_link_libraries(pydart_api ${PYTHON_LIBRARIES})
 swig_link_libraries(pydart_api dart4 dart-core4 ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
+swig_link_libraries(pydart_api ${BULLET_LIBRARIES})
 
 # ADD_CUSTOM_COMMAND(TARGET _pydart_api
 #   PRE_BUILD 

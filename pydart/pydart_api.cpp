@@ -23,6 +23,10 @@ using std::endl;
 #include "dart/dynamics/Joint.h"
 #include "dart/constraint/ConstraintSolver.h"
 #include "dart/collision/CollisionDetector.h"
+#include "dart/collision/dart/DARTCollisionDetector.h"
+#include "dart/collision/fcl/FCLCollisionDetector.h"
+#include "dart/collision/fcl_mesh/FCLMeshCollisionDetector.h"
+#include "dart/collision/bullet/BulletCollisionDetector.h"
 #include "dart/utils/Paths.h"
 #include "dart/utils/SkelParser.h"
 #include "dart/utils/sdf/SoftSdfParser.h"
@@ -164,6 +168,25 @@ int addSkeleton(int wid, const char* const path, double frictionCoeff) {
     World* world = Manager::world(wid);
     int id = world->getNumSkeletons();
     world->addSkeleton(skel);
+
+    // Debug
+    dart::constraint::ConstraintSolver* solver = world->getConstraintSolver();
+    dart::collision::CollisionDetector* detector = solver->getCollisionDetector();
+    // dart::collision::CollisionDetector* detector2 = new dart::collision::FCLMeshCollisionDetector();
+    // solver->setCollisionDetector(detector2);
+    // detector = detector2;
+
+    if (dynamic_cast<dart::collision::DARTCollisionDetector*>(detector)) {
+        std::cout << "DARTCollisionDetector!" << std::endl;
+    } else if (dynamic_cast<dart::collision::FCLCollisionDetector*>(detector)) {
+        std::cout << "FCLCollisionDetector!" << std::endl;
+    } else if (dynamic_cast<dart::collision::FCLMeshCollisionDetector*>(detector)) {
+        std::cout << "FCLMeshCollisionDetector!" << std::endl;
+    } else if (dynamic_cast<dart::collision::BulletCollisionDetector*>(detector)) {
+        std::cout << "BulletCollisionDetector!" << std::endl;
+    } else {
+        std::cout << "Unknown CollisionDetector... (maybe bullet)" << std::endl;
+    }
     return id;
 }
 
