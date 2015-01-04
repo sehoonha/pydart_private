@@ -27,6 +27,7 @@ using std::endl;
 #include "dart/collision/fcl/FCLCollisionDetector.h"
 #include "dart/collision/fcl_mesh/FCLMeshCollisionDetector.h"
 #include "dart/collision/bullet/BulletCollisionDetector.h"
+#include "dart/constraint/ContactConstraint.h"
 #include "dart/utils/Paths.h"
 #include "dart/utils/SkelParser.h"
 #include "dart/utils/sdf/SoftSdfParser.h"
@@ -172,9 +173,9 @@ int addSkeleton(int wid, const char* const path, double frictionCoeff) {
     // Debug
     dart::constraint::ConstraintSolver* solver = world->getConstraintSolver();
     dart::collision::CollisionDetector* detector = solver->getCollisionDetector();
-    // dart::collision::CollisionDetector* detector2 = new dart::collision::FCLMeshCollisionDetector();
-    // solver->setCollisionDetector(detector2);
-    // detector = detector2;
+    dart::collision::CollisionDetector* detector2 = new dart::collision::FCLMeshCollisionDetector();
+    solver->setCollisionDetector(detector2);
+    detector = detector2;
 
     if (dynamic_cast<dart::collision::DARTCollisionDetector*>(detector)) {
         std::cout << "DARTCollisionDetector!" << std::endl;
@@ -187,6 +188,11 @@ int addSkeleton(int wid, const char* const path, double frictionCoeff) {
     } else {
         std::cout << "Unknown CollisionDetector... (maybe bullet)" << std::endl;
     }
+
+    dart::constraint::ContactConstraint::setErrorReductionParameter(0);
+    std::cout << "Zero ERP!!!" << std::endl;
+    std::cout << "ERP = " << dart::constraint::ContactConstraint::getErrorReductionParameter() << std::endl;
+    
     return id;
 }
 
@@ -216,6 +222,16 @@ void resetWorld(int wid) {
     using namespace dart::simulation;
     World* world = Manager::world(wid);
     world->reset();
+    // Debug
+    // std::cout << "reinitialize collision detector" << std::endl;
+    dart::constraint::ConstraintSolver* solver = world->getConstraintSolver();
+    dart::collision::CollisionDetector* detector = solver->getCollisionDetector();
+    // std::cout << "reinitialize collision detector... creating new.." << std::endl;
+    dart::collision::CollisionDetector* detector2 = new dart::collision::FCLMeshCollisionDetector();
+    solver->setCollisionDetector(detector2);
+    // std::cout << "reinitialize collision detector... deleting old.." << std::endl;
+    // delete detector;
+    // std::cout << "reinitialize collision detector... done" << std::endl;
 }
 
 void stepWorld(int wid) {
