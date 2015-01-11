@@ -25,6 +25,7 @@ void resetWorld(int wid);
 void stepWorld(int wid);
 void render(int wid);
 void renderSkeleton(int wid, int skid);
+void renderSkeletonWithColor(int wid, int skid, double r, double g, double b, double a);
 
 // World Functions
 double getWorldTime(int wid);

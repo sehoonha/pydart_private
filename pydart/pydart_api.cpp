@@ -258,6 +258,13 @@ void renderSkeleton(int wid, int skid) {
     skel->draw(ri);
 }
 
+void renderSkeletonWithColor(int wid, int skid, double r, double g, double b, double a) {
+    using namespace dart::dynamics;
+    dart::renderer::RenderInterface* ri = Manager::getRI();
+    Skeleton* skel = Manager::skeleton(wid, skid);
+    skel->draw(ri, Eigen::Vector4d(r, g, b, a), false);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // World Functions
 double getWorldTime(int wid) {
