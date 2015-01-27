@@ -10,7 +10,7 @@ import cPickle as pickle
 
 import pydart
 import numpy as np
-from OpenGL.GL import glPushMatrix, glPopMatrix, glColor
+from OpenGL.GL import glPushMatrix, glPopMatrix, glColor, glMultMatrixf
 import gltools
 
 from history import History
@@ -168,25 +168,36 @@ class Simulation(object):
 
     def render(self):
         glPushMatrix()
-        gltools.render_axis(10)
+        # gltools.render_axis(10)
         # Draw chess board
         gltools.glMove([0.0, -0.01, 0.0])
-        gltools.render_chessboard(10, 20.0)
+        # gltools.render_chessboard(10, 20.0)
+        gltools.render_floor(10, 20.0)
 
         # Draw skeleton
+        gltools.glMove([0, 0, 0])
+        glPushMatrix()
+        M_s = [1.0, 0.0, 0.0, 0.0,
+               1.0, 0.0, -1.0, 0.0,
+               0.0, 0.0, 1.0, 0.0,
+               0.0, -0.001, 0.0, 1.0]
+        glMultMatrixf(M_s)
+        self.skel.render_with_color(0.0, 0.0, 0.0)
+        glPopMatrix()
+
         gltools.glMove([0, 0, 0])
         self.skel.render()
 
         gltools.glMove([0, 0, 0])
         glColor(1, 0, 0)
-        gltools.render_arrow(self.skel.C,
-                             self.skel.C + 0.2 * self.tip.projected_Cdot())
+        # gltools.render_arrow(self.skel.C,
+        #                      self.skel.C + 0.2 * self.tip.projected_Cdot())
 
-        # Draw TIP
-        tip_index = self.history.get_frame()['tip_index']
-        tips = self.tip_controller.tips
-        for i in range(tip_index, len(tips)):
-            tips[i].render()
+        # # Draw TIP
+        # tip_index = self.history.get_frame()['tip_index']
+        # tips = self.tip_controller.tips
+        # for i in range(tip_index, len(tips)):
+        #     tips[i].render()
 
         # Draw contacts
         gltools.glMove([0, 0, 0])
@@ -194,8 +205,8 @@ class Simulation(object):
         for c in self.history.get_frame()['contacts']:
             gltools.render_arrow(c[0:3], c[0:3] - 0.001 * c[3:6])
 
-        for c in self.prob.contacts:
-            c.render()
+        # for c in self.prob.contacts:
+        #     c.render()
 
         glPopMatrix()
 
