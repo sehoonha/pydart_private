@@ -10,6 +10,7 @@ class Configure(object):
         # == A set of configs ==
         # self.config('step', 1.5, 200)
         # self.config('step', 5, 200)
+        # self.config('step', 10, 200)
         self.config('step', 10, 200)
         # self.config('lean', 0.0)
         # self.config('lean', 1.0)
@@ -75,6 +76,17 @@ class Configure(object):
     def init_pose(self):
         return self.init_state[:self.skel.ndofs]
 
+    def target_point(self):
+        (b, f, p) = self.ext_force
+        body = self.skel.body(b)
+        T = body.T
+        pt = np.array(p + [1.0])
+        return (T.dot(pt))[:3]
+
+    def force(self):
+        (b, f, p) = self.ext_force
+        return np.array(f)
+
     def reset_simulation(self, sim):
         skel = sim.skel
         world = sim.world
@@ -99,3 +111,4 @@ class Configure(object):
         state_after_pushed = skel.x
         world.reset()
         skel.x = state_after_pushed
+        self.saved_target_point = self.target_point()

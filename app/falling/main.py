@@ -48,7 +48,7 @@ class MyWindow(QtGui.QMainWindow):
         self.cam0Event()
         # self.sim.load('gp_step_1.5.plan')
         # self.sim.load('gp_step_5.plan')
-        self.sim.load('test.plan')
+        # self.sim.load('test.plan')
 
     def initUI(self):
         self.setGeometry(0, 0, 1280, 720)
@@ -309,11 +309,12 @@ class MyWindow(QtGui.QMainWindow):
     def cam0Event(self):
         print 'cam0Event'
         if self.sim.is_bioloid():
-            self.glwidget.tb = Trackball(phi=-1.8058, theta=-7.529, zoom=1,
-                                         rot=[-0.05906059252184859,
-                                              -0.6724575897706753,
-                                              -0.0559016285363476,
-                                              0.7356545685970873],
+            self.glwidget.tb = Trackball(phi=2.999638867, theta=-11.65482418,
+                                         zoom=1,
+                                         rot=[-0.05616939096242645,
+                                              -0.6826683588086851,
+                                              -0.05049280622231401,
+                                              0.7268145485061248],
                                          trans=[-0.39,
                                                 -0.14,
                                                 -0.7499999999999998])

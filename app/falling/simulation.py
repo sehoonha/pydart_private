@@ -208,6 +208,13 @@ class Simulation(object):
         # for c in self.prob.contacts:
         #     c.render()
 
+        if self.history.get_frame()['t'] < 10.0:
+            gltools.glMove([0, 0, 0])
+            q = self.cfg.saved_target_point
+            p = q - 0.02 * self.cfg.force()
+            # gltools.render_arrow2([0, 0.4, 0], [0, 0.4, 0.4])
+            gltools.render_arrow2(p, q)
+
         glPopMatrix()
 
     def status_string(self):
