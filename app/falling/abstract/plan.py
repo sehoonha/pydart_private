@@ -84,9 +84,34 @@ class Plan:
 
     def __str__(self):
         ret = "== Plan ==\n"
+        ret += 'Impulses: '
+        ret += ', '.join(["%.6f" % e.v for e in self.path])
+        ret += '\n'
         for i, entry in enumerate(self.path):
             ret += '\n'
             ret += 'Contact %d' % i + '\n'
+            ret += 'impulse: ' + str(entry.v) + '\n'
+            ret += 'x0: ' + str(entry.x) + '\n'
+            ret += 'nx_0: ' + str(entry.nx_0) + '\n'
+            ret += 'u: ' + str(entry.u) + '\n'
+            ret += 'nx_1: ' + str(entry.nx_1) + '\n'
+        return ret
+
+    def summary(self, prob):
+        c_names = prob.contact_names()
+        ret = "== Plan ==\n"
+        ret += 'Contacts: '
+        contacts = [c_names[self.contact1(0)]]
+        contacts += [c_names[e.u.c2] for e in self.path]
+        ret += ', '.join(contacts)
+        ret += '\n'
+        ret += 'Impulses: '
+        ret += ', '.join(["%.6f" % e.v for e in self.path])
+        ret += '\n'
+        for i, entry in enumerate(self.path):
+            ret += '\n'
+            ret += 'Contact %d' % i + '\n'
+            ret += 'name: ' + c_names[entry.u.c2] + '\n'
             ret += 'impulse: ' + str(entry.v) + '\n'
             ret += 'x0: ' + str(entry.x) + '\n'
             ret += 'nx_0: ' + str(entry.nx_0) + '\n'

@@ -140,7 +140,7 @@ def R_axis_angle(axis, angle):
     return matrix
 
 
-def render_arrow2(p, q, r_base=0.01, head_width=0.02, head_len=0.02):
+def render_arrow2(p, q, r_base=0.01, head_width=0.015, head_len=0.01):
     m_quadric = gluNewQuadric()
     gluQuadricNormals(m_quadric, GLU_SMOOTH)
     p = np.array(p)

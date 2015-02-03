@@ -100,6 +100,9 @@ class MyWindow(QtGui.QMainWindow):
         self.plotAction = QtGui.QAction('Plot', self)
         self.plotAction.triggered.connect(self.plotEvent)
 
+        self.textSummaryAction = QtGui.QAction('Text Summary', self)
+        self.textSummaryAction.triggered.connect(self.textSummaryEvent)
+
         self.plotExeAction = QtGui.QAction('Plot Executed', self)
         self.plotExeAction.triggered.connect(self.plotExeEvent)
 
@@ -182,6 +185,7 @@ class MyWindow(QtGui.QMainWindow):
         # Plot menu
         plotMenu = menubar.addMenu('&Plot')
         plotMenu.addAction(self.plotAction)
+        plotMenu.addAction(self.textSummaryAction)
         plotMenu.addAction(self.plotExeAction)
         plotMenu.addAction(self.plotCOMAction)
 
@@ -249,6 +253,19 @@ class MyWindow(QtGui.QMainWindow):
     def plotEvent(self):
         self.sim.plan.plot()
 
+    def textSummaryEvent(self):
+        name = self.sim.name
+        print 'textSummaryEvent'
+        print '-' * 80
+        txt = self.sim.plan.summary(self.sim.prob)
+        print txt
+        filename = '%s_summary.txt' % name
+        with open(filename, 'w+') as fout:
+            fout.write(txt)
+        print '-' * 80
+        print 'Write to ', filename
+        print '-' * 80
+
     def plotExeEvent(self):
         self.sim.tip_controller.executed_plan.plot()
 
@@ -268,13 +285,14 @@ class MyWindow(QtGui.QMainWindow):
         print 'load OK'
 
     def saveEvent(self):
-        filename = QtGui.QFileDialog.getSaveFileName(self, 'Open file',
-                                                     '.', '*.plan')
-        if len(filename) == 0:
-            print 'save cancel'
-            return
-        if filename[-5:] != '.plan':
-            filename += '.plan'
+        # filename = QtGui.QFileDialog.getSaveFileName(self, 'Open file',
+        #                                              '.', '*.plan')
+        # if len(filename) == 0:
+        #     print 'save cancel'
+        #     return
+        # if filename[-5:] != '.plan':
+        #     filename += '.plan'
+        filename = '%s.plan' % self.sim.name
         print 'save:', filename
         self.sim.save(filename)
         print 'save OK'
@@ -295,13 +313,14 @@ class MyWindow(QtGui.QMainWindow):
         self.rangeSlider.setRange(0, len(self.sim) - 1)
 
     def savemEvent(self):
-        filename = QtGui.QFileDialog.getSaveFileName(self, 'Open file',
-                                                     '.', '*.motion')
-        if len(filename) == 0:
-            print 'save motion cancel'
-            return
-        if filename[-7:] != '.motion':
-            filename += '.motion'
+        # filename = QtGui.QFileDialog.getSaveFileName(self, 'Open file',
+        #                                              '.', '*.motion')
+        # if len(filename) == 0:
+        #     print 'save motion cancel'
+        #     return
+        # if filename[-7:] != '.motion':
+        #     filename += '.motion'
+        filename = '%s.motion' % self.sim.name
         print 'save motion:', filename
         self.sim.save_motion(filename)
         print 'save motion OK'

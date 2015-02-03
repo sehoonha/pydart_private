@@ -35,6 +35,7 @@ import gp
 
 class Simulation(object):
     def __init__(self):
+        self.name = 'GP_1.5N'
 
         # Init api
         pydart.init()
