@@ -97,7 +97,7 @@ class History:
 
         traces = []
         for i in range(5):  # Maximum traces = 5
-            isgood = lambda data: data['nframes'] % 200 == 0 \
+            isgood = lambda data: data['nframes'] % 20 == 0 \
                 and data['tip_index'] == i
 
             t = [data['t'] for data in self.histories if isgood(data)]
@@ -107,8 +107,9 @@ class History:
             if len(x) == 0:
                 continue
             print 'Generate com trace for contact', i
-            traces += [pyg.Scatter(x=x, y=y, text=text,
-                                   mode='lines+markers+text')]
+            # traces += [pyg.Scatter(x=x, y=y, text=text,
+            #                        mode='lines+markers+text')]
+            traces += [(x, y, text)]
         return traces
         # data = pyg.Data(traces)
         # unique_url = py.plot({'data': data},

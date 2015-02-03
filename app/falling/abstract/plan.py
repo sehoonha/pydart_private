@@ -199,11 +199,13 @@ class Plan:
             x = self.state_0(i)
             x1 = self.states[i + 1]
             next_t = x1.t
-            Cx = [offset]
-            Cy = [0.0]
+            # Cx = [offset]
+            # Cy = [0.0]
+            Cx = []
+            Cy = []
             text = [None]
             while x.t < next_t:
-                if cnt % 20 == 0:
+                if cnt % 2 == 0:
                     pts = get_first_point(x)
                     Cx += [pts.x1 + offset]
                     Cy += [pts.y1]
@@ -216,9 +218,10 @@ class Plan:
             print 'x = ', x
             print 'x1 = ', x1
             print
-            traces += [pyg.Scatter(x=Cx, y=Cy, text=text,
-                                   # textfont=pyg.Font(size=20),
-                                   mode='lines+markers+text')]
+            traces += [(Cx, Cy, text)]
+            # traces += [pyg.Scatter(x=Cx, y=Cy, text=text,
+            #                        # textfont=pyg.Font(size=20),
+            #                        mode='lines+markers+text')]
         # data = pyg.Data(traces)
         # unique_url = py.plot({'data': data},
         #                      filename='COM Trajectories')

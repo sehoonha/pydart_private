@@ -30,6 +30,7 @@ import model.controller
 # import cProfile
 import plotly.plotly as py
 import plotly.graph_objs as pyg
+import matplotlib.pyplot as plt
 import gp
 
 
@@ -294,12 +295,61 @@ class Simulation(object):
         print 'load #', len(self.history), 'frames'
 
     def plot_com(self):
+        mycolors = ['r', 'b', 'g', 'k', 'c']
+
         traces = []
+        colors = []
+        styles = []
+
         traces += self.history.com_traces()
+        n = len(traces)
+        colors += mycolors[:n]
+        styles += ['-'] * n
         if hasattr(self, 'plan') and self.plan is not None:
             traces += self.plan.com_traces()
+            n = len(traces) - n
+            colors += mycolors[:n]
+            styles += ['--'] * n
 
-        data = pyg.Data(traces)
-        unique_url = py.plot({'data': data},
-                             filename='COM Trajectories')
-        print '==== com_trajectory OK : ', unique_url
+        # Ploting with matplotlib
+        plt.ioff()
+        fig = plt.figure()
+        fig.set_size_inches(18.5, 10.5)
+        pp = []
+        for trace, c, ls in zip(traces, colors, styles):
+            (x, y, text) = trace
+            print 'plot'
+            print 'x:', x
+            print 'y:', y
+            p = plt.plot(x, y, ls=ls, color=c, linewidth=2)
+            pp.append(p[0])
+        # plt.title('Compare %d Trials on %s' % (num_trials, prob_name),
+        name = self.name.replace('_', ' ')
+        t = plt.title('%s' % name,
+                      fontdict={'size': 32})
+        t.set_y(0.92)
+        font = {'size': 28}
+        plt.xlabel('X', fontdict=font)
+        plt.ylabel('Y', fontdict=font)
+        legends = [None] * len(pp)
+        legends[0] = 'Executed'
+        legends[n] = 'Planned'
+        plt.legend(pp, legends, fontsize=26,
+                   # bbox_to_anchor=(0.15, 0.15))
+                   # loc='lower left')
+                   loc='upper right')
+
+        # (lo, hi) = plt.axes().get_xlim()
+        plt.axes().set_xlim(0.0, 0.36)  # Walking
+        # (lo, hi) = plt.axes().get_ylim()
+        plt.axes().set_ylim(0.0, 0.24)  # Walking
+
+        outputfile = '%s_com.png' % self.name
+        plt.savefig(outputfile, bbox_inches='tight')
+        plt.close(fig)
+        plt.close(fig)
+
+        # data = pyg.Data(traces)
+        # unique_url = py.plot({'data': data},
+        #                      filename='COM Trajectories')
+        # print '==== com_trajectory OK : ', unique_url

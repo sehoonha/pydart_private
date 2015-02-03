@@ -185,8 +185,9 @@ class MyWindow(QtGui.QMainWindow):
         # Plot menu
         plotMenu = menubar.addMenu('&Plot')
         plotMenu.addAction(self.plotAction)
-        plotMenu.addAction(self.textSummaryAction)
         plotMenu.addAction(self.plotExeAction)
+        plotMenu.addSeparator()
+        plotMenu.addAction(self.textSummaryAction)
         plotMenu.addAction(self.plotCOMAction)
 
     def idleTimerEvent(self):
@@ -198,7 +199,7 @@ class MyWindow(QtGui.QMainWindow):
                 self.rangeSlider.setValue(v)
             else:
                 self.animAction.setChecked(False)
-            doCapture = (v % 20 == 1)
+            doCapture = (v % 10 == 1)
         # Do play
         elif self.playAction.isChecked():
             result = self.sim.step()
@@ -207,7 +208,7 @@ class MyWindow(QtGui.QMainWindow):
             doCapture = (len(self.sim) % 4 == 1)
 
         if self.captureAction.isChecked() and doCapture:
-            self.glwidget.capture()
+            self.glwidget.capture(self.sim.name)
 
     def renderTimerEvent(self):
         self.glwidget.updateGL()
@@ -226,8 +227,14 @@ class MyWindow(QtGui.QMainWindow):
         self.glwidget.capture()
 
     def movieEvent(self):
-        os.system('avconv -r 100 -i ./captures/frame.%04d.png output.mp4')
-        os.system('rm ./captures/frame.*.png')
+        name = self.sim.name
+        cmd = 'avconv -r 200 -i ./captures/%s.%%04d.png %s.mp4' % (name, name)
+        print 'Movie command:', cmd
+        os.system(cmd)
+        os.system('mv captures %s' % name)
+        os.system('mkdir captures')
+        # os.system('avconv -r 100 -i ./captures/frame.%04d.png output.mp4')
+        # os.system('rm ./captures/frame.*.png')
 
     def printEvent(self):
         print repr(self.sim.skel.x)
@@ -258,6 +265,8 @@ class MyWindow(QtGui.QMainWindow):
         print 'textSummaryEvent'
         print '-' * 80
         txt = self.sim.plan.summary(self.sim.prob)
+        txt += '\n====\n'
+        txt += self.sim.status_string()
         print txt
         filename = '%s_summary.txt' % name
         with open(filename, 'w+') as fout:
