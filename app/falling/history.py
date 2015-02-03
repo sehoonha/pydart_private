@@ -56,6 +56,7 @@ class History:
         vertical_forces = [float(-c[4]) for c, b in skelcontacts]
         mg = self.world.skel.m * 9.8
         raw_impulse = (np.sum(vertical_forces) - mg) * self.world.dt
+        raw_impulse = max(0.0, raw_impulse)
         data['raw_impulse'] = raw_impulse
 
         window_size = 40
@@ -115,6 +116,12 @@ class History:
         # unique_url = py.plot({'data': data},
         #                      filename='COM Trajectories')
         # print '==== com_trajectory OK : ', unique_url
+
+    def impulse_traces(self):
+        hz = 40
+        x = [d['t'] for i, d in enumerate(self.histories) if i % hz == 0]
+        y = [d['impulse'] for i, d in enumerate(self.histories) if i % hz == 0]
+        return [(x, y)]
 
     def plotImpact(self):
         x = [ data['t'] for data in self.histories ]

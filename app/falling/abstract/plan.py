@@ -227,3 +227,25 @@ class Plan:
         #                      filename='COM Trajectories')
         # print '==== com_trajectory OK : ', unique_url
         return traces
+
+    def impulse_traces(self, max_t):
+        h = 0.01
+        x = [0.0]
+        y = [0.0]
+        for i in range(len(self.states) - 1):
+            x1 = self.states[i + 1]
+            next_t = x1.t
+            next_j = self.J(i)
+            while x[-1] + 2 * h <= next_t:
+                x += [x[-1] + h]
+                y += [0.0]
+            x += [next_t]
+            y += [next_j]
+            # x += [next_t]
+            # y += [self.J(i)]
+
+        # Fill until the last
+        while x[-1] + h <= max_t:
+            x += [x[-1] + h]
+            y += [0.0]
+        return [(x, y)]

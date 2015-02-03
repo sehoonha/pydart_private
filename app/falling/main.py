@@ -109,6 +109,9 @@ class MyWindow(QtGui.QMainWindow):
         self.plotCOMAction = QtGui.QAction('Plot COM', self)
         self.plotCOMAction.triggered.connect(self.plotCOMEvent)
 
+        self.plotImpulseAction = QtGui.QAction('Plot Impulse', self)
+        self.plotImpulseAction.triggered.connect(self.plotImpulseEvent)
+
         # File Menu
         self.loadAction = QtGui.QAction('&Load Plan', self)
         self.loadAction.triggered.connect(self.loadEvent)
@@ -151,7 +154,7 @@ class MyWindow(QtGui.QMainWindow):
         self.toolbar.addAction(self.screenshotAction)
         self.toolbar.addAction(self.captureAction)
         self.toolbar.addAction(self.movieAction)
-        self.toolbar.addAction(self.plotAction)
+        # self.toolbar.addAction(self.plotAction)
 
         self.rangeSlider = QtGui.QSlider(QtCore.Qt.Horizontal, self)
         self.rangeSlider.valueChanged[int].connect(self.rangeSliderEvent)
@@ -189,6 +192,7 @@ class MyWindow(QtGui.QMainWindow):
         plotMenu.addSeparator()
         plotMenu.addAction(self.textSummaryAction)
         plotMenu.addAction(self.plotCOMAction)
+        plotMenu.addAction(self.plotImpulseAction)
 
     def idleTimerEvent(self):
         doCapture = False
@@ -231,7 +235,7 @@ class MyWindow(QtGui.QMainWindow):
         cmd = 'avconv -r 200 -i ./captures/%s.%%04d.png %s.mp4' % (name, name)
         print 'Movie command:', cmd
         os.system(cmd)
-        os.system('mv captures %s' % name)
+        os.system('mv captures images_%s' % name)
         os.system('mkdir captures')
         # os.system('avconv -r 100 -i ./captures/frame.%04d.png output.mp4')
         # os.system('rm ./captures/frame.*.png')
@@ -282,6 +286,9 @@ class MyWindow(QtGui.QMainWindow):
         # self.sim.plan.com_trajectory()
         # self.sim.history.plotCOM()
         self.sim.plot_com()
+
+    def plotImpulseEvent(self):
+        self.sim.plot_impulse()
 
     def loadEvent(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open file',

@@ -295,7 +295,7 @@ class Simulation(object):
         print 'load #', len(self.history), 'frames'
 
     def plot_com(self):
-        mycolors = ['r', 'b', 'g', 'k', 'c']
+        # mycolors = ['r', 'b', 'g', 'k', 'c']
 
         traces = []
         colors = []
@@ -303,13 +303,15 @@ class Simulation(object):
 
         traces += self.history.com_traces()
         n = len(traces)
-        colors += mycolors[:n]
+        # colors += mycolors[:n]
+        colors += ['r'] * n
         styles += ['-'] * n
         if hasattr(self, 'plan') and self.plan is not None:
             traces += self.plan.com_traces()
-            n = len(traces) - n
-            colors += mycolors[:n]
-            styles += ['--'] * n
+            m = len(traces) - n
+            # colors += mycolors[:n]
+            colors += ['b'] * m
+            styles += ['-'] * m
 
         # Ploting with matplotlib
         plt.ioff()
@@ -331,9 +333,11 @@ class Simulation(object):
         font = {'size': 28}
         plt.xlabel('X', fontdict=font)
         plt.ylabel('Y', fontdict=font)
+        pp = [pp[0]] + [None] * (n - 1) + [pp[n]] + [None] * (m - 1)
         legends = [None] * len(pp)
         legends[0] = 'Executed'
         legends[n] = 'Planned'
+        print 'legends:', legends
         plt.legend(pp, legends, fontsize=26,
                    # bbox_to_anchor=(0.15, 0.15))
                    # loc='lower left')
@@ -349,7 +353,48 @@ class Simulation(object):
         plt.close(fig)
         plt.close(fig)
 
-        # data = pyg.Data(traces)
-        # unique_url = py.plot({'data': data},
-        #                      filename='COM Trajectories')
-        # print '==== com_trajectory OK : ', unique_url
+    def plot_impulse(self):
+        traces = []
+        traces += self.history.impulse_traces()
+        colors = ['r']
+        styles = ['-']
+        max_t = max(traces[0][0])
+        print 'max_t:', max_t
+        if hasattr(self, 'plan') and self.plan is not None:
+            traces += self.plan.impulse_traces(max_t=max_t)
+            colors += ['b']
+            styles += ['-']
+        # Ploting with matplotlib
+        plt.ioff()
+        fig = plt.figure()
+        fig.set_size_inches(18.5, 10.5)
+        pp = []
+        for trace, c, ls in zip(traces, colors, styles):
+            (x, y) = trace
+            print 'plot'
+            print 'x:', x
+            print 'y:', y
+            p = plt.plot(x, y, ls=ls, color=c, linewidth=2)
+            pp.append(p[0])
+        # plt.title('Compare %d Trials on %s' % (num_trials, prob_name),
+        name = self.name.replace('_', ' ')
+        t = plt.title('%s' % name,
+                      fontdict={'size': 32})
+        t.set_y(0.92)
+        font = {'size': 28}
+        plt.xlabel('X', fontdict=font)
+        plt.ylabel('Y', fontdict=font)
+        legends = [None] * len(pp)
+        legends[0] = 'Executed'
+        legends[1] = 'Planned'
+        plt.legend(pp, legends, fontsize=26,
+                   loc='upper left')
+
+        # (lo, hi) = plt.axes().get_xlim()
+        # plt.axes().set_xlim(0.0, 0.36)  # Walking
+        # (lo, hi) = plt.axes().get_ylim()
+        # plt.axes().set_ylim(0.0, 0.24)  # Walking
+
+        outputfile = '%s_impulse.png' % self.name
+        plt.savefig(outputfile, bbox_inches='tight')
+        plt.close(fig)
