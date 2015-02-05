@@ -203,8 +203,13 @@ class RangeChecker(object):
     def set_random_pose(self):
         if self.sim.is_bioloid():
             q = self.skel.q
-            lo = self.skel.q_lo
-            hi = self.skel.q_hi
+            lo = np.array(self.skel.q_lo)
+            hi = np.array(self.skel.q_hi)
+            # Readjusts the range of the motion
+            mi = 0.5 * (lo + hi)
+            rng = 0.5 * (hi - lo)  # lo = mi - rng, hi = mi + rng
+            lo = mi - 0.5 * rng
+            hi = mi + 0.5 * rng
             # param_desc = [(0, 'l_shoulder', 1.0),
             #               (0, 'r_shoulder', 1.0),
             #               (1, 'l_hand', 1.0),
@@ -226,7 +231,9 @@ class RangeChecker(object):
                           (6, 'l_heel', 1.0),
                           (7, 'r_heel', 1.0) ]
             dim = max([d[0] for d in param_desc]) + 1
-            params = 0.2 + (1.0 - 2 * 0.2) * np.random.rand(dim)
+            # params = 0.2 + (1.0 - 2 * 0.2) * np.random.rand(dim)
+            # params = 0.4 + (1.0 - 2 * 0.4) * np.random.rand(dim)
+            params = np.random.rand(dim)
             for x_i, dof_name, w in param_desc:
                 v = params[x_i]
                 if w < 0.0:

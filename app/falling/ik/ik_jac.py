@@ -137,6 +137,12 @@ class IKJac(object):
         q = self.sim.skel.q
         lo = self.skel.q_lo
         hi = self.skel.q_hi
+        # Readjusts the range of the motion
+        mi = 0.5 * (lo + hi)
+        rng = 0.5 * (hi - lo)  # lo = mi - rng, hi = mi + rng
+        lo = mi - 0.5 * rng
+        hi = mi + 0.5 * rng
+
         for i, dofs in enumerate(self.desc):
             v = x[i]
             for (d, w) in dofs:
