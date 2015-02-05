@@ -137,6 +137,8 @@ class IKJac(object):
         q = self.sim.skel.q
         lo = self.skel.q_lo
         hi = self.skel.q_hi
+        lo[:6] = np.zeros(6)
+        hi[:6] = np.zeros(6)
         # Readjusts the range of the motion
         mi = 0.5 * (lo + hi)
         rng = 0.5 * (hi - lo)  # lo = mi - rng, hi = mi + rng

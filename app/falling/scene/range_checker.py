@@ -205,6 +205,8 @@ class RangeChecker(object):
             q = self.skel.q
             lo = np.array(self.skel.q_lo)
             hi = np.array(self.skel.q_hi)
+            lo[:6] = np.zeros(6)
+            hi[:6] = np.zeros(6)
             # Readjusts the range of the motion
             mi = 0.5 * (lo + hi)
             rng = 0.5 * (hi - lo)  # lo = mi - rng, hi = mi + rng

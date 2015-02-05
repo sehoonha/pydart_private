@@ -141,6 +141,7 @@ def R_axis_angle(axis, angle):
 
 
 def render_arrow2(p, q, r_base=0.01, head_width=0.015, head_len=0.01):
+    # glDisable(GL_LIGHTING)
     m_quadric = gluNewQuadric()
     gluQuadricNormals(m_quadric, GLU_SMOOTH)
     p = np.array(p)
@@ -166,11 +167,14 @@ def render_arrow2(p, q, r_base=0.01, head_width=0.015, head_len=0.01):
     glPushMatrix()
     glMultMatrixd(m2)
     arrow_len = norm(q - p) - head_len
+    glColor(0.9, 0.2, 0.2)
     gluCylinder(m_quadric, r_base, r_base, arrow_len, 10, 10)
     glPopMatrix()
 
+    glColor(1.0, 0.0, 0.0)
     glPushMatrix()
     glMultMatrixd(m)
     glutSolidCone(head_width, head_len, 10, 3)
     glPopMatrix()
     gluDeleteQuadric(m_quadric)
+    # glEnable(GL_LIGHTING)

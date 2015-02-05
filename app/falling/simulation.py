@@ -144,6 +144,8 @@ class Simulation(object):
         self.terminated = dict()
 
     def step(self):
+        if not self.tip_controller.has_next():
+            self.tip_controller.update_target_with_balance()
         self.skel.tau = self.tip_controller.control()
         self.world.step()
         self.history.push()
@@ -213,9 +215,18 @@ class Simulation(object):
         if self.history.get_frame()['t'] < 10.0:
             gltools.glMove([0, 0, 0])
             q = self.cfg.saved_target_point
-            p = q - 0.02 * self.cfg.force()
+            d = self.cfg.force()
+            d[0] = 0.0
+            len_d = np.linalg.norm(d)
+            l = len_d * 0.025 + 0.020
+            d /= len_d
+            p = q - l * d
+            # p[0] = q[0]
             # gltools.render_arrow2([0, 0.4, 0], [0, 0.4, 0.4])
-            gltools.render_arrow2(p, q)
+            rb = 0.01 * (len_d * 0.025 + 1.0)
+            hw = 0.015 * (len_d * 0.05 + 1.0)
+            hl = 0.015 * (len_d * 0.05 + 1.0)
+            gltools.render_arrow2(p, q, rb, hw, hl)
 
         glPopMatrix()
 

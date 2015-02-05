@@ -8,7 +8,7 @@ class Configure(object):
     def __init__(self, _sim):
         self.sim = _sim
         # == A set of configs ==
-        self.config('step', 0.5, 200)
+        self.config('step', 0.5, 200, -1.2)
         # self.config('step', 5, 200)
         # self.config('step', 10, 200)
         # self.config('step', 10, 200)

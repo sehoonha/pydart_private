@@ -70,9 +70,43 @@ class Controller(object):
             # print 'update_target NG', self.tip_index, len(self.targets)
             pass
 
+    def update_target_with_balance(self):
+        Cd = self.skel.Cdot
+        bal2 = Cd[0]
+
+        x0 = self.skel.dof_index('l_hip')
+        y0 = self.skel.dof_index('r_hip')
+        x1 = self.skel.dof_index('l_foot')
+        y1 = self.skel.dof_index('r_foot')
+
+        x2 = self.skel.dof_index('l_arm')
+        y2 = self.skel.dof_index('r_arm')
+        x3 = self.skel.dof_index('l_hand')
+        y3 = self.skel.dof_index('r_hand')
+
+        x4 = self.skel.dof_index('l_shin')
+
+        qhat = self.targets[-1]  # Pick the last pose
+        power = 1.0
+        bal2 *= power
+        print 'bal2:', bal2
+        # qhat[x0] += bal2 * 1.0
+        # qhat[y0] += bal2 * 1.0
+        # qhat[x1] += bal2 * 1.0
+        # qhat[y1] += bal2 * 1.0
+        # qhat[x4] -= 0.1
+        # qhat[x2] = 1.0
+        qhat[y2] = 0.5
+        # qhat[x3] = -1.57
+        # qhat[y3] = -1.57
+        self.pd.target = qhat
+
     def reset(self):
         self.tip_index = 0
         self.update_target()
+
+    def has_next(self):
+        return (self.tip_index < len(self.tips))
 
     def check_next(self):  # Proceed to the next step
         if self.tip_index >= len(self.tips):
