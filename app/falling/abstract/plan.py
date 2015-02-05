@@ -193,6 +193,7 @@ class Plan:
         traces = []
         offset = 0.0
         cnt = 0
+        last_x, last_y = 0, 0
         for i in range(len(self.states) - 1):
             print
             print 'collision', i, 'offset=', offset
@@ -203,6 +204,9 @@ class Plan:
             # Cy = [0.0]
             Cx = []
             Cy = []
+            if i > 0:
+                Cx += [last_x]
+                Cy += [last_y]
             text = [None]
             while x.t < next_t:
                 if cnt % 2 == 0:
@@ -213,12 +217,14 @@ class Plan:
                     print x, pts.x1, pts.y1
                 cnt += 1
                 x = self.step(x)
-            offset = self.P(i)[0]
+            offset += self.P(i)[0]
             print 'Checking the result'
             print 'x = ', x
             print 'x1 = ', x1
             print
             traces += [(Cx, Cy, text)]
+            last_x = Cx[-1]
+            last_y = Cy[-1]
             # traces += [pyg.Scatter(x=Cx, y=Cy, text=text,
             #                        # textfont=pyg.Font(size=20),
             #                        mode='lines+markers+text')]

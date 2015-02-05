@@ -36,7 +36,7 @@ import gp
 
 class Simulation(object):
     def __init__(self):
-        self.name = 'GP_1.5N'
+        self.name = 'GP_8.0N'
 
         # Init api
         pydart.init()
@@ -144,8 +144,8 @@ class Simulation(object):
         self.terminated = dict()
 
     def step(self):
-        if not self.tip_controller.has_next():
-            self.tip_controller.update_target_with_balance()
+        # if not self.tip_controller.has_next():  # For GP 0.5N
+        #     self.tip_controller.update_target_with_balance()
         self.skel.tau = self.tip_controller.control()
         self.world.step()
         self.history.push()
@@ -355,7 +355,7 @@ class Simulation(object):
                    loc='upper right')
 
         # (lo, hi) = plt.axes().get_xlim()
-        plt.axes().set_xlim(0.0, 0.36)  # Walking
+        plt.axes().set_xlim(0.0, 0.70)  # Walking
         # (lo, hi) = plt.axes().get_ylim()
         plt.axes().set_ylim(0.0, 0.24)  # Walking
 

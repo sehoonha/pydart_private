@@ -96,6 +96,8 @@ class History:
         # x = [data['C.x'] - x0 for data in self.histories]
         # y = [data['C.y'] - y0 for data in self.histories]
 
+        last_x = None
+        last_y = None
         traces = []
         for i in range(5):  # Maximum traces = 5
             isgood = lambda data: data['nframes'] % 20 == 0 \
@@ -104,6 +106,9 @@ class History:
             t = [data['t'] for data in self.histories if isgood(data)]
             x = [data['C.x'] - x0 for data in self.histories if isgood(data)]
             y = [data['C.y'] - y0 for data in self.histories if isgood(data)]
+            if i != 0:
+                x = [last_x] + x
+                y = [last_y] + y
             text = ["%.4f" % t_i for t_i in t]
             if len(x) == 0:
                 continue
@@ -111,6 +116,8 @@ class History:
             # traces += [pyg.Scatter(x=x, y=y, text=text,
             #                        mode='lines+markers+text')]
             traces += [(x, y, text)]
+            last_x = x[-1]
+            last_y = y[-1]
         return traces
         # data = pyg.Data(traces)
         # unique_url = py.plot({'data': data},
