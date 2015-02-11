@@ -122,7 +122,7 @@ class Controller(object):
         if 'l_foot' in self.tip().c1.bodynames and \
            'l_foot' in self.tip().c2.bodynames:
             lfoot_contacts = self.skel.body('l_foot').contacts()
-            print '!!!!', len(lfoot_contacts)
+            # print '!!!!', len(lfoot_contacts)
             return (len(lfoot_contacts) >= 5)
 
         # Generally, proceed to next if there's new contacts
