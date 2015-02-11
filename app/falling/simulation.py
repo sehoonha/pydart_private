@@ -11,6 +11,7 @@ import cPickle as pickle
 import pydart
 import numpy as np
 from OpenGL.GL import glPushMatrix, glPopMatrix, glColor, glMultMatrixf
+import OpenGL.GL as gl
 import gltools
 
 from history import History
@@ -36,17 +37,17 @@ import gp
 
 class Simulation(object):
     def __init__(self):
-        self.name = 'GP_1.5N'
+        self.name = 'Atlas_1.5N'
 
         # Init api
         pydart.init()
         self.world = pydart.create_world(1.0 / 2000.0)
         self.world.add_skeleton(config.DATA_PATH + "sdf/ground.urdf",
                                 control=False)
-        self.world.add_skeleton(config.DATA_PATH +
-                                "urdf/BioloidGP/BioloidGP.URDF")
         # self.world.add_skeleton(config.DATA_PATH +
-        #                         "urdf/atlas/atlas_v3_no_head.urdf")
+        #                         "urdf/BioloidGP/BioloidGP.URDF")
+        self.world.add_skeleton(config.DATA_PATH +
+                                "urdf/atlas/atlas_v3_no_head.urdf")
 
         self.skel = self.world.skel  # shortcut for the control skeleton
 
@@ -176,7 +177,7 @@ class Simulation(object):
         # Draw chess board
         gltools.glMove([0.0, -0.01, 0.0])
         # gltools.render_chessboard(10, 20.0)
-        gltools.render_floor(10, 20.0)
+        gltools.render_floor(20, 40.0)
 
         # Draw skeleton
         gltools.glMove([0, 0, 0])
@@ -186,7 +187,10 @@ class Simulation(object):
                0.0, 0.0, 1.0, 0.0,
                0.0, -0.001, 0.0, 1.0]
         glMultMatrixf(M_s)
+        glColor(0.0, 0.0, 0.0, 1.0)
+        gl.glEnable(gl.GL_LIGHTING)
         self.skel.render_with_color(0.0, 0.0, 0.0)
+        gl.glEnable(gl.GL_LIGHTING)
         glPopMatrix()
 
         gltools.glMove([0, 0, 0])
@@ -218,8 +222,11 @@ class Simulation(object):
             d = self.cfg.force()
             d[0] = 0.0
             len_d = np.linalg.norm(d)
-            l = len_d * 0.025 + 0.020
             d /= len_d
+            if not self.is_bioloid():
+                len_d /= 40.0
+            l = len_d * 0.025 + 0.020
+
             p = q - l * d
             # p[0] = q[0]
             # gltools.render_arrow2([0, 0.4, 0], [0, 0.4, 0.4])

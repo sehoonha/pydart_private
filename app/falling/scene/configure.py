@@ -11,14 +11,14 @@ class Configure(object):
         # self.config('step', 0.5, 200, -1.2)
         # self.config('step', 1.5, 200, -1.5)
         # self.config('step', 5, 200)
-        self.config('step', 6, 200)
+        # self.config('step', 6, 200)
         # self.config('step', 8, 200)
         # self.config('lean', 0.0)
         # self.config('lean', 1.0)
         # self.config('skate', 10)
         # self.config('back', 3)
         # self.config('side', 10)
-        # self.config('atlas_lean', 1000.0, 200)
+        self.config('atlas_lean', 1000.0, 200)
         # self.config('atlas_lean', 300)
         # self.config('atlas_step', 250, 1000, -150) # Side push
         # self.config('atlas_back', 1000)
@@ -42,7 +42,7 @@ class Configure(object):
         if self.sim.is_bioloid():
             self.ext_force = ("torso", [side_force, 0, force], [0, 0, 0.03])
         else:
-            self.ext_force = ("mtorso", [side_force, 0, force], [0, 0, 0.4])
+            self.ext_force = ("mtorso", [side_force, 0, force], [-0.3, 0, 0.5])
 
     def set_pose(self, class_name):
         if class_name == 'step':
