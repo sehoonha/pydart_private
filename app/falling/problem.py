@@ -177,10 +177,10 @@ class Problem(object):
         elif self.name == 'atlas_lean':
             defs = [
                 ("toes", "knees"),
-                ("toes", "hands"),
-                ("knees", "hands"),
-                ("knees", "head"),
-                ("hands", "head"),
+                # ("toes", "hands"),
+                # ("knees", "hands"),
+                # ("knees", "head"),
+                # ("hands", "head"),
             ]
         elif self.name == 'atlas_step':
             defs = [

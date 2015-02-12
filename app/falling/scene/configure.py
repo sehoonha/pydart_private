@@ -42,7 +42,7 @@ class Configure(object):
         if self.sim.is_bioloid():
             self.ext_force = ("torso", [side_force, 0, force], [0, 0, 0.03])
         else:
-            self.ext_force = ("mtorso", [side_force, 0, force], [-0.3, 0, 0.5])
+            self.ext_force = ("mtorso", [side_force, 0, force], [-0.3, 0, 0.4])
 
     def set_pose(self, class_name):
         if class_name == 'step':

@@ -34,7 +34,9 @@ class IKJac(object):
         # param_desc: ( [{dof_index or dof_name}, {weight}] )
         desc = []
         cfg_name = self.sim.cfg.name
-        leg_symmetry = cfg_name in ['lean', 'back']
+        # leg_symmetry = cfg_name in ['lean', 'back']
+        leg_symmetry = ('lean' in cfg_name) or ('back' in cfg_name)
+        print 'cfg_name:', cfg_name
         print 'leg_symmetry:', leg_symmetry
 
         if self.sim.is_bioloid():
@@ -53,15 +55,17 @@ class IKJac(object):
                 desc.append([('r_heel', 1.0), ])
         else:
             desc.append([('back_bky', 1.0), ])
-            # desc.append([('l_leg_hpy', 1.0), ('r_leg_hpy', 1.0), ])
-            # desc.append([('l_leg_kny', 1.0), ('r_leg_kny', 1.0), ])
-            # desc.append([('l_leg_aky', 1.0), ('r_leg_aky', 1.0), ])
-            desc.append([('l_leg_hpy', 1.0), ])
-            desc.append([('r_leg_hpy', 1.0), ])
-            desc.append([('l_leg_kny', 1.0), ])
-            desc.append([('r_leg_kny', 1.0), ])
-            desc.append([('l_leg_aky', 1.0), ])
-            desc.append([('r_leg_aky', 1.0), ])
+            if leg_symmetry:
+                desc.append([('l_leg_hpy', 1.0), ('r_leg_hpy', 1.0), ])
+                desc.append([('l_leg_kny', 1.0), ('r_leg_kny', 1.0), ])
+                desc.append([('l_leg_aky', 1.0), ('r_leg_aky', 1.0), ])
+            else:
+                desc.append([('l_leg_hpy', 1.0), ])
+                desc.append([('r_leg_hpy', 1.0), ])
+                desc.append([('l_leg_kny', 1.0), ])
+                desc.append([('r_leg_kny', 1.0), ])
+                desc.append([('l_leg_aky', 1.0), ])
+                desc.append([('r_leg_aky', 1.0), ])
             desc.append([('l_arm_shx', 1.0), ('r_arm_shx', -1.0), ])
             desc.append([('l_arm_shy', 1.0), ('r_arm_shy', 1.0), ])
             desc.append([('l_arm_elx', 1.0), ('r_arm_elx', -1.0), ])

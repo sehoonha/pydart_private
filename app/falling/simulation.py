@@ -46,15 +46,15 @@ class Simulation(object):
                                 control=False)
         # self.world.add_skeleton(config.DATA_PATH +
         #                         "urdf/BioloidGP/BioloidGP.URDF")
+        # self.world.skel.set_joint_damping(0.15)
         self.world.add_skeleton(config.DATA_PATH +
                                 "urdf/atlas/atlas_v3_no_head.urdf")
+        self.world.skel.set_joint_damping(0.15)
 
         self.skel = self.world.skel  # shortcut for the control skeleton
 
         for i, dof in enumerate(self.skel.dofs):
             print i, dof, 'efforts:', self.skel.tau_lo[i], self.skel.tau_hi[i]
-
-        self.skel.set_joint_damping(0.15)
 
         # Configure the scene
         self.cfg = scene.configure.Configure(self)
@@ -224,7 +224,7 @@ class Simulation(object):
             len_d = np.linalg.norm(d)
             d /= len_d
             if not self.is_bioloid():
-                len_d /= 40.0
+                len_d /= 100.0
             l = len_d * 0.025 + 0.020
 
             p = q - l * d
@@ -362,9 +362,10 @@ class Simulation(object):
                    loc='upper right')
 
         # (lo, hi) = plt.axes().get_xlim()
-        plt.axes().set_xlim(0.0, 0.70)  # Walking
+        # plt.axes().set_xlim(0.0, 0.70)
+        # plt.axes().set_xlim(0.0, 1.50)
         # (lo, hi) = plt.axes().get_ylim()
-        plt.axes().set_ylim(0.0, 0.24)  # Walking
+        # plt.axes().set_ylim(0.0, 1.0)
 
         outputfile = '%s_com.png' % self.name
         plt.savefig(outputfile, bbox_inches='tight')

@@ -24,12 +24,13 @@ class DynamicTIP:
         if self.prob.sim.is_bioloid():
             self.m = 1.08
             self.I = 0.0093
+            (self.lo_dr, self.hi_dr) = (-0.01, 0.01)
         else:
             self.m = 149.55
             self.I = 25.7
+            (self.lo_dr, self.hi_dr) = (-0.1, 0.1)
         self.g = -9.8
         # (self.lo_dr, self.hi_dr) = (-0.1, 0.1)
-        (self.lo_dr, self.hi_dr) = (-0.01, 0.01)
         # (self.lo_dr, self.hi_dr) = (-0.140, -0.130)
 
     def set_x0(self, tips):
