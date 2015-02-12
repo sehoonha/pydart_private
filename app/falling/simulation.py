@@ -203,20 +203,20 @@ class Simulation(object):
         # gltools.render_arrow(self.skel.C,
         #                      self.skel.C + 0.2 * self.tip.projected_Cdot())
 
-        # Draw TIP
-        tip_index = self.history.get_frame()['tip_index']
-        tips = self.tip_controller.tips
-        for i in range(tip_index, len(tips)):
-            tips[i].render()
+        # # Draw TIP
+        # tip_index = self.history.get_frame()['tip_index']
+        # tips = self.tip_controller.tips
+        # for i in range(tip_index, len(tips)):
+        #     tips[i].render()
+
+        # for c in self.prob.contacts:
+        #     c.render()
 
         # Draw contacts
         gltools.glMove([0, 0, 0])
         glColor(0.7, 0.0, 0.3)
         for c in self.history.get_frame()['contacts']:
             gltools.render_arrow(c[0:3], c[0:3] - 0.001 * c[3:6])
-
-        for c in self.prob.contacts:
-            c.render()
 
         if self.history.get_frame()['t'] < 10.0:
             gltools.glMove([0, 0, 0])

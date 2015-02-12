@@ -68,7 +68,7 @@ class AtlasPDController:
                 self.tau_hi[i] = self.skel.tau_hi[i] * 1.0
             elif 'leg' in dof_name:
                 self.kp[i] = 150.0
-                self.kd[i] = 20.0
+                self.kd[i] = 20.0  # 40 for Atlas_Back_600N?
                 self.tau_lo[i] = self.skel.tau_lo[i] * 0.4
                 self.tau_hi[i] = self.skel.tau_hi[i] * 0.4
             else:
