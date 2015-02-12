@@ -116,6 +116,9 @@ class Controller(object):
             return False
 
         contacts = set(self.skel.contacted_body_names())
+        if "pelvis" in contacts:
+            contacts.remove("pelvis")
+            contacts.add("ltorso")
         pivots = self.pivots()
 
         # Special case: l_heel to l_toe

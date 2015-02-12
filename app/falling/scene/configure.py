@@ -18,11 +18,14 @@ class Configure(object):
         # self.config('skate', 10)
         # self.config('back', 3)
         # self.config('side', 10)
-        # self.config('atlas_lean', 1000.0, 200)
-        self.config('atlas_lean', 2000.0, 200)
+        # self.config('atlas_lean', 1000.0, 200, px=-0.3)
+        # self.config('atlas_lean', 2000.0, 200, px=-0.3)
         # self.config('atlas_lean', 300)
         # self.config('atlas_step', 250, 1000, -150) # Side push
-        # self.config('atlas_back', 1000)
+        # self.config('atlas_back', 250, 200, px=0.2, py=0.0)
+        # self.config('atlas_back', 600, 100, px=0.2, py=0.0)
+        self.config('atlas_back', 1000, 100, px=0.2, py=0.0)
+        # self.config('atlas_back', 1600, 200, px=0.2, py=0.0, pz=-0.2)
 
         self.conditions = None
         # self.conditions = self.generate()
@@ -32,7 +35,8 @@ class Configure(object):
     def skel(self):
         return self.sim.skel
 
-    def config(self, class_name, force, force_steps, side_force=0.0):
+    def config(self, class_name, force, force_steps, side_force=0.0,
+               px=0.0, py=0.0, pz=0.0):
         print 'skeleton', self.skel.filename
         print 'config', class_name, force, force_steps
         self.ext_force_steps = force_steps
@@ -43,7 +47,8 @@ class Configure(object):
         if self.sim.is_bioloid():
             self.ext_force = ("torso", [side_force, 0, force], [0, 0, 0.03])
         else:
-            self.ext_force = ("mtorso", [side_force, 0, force], [-0.3, 0, 0.4])
+            self.ext_force = ("mtorso", [side_force, 0, force],
+                              [px, py, 0.4 + pz])
 
     def set_pose(self, class_name):
         if class_name == 'step':

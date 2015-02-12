@@ -196,6 +196,7 @@ class Problem(object):
                     ("heels", "hands"),
                     ("hips", "hands"),
                     ("hands", "back"),
+                    ("hands", "uback"),
                     ("back", "uback"),
                     ]
 

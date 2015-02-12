@@ -148,8 +148,8 @@ class IKJac(object):
         rng = 0.5 * (hi - lo)  # lo = mi - rng, hi = mi + rng
         # lo = mi - 0.5 * rng
         # hi = mi + 0.5 * rng
-        lo = mi - 0.75 * rng
-        hi = mi + 0.75 * rng
+        lo = mi - 1.0 * rng
+        hi = mi + 1.0 * rng
 
         for i, dofs in enumerate(self.desc):
             v = x[i]

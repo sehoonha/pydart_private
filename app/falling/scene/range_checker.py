@@ -33,6 +33,8 @@ class StopperSet(object):
         else:
             self.lo = [0.40, 0.40, 0.0]
             self.hi = [1.20, 1.20, 3.0]
+            # self.lo = [0.20, 0.20, 0.0]
+            # self.hi = [1.00, 1.00, 2.0]
             self.step = [0.02, 0.02, 0.1]
 
         self.num = [int((self.hi[i] - self.lo[i]) / self.step[i])
@@ -253,8 +255,8 @@ class RangeChecker(object):
             # Readjusts the range of the motion
             mi = 0.5 * (lo + hi)
             rng = 0.5 * (hi - lo)  # lo = mi - rng, hi = mi + rng
-            lo = mi - 0.75 * rng
-            hi = mi + 0.75 * rng
+            lo = mi - 0.9 * rng
+            hi = mi + 0.9 * rng
             param_desc = [(0, 'back_bky', 1.0),
                           (1, 'l_leg_hpy', 1.0),
                           (1, 'r_leg_hpy', 1.0),
