@@ -146,8 +146,10 @@ class IKJac(object):
         # Readjusts the range of the motion
         mi = 0.5 * (lo + hi)
         rng = 0.5 * (hi - lo)  # lo = mi - rng, hi = mi + rng
-        lo = mi - 0.5 * rng
-        hi = mi + 0.5 * rng
+        # lo = mi - 0.5 * rng
+        # hi = mi + 0.5 * rng
+        lo = mi - 0.75 * rng
+        hi = mi + 0.75 * rng
 
         for i, dofs in enumerate(self.desc):
             v = x[i]

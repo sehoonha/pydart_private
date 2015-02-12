@@ -18,7 +18,8 @@ class Configure(object):
         # self.config('skate', 10)
         # self.config('back', 3)
         # self.config('side', 10)
-        self.config('atlas_lean', 1000.0, 200)
+        # self.config('atlas_lean', 1000.0, 200)
+        self.config('atlas_lean', 2000.0, 200)
         # self.config('atlas_lean', 300)
         # self.config('atlas_step', 250, 1000, -150) # Side push
         # self.config('atlas_back', 1000)

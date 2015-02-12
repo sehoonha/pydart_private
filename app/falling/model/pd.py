@@ -61,16 +61,21 @@ class AtlasPDController:
 
         for i in range(6, self.ndofs):
             dof_name = self.skel.dofs[i].name
-            if 'arm' not in dof_name:
-                self.kp[i] = 250.0
-                self.kd[i] = 20.0
-                self.tau_lo[i] = self.skel.tau_lo[i] * 0.4
-                self.tau_hi[i] = self.skel.tau_hi[i] * 0.4
-            else:
+            if 'arm' in dof_name:
                 self.kp[i] = 300.0
                 self.kd[i] = 20.0
                 self.tau_lo[i] = self.skel.tau_lo[i] * 1.0
                 self.tau_hi[i] = self.skel.tau_hi[i] * 1.0
+            elif 'leg' in dof_name:
+                self.kp[i] = 150.0
+                self.kd[i] = 20.0
+                self.tau_lo[i] = self.skel.tau_lo[i] * 0.4
+                self.tau_hi[i] = self.skel.tau_hi[i] * 0.4
+            else:
+                self.kp[i] = 250.0
+                self.kd[i] = 20.0
+                self.tau_lo[i] = self.skel.tau_lo[i] * 0.4
+                self.tau_hi[i] = self.skel.tau_hi[i] * 0.4
             print dof_name, self.kp[i], self.kd[i]
 
         self.step_counter = 0  # For debug
@@ -89,7 +94,7 @@ class AtlasPDController:
             tau[i] = -self.kp[i] * (q[i] - self.target[i]) \
                      - self.kd[i] * qdot[i]
             # tau[i] = confine(tau[i], -self.maxTorque, self.maxTorque)
-
+            tau[i] = confine(tau[i], self.tau_lo[i], self.tau_hi[i])
             # tau[i] = confine(tau[i], -100.0, 100.0)  # Ugly..
             if self.verbose():
                 print i, "%.4f %.4f %.4f %.4f" % (q[i], self.target[i],

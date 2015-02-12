@@ -37,7 +37,7 @@ import gp
 
 class Simulation(object):
     def __init__(self):
-        self.name = 'Atlas_1.5N'
+        self.name = 'Atlas_Lean_2000N'
 
         # Init api
         pydart.init()
@@ -221,11 +221,15 @@ class Simulation(object):
             q = self.cfg.saved_target_point
             d = self.cfg.force()
             d[0] = 0.0
+            # len_d = np.linalg.norm(d)
+            # d /= len_d
+            # l = len_d * 0.025 + 0.020
+
+            d[0] = 0.0
             len_d = np.linalg.norm(d)
             d /= len_d
-            if not self.is_bioloid():
-                len_d /= 100.0
-            l = len_d * 0.025 + 0.020
+            len_d /= 60.0
+            l = len_d * 0.025
 
             p = q - l * d
             # p[0] = q[0]

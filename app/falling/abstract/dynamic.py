@@ -28,7 +28,7 @@ class DynamicTIP:
         else:
             self.m = 149.55
             self.I = 25.7
-            (self.lo_dr, self.hi_dr) = (-0.1, 0.1)
+            (self.lo_dr, self.hi_dr) = (-0.3, 0.3)
         self.g = -9.8
         # (self.lo_dr, self.hi_dr) = (-0.1, 0.1)
         # (self.lo_dr, self.hi_dr) = (-0.140, -0.130)
