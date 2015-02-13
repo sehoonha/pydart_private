@@ -31,10 +31,10 @@ class StopperSet(object):
             self.step = [0.005, 0.005, 0.1]
             # self.step = [0.01, 0.01, 0.1]
         else:
-            # self.lo = [0.40, 0.40, 0.0]
-            # self.hi = [1.20, 1.20, 3.0]
-            self.lo = [0.20, 0.20, 0.0]
-            self.hi = [1.00, 1.00, 2.0]
+            self.lo = [0.40, 0.40, 0.0]
+            self.hi = [1.20, 1.20, 3.0]
+            # self.lo = [0.20, 0.20, 0.0]
+            # self.hi = [1.00, 1.00, 2.0]
             self.step = [0.02, 0.02, 0.1]
 
         self.num = [int((self.hi[i] - self.lo[i]) / self.step[i])
@@ -164,7 +164,7 @@ class RangeChecker(object):
         # Each edge has a set of stoppers
         self.stop_sets = [StopperSet(humansize) for _ in range(self.prob.m)]
 
-        for i in range(10):
+        for i in range(10000):
             self.set_random_pose()
             for tip, ss in zip(self.prob.tips, self.stop_sets):
                 x = tip.pose()
@@ -257,32 +257,32 @@ class RangeChecker(object):
             rng = 0.5 * (hi - lo)  # lo = mi - rng, hi = mi + rng
             lo = mi - 0.9 * rng
             hi = mi + 0.9 * rng
-            param_desc = [(0, 'back_bky', 1.0),
-                          (1, 'l_leg_hpy', 1.0),
-                          (1, 'r_leg_hpy', 1.0),
-                          (2, 'l_leg_kny', 1.0),
-                          (2, 'r_leg_kny', 1.0),
-                          (3, 'l_leg_aky', 1.0),
-                          (3, 'r_leg_aky', 1.0),
-                          (4, 'l_arm_shx', 1.0),
-                          (4, 'r_arm_shx', -1.0),
-                          (5, 'l_arm_shy', 1.0),
-                          (5, 'r_arm_shy', 1.0),
-                          (6, 'l_arm_elx', 1.0),
-                          (6, 'r_arm_elx', -1.0), ]
             # param_desc = [(0, 'back_bky', 1.0),
             #               (1, 'l_leg_hpy', 1.0),
-            #               (2, 'r_leg_hpy', 1.0),
-            #               (3, 'l_leg_kny', 1.0),
-            #               (4, 'r_leg_kny', 1.0),
-            #               (5, 'l_leg_aky', 1.0),
-            #               (6, 'r_leg_aky', 1.0),
-            #               (7, 'l_arm_shx', 1.0),
-            #               (7, 'r_arm_shx', -1.0),
-            #               (8, 'l_arm_shy', 1.0),
-            #               (8, 'r_arm_shy', 1.0),
-            #               (9, 'l_arm_elx', 1.0),
-            #               (9, 'r_arm_elx', -1.0), ]
+            #               (1, 'r_leg_hpy', 1.0),
+            #               (2, 'l_leg_kny', 1.0),
+            #               (2, 'r_leg_kny', 1.0),
+            #               (3, 'l_leg_aky', 1.0),
+            #               (3, 'r_leg_aky', 1.0),
+            #               (4, 'l_arm_shx', 1.0),
+            #               (4, 'r_arm_shx', -1.0),
+            #               (5, 'l_arm_shy', 1.0),
+            #               (5, 'r_arm_shy', 1.0),
+            #               (6, 'l_arm_elx', 1.0),
+            #               (6, 'r_arm_elx', -1.0), ]
+            param_desc = [(0, 'back_bky', 1.0),
+                          (1, 'l_leg_hpy', 1.0),
+                          (2, 'r_leg_hpy', 1.0),
+                          (3, 'l_leg_kny', 1.0),
+                          (4, 'r_leg_kny', 1.0),
+                          (5, 'l_leg_aky', 1.0),
+                          (6, 'r_leg_aky', 1.0),
+                          (7, 'l_arm_shx', 1.0),
+                          (7, 'r_arm_shx', -1.0),
+                          (8, 'l_arm_shy', 1.0),
+                          (8, 'r_arm_shy', 1.0),
+                          (9, 'l_arm_elx', 1.0),
+                          (9, 'r_arm_elx', -1.0), ]
             dim = max([d[0] for d in param_desc]) + 1
             params = np.random.rand(dim)
             for x_i, dof_name, w in param_desc:

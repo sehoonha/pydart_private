@@ -62,20 +62,20 @@ class AtlasPDController:
         for i in range(6, self.ndofs):
             dof_name = self.skel.dofs[i].name
             if 'arm' in dof_name:
-                self.kp[i] = 300.0
+                self.kp[i] = 500.0
                 self.kd[i] = 20.0
                 self.tau_lo[i] = self.skel.tau_lo[i] * 1.0
                 self.tau_hi[i] = self.skel.tau_hi[i] * 1.0
             elif 'leg' in dof_name:
-                self.kp[i] = 150.0
+                self.kp[i] = 500.0
                 self.kd[i] = 20.0  # 40 for Atlas_Back_600N?
-                self.tau_lo[i] = self.skel.tau_lo[i] * 0.4
-                self.tau_hi[i] = self.skel.tau_hi[i] * 0.4
+                self.tau_lo[i] = self.skel.tau_lo[i] * 0.7
+                self.tau_hi[i] = self.skel.tau_hi[i] * 0.7
             else:
-                self.kp[i] = 250.0
+                self.kp[i] = 500.0
                 self.kd[i] = 20.0
-                self.tau_lo[i] = self.skel.tau_lo[i] * 0.4
-                self.tau_hi[i] = self.skel.tau_hi[i] * 0.4
+                self.tau_lo[i] = self.skel.tau_lo[i] * 0.7
+                self.tau_hi[i] = self.skel.tau_hi[i] * 0.7
             print dof_name, self.kp[i], self.kd[i]
 
         self.step_counter = 0  # For debug
