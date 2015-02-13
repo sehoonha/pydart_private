@@ -12,7 +12,7 @@ class Configure(object):
         # self.config('step', 1.5, 200, -1.5)
         # self.config('step', 5, 200)
         # self.config('step', 6, 200)
-        # self.config('step', 8, 200)
+        self.config('step', 8, 200)
         # self.config('lean', 0.0)
         # self.config('lean', 1.0)
         # self.config('skate', 10)
@@ -23,7 +23,7 @@ class Configure(object):
         # self.config('atlas_lean', 300)
         # self.config('atlas_step', 250, 1000, -150) # Side push
         # self.config('atlas_back', 500, 200, px=0.2, py=0.0)
-        self.config('atlas_back', 600, 100, px=0.2, py=0.0)
+        # self.config('atlas_back', 600, 100, px=0.2, py=0.0)
         # self.config('atlas_back', 1000, 100, px=0.2, py=0.0)
         # self.config('atlas_back', 1600, 200, px=0.2, py=0.0, pz=-0.2)
 
