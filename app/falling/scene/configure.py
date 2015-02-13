@@ -8,7 +8,7 @@ class Configure(object):
     def __init__(self, _sim):
         self.sim = _sim
         # == A set of configs ==
-        # self.config('step', 0.5, 200, -1.2)
+        self.config('step', 0.5, 200, -1.2)
         # self.config('step', 1.5, 200, -1.5)
         # self.config('step', 5, 200)
         # self.config('step', 6, 200)
@@ -22,7 +22,7 @@ class Configure(object):
         # self.config('atlas_lean', 2000.0, 200, px=-0.3)
         # self.config('atlas_lean', 300)
         # self.config('atlas_step', 1000.0, 200, -30.0)
-        self.config('atlas_step', 2500.0, 200, 0)
+        # self.config('atlas_step', 2500.0, 200, 0)
         # self.config('atlas_back', 500, 200, px=0.2, py=0.0)
         # self.config('atlas_back', 600, 100, px=0.2, py=0.0)
         # self.config('atlas_back', 1000, 100, px=0.2, py=0.0)

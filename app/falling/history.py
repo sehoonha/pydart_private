@@ -124,8 +124,7 @@ class History:
         #                      filename='COM Trajectories')
         # print '==== com_trajectory OK : ', unique_url
 
-    def impulse_traces(self):
-        hz = 40
+    def impulse_traces(self, hz=40):
         x = [d['t'] for i, d in enumerate(self.histories) if i % hz == 0]
         y = [d['impulse'] for i, d in enumerate(self.histories) if i % hz == 0]
         return [(x, y)]

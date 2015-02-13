@@ -34,6 +34,9 @@ class GLWidget(QGLWidget):
         glMultMatrixf(self.tb.matrix)
 
         self.sim.render()
+        self.enable2D()
+        self.sim.impulse_live_renderer.render()
+        self.disable2D()
 
     def resizeGL(self, w, h):
         (self.width, self.height) = (w, h)
@@ -85,6 +88,30 @@ class GLWidget(QGLWidget):
 
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+    def enable2D(self):
+        w, h = self.width, self.height
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        glDisable(GL_LIGHTING | GL_DEPTH_TEST)
+        glDepthMask(0)
+        glOrtho(0, w, h, 0, -1, 1)
+        glViewport(0, 0, w, h)
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+
+    def disable2D(self):
+        w, h = self.width, self.height
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+
+        glEnable(GL_DEPTH_TEST | GL_LIGHTING)
+        glDepthMask(1)
+        gluPerspective(45.0, float(w) / float(h), 0.01, 100.0)
+
+        glViewport(0, 0, w, h)
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
 
     def mousePressEvent(self, event):
         self.lastPos = event.pos()

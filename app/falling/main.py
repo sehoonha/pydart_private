@@ -45,7 +45,8 @@ class MyWindow(QtGui.QMainWindow):
         self.renderTimer.timeout.connect(self.renderTimerEvent)
         self.renderTimer.start(25)
 
-        self.cam0Event()
+        # self.cam0Event()
+        self.cam1Event()
         # self.sim.load('gp_step_1.5.plan')
         # self.sim.load('gp_step_5.plan')
         # self.sim.load('test.plan')
