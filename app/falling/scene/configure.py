@@ -8,11 +8,11 @@ class Configure(object):
     def __init__(self, _sim):
         self.sim = _sim
         # == A set of configs ==
-        self.config('step', 0.5, 200, -1.2)
+        # self.config('step', 0.5, 200, -1.2)
         # self.config('step', 1.5, 200, -1.5)
         # self.config('step', 5, 200)
         # self.config('step', 6, 200)
-        # self.config('step', 8, 200)
+        self.config('step', 8, 200)
         # self.config('lean', 0.0)
         # self.config('lean', 1.0)
         # self.config('skate', 10)
@@ -40,6 +40,7 @@ class Configure(object):
                px=0.0, py=0.0, pz=0.0):
         print 'skeleton', self.skel.filename
         print 'config', class_name, force, force_steps
+        self.f_mag = force
         self.ext_force_steps = force_steps
         self.name = class_name
         # 1. Set the pose

@@ -31,6 +31,7 @@ class MyWindow(QtGui.QMainWindow):
 
         # Create a simulation
         self.sim = Simulation()
+        self.setWindowTitle('Falling - ' + self.sim.name)
 
         self.initUI()
         self.initActions()
@@ -299,6 +300,7 @@ class MyWindow(QtGui.QMainWindow):
             return
         print 'load:', filename
         self.sim.load(filename)
+        self.setWindowTitle('Falling - ' + self.sim.name)
         print 'load OK'
 
     def saveEvent(self):

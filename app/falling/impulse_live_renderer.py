@@ -9,16 +9,21 @@ class ImpulseLiveRenderer:
         self.history = self.sim.history
 
     def render(self):
+        t_now = self.history.get_frame()['t']
+
         glPushMatrix()
         glColor3d(0.0, 0.0, 1.0)
         glTranslated(20, 480, 0)
 
         t_data, j_data = self.history.impulse_traces(hz=20)[0]
+        while t_data[-1] > t_now:
+            t_data.pop()
+            j_data.pop()
 
         max_impulse = 1.5 if self.sim.is_bioloid() else 500.0
         max_len = 150
         y_max_height = 200.0
-        x_max_width = 350.0
+        x_max_width = 600.0
 
         x = 0.0
         y = 0.0

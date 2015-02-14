@@ -38,7 +38,7 @@ import gp
 
 class Simulation(object):
     def __init__(self):
-        self.name = 'GP_0.5N_naive_zo'
+        self.name = 'GP_--N_naive_zo'
         # self.name = 'Atlas_Step_2500N'
 
         # Init api
@@ -62,6 +62,7 @@ class Simulation(object):
 
         # Configure the scene
         self.cfg = scene.configure.Configure(self)
+        self.name = self.name.replace('--', '%.1f' % self.cfg.f_mag)
         self.prob = problem.Problem(self, self.cfg.name)
         self.history = History(self)
         self.impulse_live_renderer = ImpulseLiveRenderer(self)
@@ -149,6 +150,17 @@ class Simulation(object):
 
         self.terminated = dict()
 
+    def terminate_time(self):
+        name = self.name
+        if 'GP' in name:
+            if '0.5' in name:
+                return 1.25
+            elif '1.5' in name:
+                return 1.3
+        else:
+            pass
+        return 1.0
+
     def step(self):
         # if not self.tip_controller.has_next():  # For GP 0.5N
         #     self.tip_controller.update_target_with_balance()
@@ -170,10 +182,11 @@ class Simulation(object):
                 return True
             elif e.name == 'terminate':
                 self.event_handler.push("terminate", 9999)
-                return True
+                return False
 
         self.event_handler.step()
         # print self.world.nframes, ':', self.event_handler
+        return (self.terminate_time() <= self.world.t + 0.001)
         return False
 
     def render(self):
@@ -217,9 +230,9 @@ class Simulation(object):
 
         # Draw contacts
         gltools.glMove([0, 0, 0])
-        glColor(0.7, 0.0, 0.3)
-        for c in self.history.get_frame()['contacts']:
-            gltools.render_arrow(c[0:3], c[0:3] - 0.001 * c[3:6])
+        # glColor(0.7, 0.0, 0.3)
+        # for c in self.history.get_frame()['contacts']:
+        #     gltools.render_arrow(c[0:3], c[0:3] - 0.001 * c[3:6])
 
         if self.history.get_frame()['t'] < 10.0:
             gltools.glMove([0, 0, 0])
@@ -305,6 +318,7 @@ class Simulation(object):
         print 'export_motion OK'
 
     def load(self, filename):
+        self.name = self.name.replace('_naive', '')
         with open(filename, 'r') as fp:
             self.plan = pickle.load(fp)
             self.tip_controller = model.controller.Controller(self.skel,
