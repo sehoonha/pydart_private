@@ -162,8 +162,9 @@ class Simulation(object):
         return 1.0
 
     def step(self):
-        # if not self.tip_controller.has_next():  # For GP 0.5N
-        #     self.tip_controller.update_target_with_balance()
+        if 'GP_0.5N' in self.name:
+            if not self.tip_controller.has_next():  # For GP 0.5N
+                self.tip_controller.update_target_with_balance()
         self.skel.tau = self.tip_controller.control()
         self.world.step()
         self.history.push()
