@@ -39,7 +39,7 @@ import gp
 class Simulation(object):
     def __init__(self):
         # self.name = 'GP_--N_naive_zo'
-        self.name = 'Atlas_##_--N_naive_zo'
+        self.name = 'Atlas_##_--N_wider_naive_zo'
 
         # Init api
         pydart.init()
@@ -164,6 +164,8 @@ class Simulation(object):
                 return 1.3
         else:
             if 'Lean_1000' in name:
+                return 1.3
+            elif 'Step_2500' in name:
                 return 1.3
         return 1.0
 
