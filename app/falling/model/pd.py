@@ -15,6 +15,9 @@ class PDController:
         self.effort_ratio = _effort_ratio
         self.step_counter = 0  # For debug
 
+    def set_pd_params(self, name):
+        pass
+
     def verbose(self):
         return False
         # return (self.step_counter % 100 == 0)
