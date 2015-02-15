@@ -88,6 +88,8 @@ class AtlasPDController:
                 self.set_atlas_step_params()
             else:
                 self.set_atlas_step_params2()
+        elif 'Back' in name:
+            self.set_atlas_back_params()
 
     def set_atlas_lean_params(self):
         print 'PD parameters for leaning motions (lower gains)'
@@ -152,6 +154,28 @@ class AtlasPDController:
                 self.kd[i] = 20.0
                 self.tau_lo[i] = self.skel.tau_lo[i] * 0.7
                 self.tau_hi[i] = self.skel.tau_hi[i] * 0.7
+            print dof_name, self.kp[i], self.kd[i],
+            print self.tau_lo[i], self.tau_hi[i]
+
+    def set_atlas_back_params(self):
+        print 'PD parameters for backward motions (lower gains)'
+        for i in range(6, self.ndofs):
+            dof_name = self.skel.dofs[i].name
+            if 'arm' in dof_name:
+                self.kp[i] = 500.0
+                self.kd[i] = 20.0
+                self.tau_lo[i] = self.skel.tau_lo[i] * 1.2
+                self.tau_hi[i] = self.skel.tau_hi[i] * 1.2
+            elif 'leg' in dof_name:
+                self.kp[i] = 120.0
+                self.kd[i] = 40.0
+                self.tau_lo[i] = self.skel.tau_lo[i] * 0.4
+                self.tau_hi[i] = self.skel.tau_hi[i] * 0.4
+            else:
+                self.kp[i] = 200.0
+                self.kd[i] = 20.0
+                self.tau_lo[i] = self.skel.tau_lo[i] * 1.0
+                self.tau_hi[i] = self.skel.tau_hi[i] * 1.0
             print dof_name, self.kp[i], self.kd[i],
             print self.tau_lo[i], self.tau_hi[i]
 

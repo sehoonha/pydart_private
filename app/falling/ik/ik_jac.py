@@ -148,6 +148,8 @@ class IKJac(object):
         rng = 0.5 * (hi - lo)  # lo = mi - rng, hi = mi + rng
         # lo = mi - 0.5 * rng
         # hi = mi + 0.5 * rng
+        # lo = mi - 0.9 * rng
+        # hi = mi + 0.9 * rng
         lo = mi - 0.9 * rng
         hi = mi + 0.9 * rng
 

@@ -21,10 +21,10 @@ class Configure(object):
         # self.config('atlas_lean', 2000.0, 200, px=-0.3)
         # self.config('atlas_lean', 300)
         # self.config('atlas_step', 1000.0, 200, -30.0)
-        self.config('atlas_step', 2500.0, 200, 0)
+        # self.config('atlas_step', 2500.0, 200, 0)
         # self.config('atlas_back', 500, 200, px=0.2, py=0.0)
         # self.config('atlas_back', 600, 100, px=0.2, py=0.0)
-        # self.config('atlas_back', 1000, 100, px=0.2, py=0.0)
+        self.config('atlas_back', 1000, 100, px=0.2, py=0.0)
         # self.config('atlas_back', 1600, 200, px=0.2, py=0.0, pz=-0.2)
 
         self.conditions = None
@@ -45,6 +45,8 @@ class Configure(object):
         self.tag = None
         if 'atlas' in class_name:
             self.tag = class_name[6:].capitalize()
+        if 'back' in class_name:
+            self.f_mag /= 2
 
         # 1. Set the pose
         self.set_pose(class_name)

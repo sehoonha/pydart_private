@@ -164,6 +164,7 @@ class RangeChecker(object):
         # Each edge has a set of stoppers
         self.stop_sets = [StopperSet(humansize) for _ in range(self.prob.m)]
 
+        # for i in range(10000):
         for i in range(10):
             self.set_random_pose()
             for tip, ss in zip(self.prob.tips, self.stop_sets):
@@ -255,8 +256,10 @@ class RangeChecker(object):
             # Readjusts the range of the motion
             mi = 0.5 * (lo + hi)
             rng = 0.5 * (hi - lo)  # lo = mi - rng, hi = mi + rng
-            lo = mi - 0.9 * rng
-            hi = mi + 0.9 * rng
+            lo = mi - 0.8 * rng
+            hi = mi + 0.8 * rng
+            # lo = mi - 1.0 * rng
+            # hi = mi + 0.4 * rng
             # param_desc = [(0, 'back_bky', 1.0),
             #               (1, 'l_leg_hpy', 1.0),
             #               (1, 'r_leg_hpy', 1.0),
