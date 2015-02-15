@@ -11,14 +11,14 @@ class Configure(object):
         # self.config('step', 0.5, 200, -1.2)
         # self.config('step', 1.5, 200, -1.5)
         # self.config('step', 5, 200)
-        self.config('step', 8, 200)
+        # self.config('step', 8, 200)
         # self.config('lean', 0.0)
         # self.config('lean', 1.0)
         # self.config('skate', 10)
         # self.config('back', 3)
         # self.config('side', 10)
         # self.config('atlas_lean', 1000.0, 200, px=-0.3)
-        # self.config('atlas_lean', 2000.0, 200, px=-0.3)
+        self.config('atlas_lean', 2000.0, 200, px=-0.3)
         # self.config('atlas_lean', 300)
         # self.config('atlas_step', 1000.0, 200, -30.0)
         # self.config('atlas_step', 2500.0, 200, 0)
@@ -42,6 +42,10 @@ class Configure(object):
         self.f_mag = force
         self.ext_force_steps = force_steps
         self.name = class_name
+        self.tag = None
+        if 'atlas' in class_name:
+            self.tag = class_name[6:].capitalize()
+
         # 1. Set the pose
         self.set_pose(class_name)
         # 2. Proceed the simulation

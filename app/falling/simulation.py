@@ -38,22 +38,22 @@ import gp
 
 class Simulation(object):
     def __init__(self):
-        self.name = 'GP_--N_naive_zo'
-        # self.name = 'Atlas_Step_2500N'
+        # self.name = 'GP_--N_naive_zo'
+        self.name = 'Atlas_##_--N_naive_zo'
 
         # Init api
         pydart.init()
         self.world = pydart.create_world(1.0 / 2000.0)
         self.world.add_skeleton(config.DATA_PATH + "sdf/ground.urdf",
                                 control=False)
-        self.world.add_skeleton(config.DATA_PATH +
-                                "urdf/BioloidGP/BioloidGP.URDF")
-        self.world.skel.set_joint_damping(0.15)
         # self.world.add_skeleton(config.DATA_PATH +
-        #                         "urdf/atlas/atlas_v3_no_head.urdf")
-        # self.world.add_skeleton(config.DATA_PATH +
-        #                         "urdf/atlas/atlas_v3_no_head.urdf")
+        #                         "urdf/BioloidGP/BioloidGP.URDF")
         # self.world.skel.set_joint_damping(0.15)
+        # self.world.add_skeleton(config.DATA_PATH +
+        #                         "urdf/atlas/atlas_v3_no_head.urdf")
+        self.world.add_skeleton(config.DATA_PATH +
+                                "urdf/atlas/atlas_v3_no_head.urdf")
+        self.world.skel.set_joint_damping(0.15)
 
         self.skel = self.world.skel  # shortcut for the control skeleton
 
@@ -63,12 +63,16 @@ class Simulation(object):
         # Configure the scene
         self.cfg = scene.configure.Configure(self)
         self.name = self.name.replace('--', '%.1f' % self.cfg.f_mag)
+        if '##' in self.name and self.cfg.tag is not None:
+            self.name = self.name.replace('##', self.cfg.tag)
+
         self.prob = problem.Problem(self, self.cfg.name)
         self.history = History(self)
         self.impulse_live_renderer = ImpulseLiveRenderer(self)
 
         # # ### Now, configure the controllers
         self.tip_controller = model.controller.Controller(self.skel, self.prob)
+        self.tip_controller.pd.set_pd_params(self.name)
         self.event_handler = events.Handler()
 
         # Reset to the initial state
@@ -116,6 +120,7 @@ class Simulation(object):
         self.tip_controller = model.controller.Controller(self.skel,
                                                           self.prob,
                                                           self.plan)
+        self.tip_controller.pd.set_pd_params(self.name)
         print 'new tip controller is generated'
         self.do_ik()
 
@@ -158,7 +163,8 @@ class Simulation(object):
             elif '1.5' in name:
                 return 1.3
         else:
-            pass
+            if 'Lean_1000' in name:
+                return 1.3
         return 1.0
 
     def step(self):
@@ -240,15 +246,15 @@ class Simulation(object):
             q = self.cfg.saved_target_point
             d = self.cfg.force()
             d[0] = 0.0
-            len_d = np.linalg.norm(d)
-            d /= len_d
-            l = len_d * 0.025 + 0.020
-
-            # d[0] = 0.0
             # len_d = np.linalg.norm(d)
             # d /= len_d
-            # len_d /= 60.0
-            # l = len_d * 0.025
+            # l = len_d * 0.025 + 0.020
+
+            d[0] = 0.0
+            len_d = np.linalg.norm(d)
+            d /= len_d
+            len_d /= 60.0
+            l = len_d * 0.025
 
             p = q - l * d
             # p[0] = q[0]
@@ -256,10 +262,10 @@ class Simulation(object):
             rb = 0.01 * (len_d * 0.025 + 1.0)
             hw = 0.015 * (len_d * 0.05 + 1.0)
             hl = 0.015 * (len_d * 0.05 + 1.0)
-            rb *= 0.5
-            hw *= 0.5
-            # rb *= 2.0
-            # hw *= 2.0
+            # rb *= 0.5
+            # hw *= 0.5
+            rb *= 2.0
+            hw *= 2.0
             gltools.render_arrow2(p, q, rb, hw, hl)
 
         glPopMatrix()
@@ -325,6 +331,7 @@ class Simulation(object):
             self.tip_controller = model.controller.Controller(self.skel,
                                                               self.prob,
                                                               self.plan)
+            self.tip_controller.pd.set_pd_params(self.name)
             targets = pickle.load(fp)
             self.tip_controller.targets = targets
 

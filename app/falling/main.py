@@ -381,7 +381,16 @@ class MyWindow(QtGui.QMainWindow):
                                                 -0.14,
                                                 -1.20])
         else:
-            pass
+            self.glwidget.tb = Trackball(phi=85.0,
+                                         theta=-85.0,
+                                         zoom=1,
+                                         rot=[-0.018834950780547477,
+                                              -0.7068710460660375,
+                                              -0.01925124892805669,
+                                              0.7068295114646171],
+                                         trans=[-0.63,
+                                                -0.73,
+                                                -5.58])
 
     def printCamEvent(self):
         print 'printCamEvent'
