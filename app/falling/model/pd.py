@@ -84,6 +84,7 @@ class AtlasPDController:
         self.step_counter = 0  # For debug
 
     def set_pd_params(self, name):
+        # self.set_atlas_lean_params()
         if 'Lean' in name:
             self.set_atlas_lean_params()
         elif 'Step' in name:

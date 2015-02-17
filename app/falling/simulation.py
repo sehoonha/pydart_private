@@ -38,22 +38,26 @@ import gp
 
 class Simulation(object):
     def __init__(self):
-        self.name = 'GP_--N_naive_zo'
+        # self.name = 'GP_--N_naive_zo'
         # self.name = 'Atlas_##_--N_naive'
+        self.name = 'Atlas_--N'
+        # self.name = 'GP_--N'
 
         # Init api
         pydart.init()
         self.world = pydart.create_world(1.0 / 2000.0)
         self.world.add_skeleton(config.DATA_PATH + "sdf/ground.urdf",
                                 control=False)
-        self.world.add_skeleton(config.DATA_PATH +
-                                "urdf/BioloidGP/BioloidGP.URDF")
-        self.world.skel.set_joint_damping(0.15)
+        if 'GP' in self.name:
+            self.world.add_skeleton(config.DATA_PATH +
+                                    "urdf/BioloidGP/BioloidGP.URDF")
+            self.world.skel.set_joint_damping(0.15)
         # self.world.add_skeleton(config.DATA_PATH +
         #                         "urdf/atlas/atlas_v3_no_head.urdf")
-        # self.world.add_skeleton(config.DATA_PATH +
-        #                         "urdf/atlas/atlas_v3_no_head.urdf")
-        # self.world.skel.set_joint_damping(0.15)
+        else:
+            self.world.add_skeleton(config.DATA_PATH +
+                                    "urdf/atlas/atlas_v3_no_head.urdf")
+            self.world.skel.set_joint_damping(0.15)
 
         self.skel = self.world.skel  # shortcut for the control skeleton
 
@@ -385,9 +389,9 @@ class Simulation(object):
         # plt.title('Compare %d Trials on %s' % (num_trials, prob_name),
         name = self.name.replace('_', ' ')
         t = plt.title('%s' % name,
-                      fontdict={'size': 32})
+                      fontdict={'size': 40})
         t.set_y(0.92)
-        font = {'size': 28}
+        font = {'size': 36}
         plt.xlabel('X', fontdict=font)
         plt.ylabel('Y', fontdict=font)
         pp = [pp[0]] + [None] * (n - 1) + [pp[n]] + [None] * (m - 1)
@@ -395,16 +399,18 @@ class Simulation(object):
         legends[0] = 'Executed'
         legends[n] = 'Planned'
         print 'legends:', legends
-        plt.legend(pp, legends, fontsize=26,
+        plt.legend(pp, legends, fontsize=36,
                    # bbox_to_anchor=(0.15, 0.15))
-                   # loc='lower left')
-                   loc='upper right')
+                   loc='lower left')
+                   # loc='lower right')
 
         # (lo, hi) = plt.axes().get_xlim()
         # plt.axes().set_xlim(0.0, 0.70)
         # plt.axes().set_xlim(0.0, 1.50)
-        # (lo, hi) = plt.axes().get_ylim()
-        # plt.axes().set_ylim(0.0, 1.0)
+        (lo, hi) = plt.axes().get_ylim()
+        plt.axes().set_ylim(0.0, hi + 0.1)
+        plt.tick_params(axis='x', labelsize=28)
+        plt.tick_params(axis='y', labelsize=28)
 
         outputfile = '%s_com.png' % self.name
         plt.savefig(outputfile, bbox_inches='tight')
