@@ -463,3 +463,63 @@ class Simulation(object):
         outputfile = '%s_impulse.png' % self.name
         plt.savefig(outputfile, bbox_inches='tight')
         plt.close(fig)
+
+    def plot_accel(self):
+        t_data, y_data = [], []
+        filename = 'TwoFeetStance.csv'
+        with open(filename) as fin:
+            for line in fin.readlines():
+                values = [float(x.strip()) for x in line.split(',')]
+                t_data += [values[0]]
+                accel = np.array([values[1], values[2], values[3]])
+                y_data += [np.linalg.norm(accel)]
+                # print values, t_data[-1], y_data[-1]
+        max_t = max(t_data)
+        times = [(0, max_t)]
+        colors = ['r']
+        legends = ['All']
+        interactive = True
+        if 'TwoFeet' in filename:
+            times = [(135.0, 139.0), (216.4, 220.4)]
+            colors = ['r', 'b']
+            legends = ['Our approach', 'Baseline']
+            interactive = False
+
+        traces = []
+        for lo, hi in times:
+            trace_x = []
+            trace_y = []
+            for t, y in zip(t_data, y_data):
+                if lo <= t and t <= hi:
+                    trace_x += [t - lo]
+                    trace_y += [y]
+            traces += [(trace_x, trace_y)]
+
+        if not interactive:
+            plt.ioff()
+        fig = plt.figure()
+        fig.set_size_inches(18.5, 10.5)
+        pp = []
+        for trace, c in zip(traces, colors):
+            (x, y) = trace
+            print 'plot', max(y)
+            # print 'x:', x
+            # print 'y:', y
+            p = plt.plot(x, y, color=c, linewidth=2)
+            pp.append(p[0])
+        # t = plt.title('Hardware',
+        #               fontdict={'size': 32})
+        # t.set_x(0.4)
+        # t.set_y(0.92)
+        font = {'size': 28}
+        plt.xlabel('Time', fontdict=font)
+        plt.ylabel('Acceleration at Head', fontdict=font)
+        plt.tick_params(axis='x', labelsize=28)
+        plt.tick_params(axis='y', labelsize=28)
+        plt.legend(pp, legends, fontsize=26,
+                   loc='upper right')
+
+        if not interactive:
+            outputfile = '%s_impulse.png' % (filename.replace('.csv', ''))
+            plt.savefig(outputfile, bbox_inches='tight')
+            plt.close(fig)

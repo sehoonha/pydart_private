@@ -114,6 +114,9 @@ class MyWindow(QtGui.QMainWindow):
         self.plotImpulseAction = QtGui.QAction('Plot Impulse', self)
         self.plotImpulseAction.triggered.connect(self.plotImpulseEvent)
 
+        self.plotAccelAction = QtGui.QAction('Plot Accel', self)
+        self.plotAccelAction.triggered.connect(self.plotAccelEvent)
+
         # File Menu
         self.loadAction = QtGui.QAction('&Load Plan', self)
         self.loadAction.triggered.connect(self.loadEvent)
@@ -195,6 +198,8 @@ class MyWindow(QtGui.QMainWindow):
         plotMenu.addAction(self.textSummaryAction)
         plotMenu.addAction(self.plotCOMAction)
         plotMenu.addAction(self.plotImpulseAction)
+        plotMenu.addSeparator()
+        plotMenu.addAction(self.plotAccelAction)
 
     def idleTimerEvent(self):
         doCapture = False
@@ -291,6 +296,9 @@ class MyWindow(QtGui.QMainWindow):
 
     def plotImpulseEvent(self):
         self.sim.plot_impulse()
+
+    def plotAccelEvent(self):
+        self.sim.plot_accel()
 
     def loadEvent(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Open file',
