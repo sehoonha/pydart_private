@@ -155,10 +155,10 @@ class Problem(object):
         elif self.name == 'lean':
             defs = [
                 ("toes", "knees"),
-                # ("toes", "hands"),
-                # ("knees", "hands"),
-                # ("knees", "head"),
-                # ("hands", "head"),
+                ("toes", "hands"),
+                ("knees", "hands"),
+                ("knees", "head"),
+                ("hands", "head"),
             ]
         elif self.name == 'skate':
             defs = [("l_toe", "hands"),

@@ -38,9 +38,9 @@ import gp
 
 class Simulation(object):
     def __init__(self):
-        # self.name = 'GP_--N_naive_zo'
+        self.name = 'GP_--N_naive_zo'
         # self.name = 'Atlas_##_--N_naive'
-        self.name = 'Atlas_--N'
+        # self.name = 'Atlas_--N'
         # self.name = 'GP_--N'
 
         # Init api
@@ -127,6 +127,7 @@ class Simulation(object):
         self.tip_controller.pd.set_pd_params(self.name)
         print 'new tip controller is generated'
         self.do_ik()
+        self.name = self.name.replace('_naive', '')
 
     def do_ik(self):
         # self.plan.plot()
@@ -176,9 +177,9 @@ class Simulation(object):
         return 1.0
 
     def step(self):
-        if 'GP_0.5N' in self.name:
-            if not self.tip_controller.has_next():  # For GP 0.5N
-                self.tip_controller.update_target_with_balance()
+        # if 'GP_0.5N' in self.name:
+        #     if not self.tip_controller.has_next():  # For GP 0.5N
+        #         self.tip_controller.update_target_with_balance()
         self.skel.tau = self.tip_controller.control()
         self.world.step()
         self.history.push()
