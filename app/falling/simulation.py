@@ -330,8 +330,10 @@ class Simulation(object):
         m.add_page('Init', [self.cfg.init_pose()], [1.0])
         m.add_page('Falling', poses, durations)
         m.fill_with_empty_pages()
-        m.save('test.mtn')
-        print 'export_motion OK'
+        # m.save('test.mtn')
+        filename = '%s.mtn' % self.name
+        m.save(filename)
+        print 'export_motion OK:', filename
 
     def load(self, filename):
         self.name = self.name.replace('_naive', '')
@@ -466,7 +468,11 @@ class Simulation(object):
 
     def plot_accel(self):
         t_data, y_data = [], []
-        filename = 'TwoFeetStance.csv'
+        # filename = 'OneFootStance.csv'
+        # filename = 'TwoFeetStance.csv'
+        # filename = 'Rolling.csv'
+        # filename = 'GP00_new_2.csv'
+        filename = 'GP01.csv'
         with open(filename) as fin:
             for line in fin.readlines():
                 values = [float(x.strip()) for x in line.split(',')]
@@ -481,6 +487,21 @@ class Simulation(object):
         interactive = True
         if 'TwoFeet' in filename:
             times = [(135.0, 139.0), (216.4, 220.4)]
+            colors = ['r', 'b']
+            legends = ['Our approach', 'Baseline']
+            interactive = False
+        elif 'OneFoot' in filename:
+            times = [(81.0, 85.0), (122.0, 126.0)]  # 4.5 6.9
+            colors = ['r', 'b']
+            legends = ['Our approach', 'Baseline']
+            interactive = False
+        elif 'Rolling' in filename:
+            times = [(154.5, 158.5), (197.5, 201.5)]  # 5.23 13.36
+            colors = ['r', 'b']
+            legends = ['Our approach', 'Baseline']
+            interactive = False
+        elif 'GP00_new.' in filename:
+            times = [(119.5, 123.5), (235.0, 239.0)]  # 8.8 12.1
             colors = ['r', 'b']
             legends = ['Our approach', 'Baseline']
             interactive = False
