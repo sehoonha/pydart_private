@@ -472,19 +472,37 @@ class Simulation(object):
         # filename = 'TwoFeetStance.csv'
         # filename = 'Rolling.csv'
         # filename = 'GP00_new_2.csv'
-        filename = 'GP01.csv'
-        with open(filename) as fin:
-            for line in fin.readlines():
-                values = [float(x.strip()) for x in line.split(',')]
-                t_data += [values[0]]
-                accel = np.array([values[1], values[2], values[3]])
-                y_data += [np.linalg.norm(accel)]
-                # print values, t_data[-1], y_data[-1]
+        # filename = 'GP01.csv'
+        # filename = 'test.csv'
+        # filename = 'test2.csv'
+        # filename = 'yogamatt00.csv'
+        # filename = 'yogamatt01.csv'
+        filename = ['yogamatt00.csv', 'yogamatt01.csv']
+        if isinstance(filename, str):
+            with open(filename) as fin:
+                for line in fin.readlines():
+                    values = [float(x.strip()) for x in line.split(',')]
+                    t_data += [values[0]]
+                    accel = np.array([values[1], values[2], values[3]])
+                    y_data += [np.linalg.norm(accel)]
+                    # print values, t_data[-1], y_data[-1]
+        else:
+            offset = 0.0
+            for f in filename:
+                with open(f) as fin:
+                    for line in fin.readlines():
+                        values = [float(x.strip()) for x in line.split(',')]
+                        t_data += [values[0] + offset]
+                        accel = np.array([values[1], values[2], values[3]])
+                        y_data += [np.linalg.norm(accel)]
+                offset += max(t_data) + 10.0
+
         max_t = max(t_data)
         times = [(0, max_t)]
         colors = ['r']
         legends = ['All']
         interactive = True
+        styles = None
         if 'TwoFeet' in filename:
             times = [(135.0, 139.0), (216.4, 220.4)]
             colors = ['r', 'b']
@@ -505,6 +523,27 @@ class Simulation(object):
             colors = ['r', 'b']
             legends = ['Our approach', 'Baseline']
             interactive = False
+        elif 'yogamatt00' in filename:
+            times = [(152.9, 155.9), (223.7, 226.7)]  # 8.8 12.1
+            colors = ['r', 'b']
+            legends = ['Our approach', 'Baseline']
+            interactive = False
+        elif 'yogamatt01' in filename:
+            x = 360.2396 + 10.0
+            times = [(466.1 - x, 469.1 - x), (557.51 - x, 560.51 - x)]
+            colors = ['r', 'b']
+            legends = ['Our approach', 'Baseline']
+            interactive = False
+        # elif 'yogamatt00.csv' in filename:
+        #     times = [(153.5, 156.5), (224.5, 227.5),  # 5.49 7.98
+        #              (467.0, 470.0), (558.5, 561.5)]  # 5.50 8.04
+        #     colors = ['r', 'r', 'b', 'b']
+        #     styles = ['-', '--', '-', '--']
+        #     legends = ['0.0N (Ours)', '0.0N (Baseline)',
+        #                '0.5 (Ours)', '0.5 (Baseline)']
+        #     interactive = False
+        if styles is None:
+            styles = ['-'] * len(colors)
 
         traces = []
         for lo, hi in times:
@@ -521,12 +560,12 @@ class Simulation(object):
         fig = plt.figure()
         fig.set_size_inches(18.5, 10.5)
         pp = []
-        for trace, c in zip(traces, colors):
+        for trace, c, ls in zip(traces, colors, styles):
             (x, y) = trace
             print 'plot', max(y)
             # print 'x:', x
             # print 'y:', y
-            p = plt.plot(x, y, color=c, linewidth=2)
+            p = plt.plot(x, y, color=c, ls=ls, linewidth=2)
             pp.append(p[0])
         # t = plt.title('Hardware',
         #               fontdict={'size': 32})
@@ -537,10 +576,16 @@ class Simulation(object):
         plt.ylabel('Acceleration at Head', fontdict=font)
         plt.tick_params(axis='x', labelsize=28)
         plt.tick_params(axis='y', labelsize=28)
+        (lo, hi) = plt.axes().get_ylim()
+        plt.axes().set_ylim(0.0, 10.0)
         plt.legend(pp, legends, fontsize=26,
                    loc='upper right')
 
         if not interactive:
-            outputfile = '%s_impulse.png' % (filename.replace('.csv', ''))
+            if isinstance(filename, str):
+                outputfile = '%s_impulse.png' % (filename.replace('.csv', ''))
+            else:
+                outputfile = '%s_all_impulse.png' \
+                             % (filename[0].replace('.csv', ''))
             plt.savefig(outputfile, bbox_inches='tight')
             plt.close(fig)
