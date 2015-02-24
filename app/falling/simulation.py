@@ -38,8 +38,9 @@ import gp
 
 class Simulation(object):
     def __init__(self):
-        self.name = 'GP_--N_naive_zo'
-        # self.name = 'Atlas_##_--N_naive'
+        self.show_impulse = False
+        # self.name = 'GP_--N_naive_clean'
+        self.name = 'Atlas_##_--N_naive_clean'
         # self.name = 'Atlas_--N'
         # self.name = 'GP_--N'
 
@@ -255,15 +256,15 @@ class Simulation(object):
             q = self.cfg.saved_target_point
             d = self.cfg.force()
             d[0] = 0.0
-            len_d = np.linalg.norm(d)
-            d /= len_d
-            l = len_d * 0.025 + 0.020
-
-            # d[0] = 0.0
             # len_d = np.linalg.norm(d)
             # d /= len_d
-            # len_d /= 60.0
-            # l = len_d * 0.025
+            # l = len_d * 0.025 + 0.020
+
+            d[0] = 0.0
+            len_d = np.linalg.norm(d)
+            d /= len_d
+            len_d /= 60.0
+            l = len_d * 0.025
 
             p = q - l * d
             # p[0] = q[0]
@@ -271,10 +272,10 @@ class Simulation(object):
             rb = 0.01 * (len_d * 0.025 + 1.0)
             hw = 0.015 * (len_d * 0.05 + 1.0)
             hl = 0.015 * (len_d * 0.05 + 1.0)
-            rb *= 0.5
-            hw *= 0.5
-            # rb *= 2.0
-            # hw *= 2.0
+            # rb *= 0.5
+            # hw *= 0.5
+            rb *= 2.0
+            hw *= 2.0
             gltools.render_arrow2(p, q, rb, hw, hl)
 
         glPopMatrix()

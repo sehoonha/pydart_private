@@ -35,7 +35,8 @@ class GLWidget(QGLWidget):
 
         self.sim.render()
         self.enable2D()
-        # self.sim.impulse_live_renderer.render()
+        if self.sim.show_impulse:
+            self.sim.impulse_live_renderer.render()
         self.disable2D()
 
     def resizeGL(self, w, h):

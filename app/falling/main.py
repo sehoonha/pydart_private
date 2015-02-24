@@ -21,6 +21,75 @@ from simulation import Simulation
 from trackball import Trackball
 
 
+import threading
+import time
+
+
+def bake(win):
+    print 'Bake worker', win.sim.name
+    time.sleep(1)
+    print 'Macro: setWindowTitle'
+    time.sleep(1)
+    win.glwidget.captureIndex = 0
+    win.captureAction.setChecked(False)
+    time.sleep(1)
+    print 'Macro: reset'
+    win.resetEvent()
+    time.sleep(1)
+    print 'Macro: play'
+    win.playAction.setChecked(True)
+    while win.playAction.isChecked():
+        time.sleep(1)
+    print 'Macro: go to the first'
+    win.rangeSlider.setValue(0)
+    win.rangeSliderEvent(0)
+    time.sleep(1)
+    print 'Macro: display the first frame'
+    time.sleep(1)
+    print 'Macro: animation with recording'
+    win.captureAction.setChecked(True)
+    win.animAction.setChecked(True)
+    while win.animAction.isChecked():
+        time.sleep(1)
+    print 'Macro: create a movie'
+    win.movieEvent()
+    time.sleep(5)
+    print 'Macro: done'
+
+
+def worker(win):
+    """thread worker function"""
+    return
+    plan_filename = 'Atlas_Back_500N'
+    plan_filename += '.plan'
+    print 'plan_filename', plan_filename
+    name = win.sim.name
+
+    # Naive, Clean
+    bake(win)
+
+    # Naive, Impulse
+    win.sim.show_impulse = True
+    win.sim.name = name.replace('clean', 'impulse')
+    bake(win)
+
+    # Load plan
+    print 'plan_filename', plan_filename
+    win.sim.load(plan_filename)
+
+    # Planned, Clean
+    win.sim.show_impulse = False
+    win.sim.name = name.replace('naive', 'planned')
+    bake(win)
+
+    # Planned, Impulse
+    win.sim.show_impulse = True
+    win.sim.name = name.replace('clean', 'impulse').replace('naive', 'planned')
+    bake(win)
+    print 'All bakings are done by worker function!!!'
+    return
+
+
 class MyWindow(QtGui.QMainWindow):
     def __init__(self):
         super(MyWindow, self).__init__()
@@ -51,6 +120,9 @@ class MyWindow(QtGui.QMainWindow):
         # self.sim.load('gp_step_1.5.plan')
         # self.sim.load('gp_step_5.plan')
         # self.sim.load('test.plan')
+
+        t = threading.Thread(target=worker, args=(self, ))
+        t.start()
 
     def initUI(self):
         self.setGeometry(0, 0, 1280, 720)

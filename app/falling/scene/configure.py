@@ -14,7 +14,7 @@ class Configure(object):
         # self.config('step', 8, 200)
         # self.config('lean', 0.0)
         # self.config('lean', 1.0, 200)
-        self.config('lean', 0.0, 200)
+        # self.config('lean', 0.0, 200)
         # self.config('lean', 0.5, 200)
         # self.config('lean', 1.5, 200)
         # self.config('skate', 10)
@@ -27,7 +27,7 @@ class Configure(object):
         # self.config('atlas_step', 2500.0, 200, 0)
         # self.config('atlas_back', 500, 200, px=0.2, py=0.0)
         # self.config('atlas_back', 600, 100, px=0.2, py=0.0)
-        # self.config('atlas_back', 1000, 100, px=0.2, py=0.0)
+        self.config('atlas_back', 1000, 100, px=0.2, py=0.0)
         # self.config('atlas_back', 1600, 200, px=0.2, py=0.0, pz=-0.2)
 
         self.conditions = None

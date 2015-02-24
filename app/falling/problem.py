@@ -144,13 +144,13 @@ class Problem(object):
         #         ("l_toe", "hands"), ]
         if self.name == 'step':
             defs = [("r_toe", "l_heel"),
-                    # ("r_toe", "l_toe"),
-                    # ("r_toe", "hands"),
-                    # ("r_toe", "head"),
+                    ("r_toe", "l_toe"),
+                    ("r_toe", "hands"),
+                    ("r_toe", "head"),
                     ("l_heel", "l_toe"),
                     ("l_toe", "hands"),
-                    # ("l_toe", "head"),
-                    # ("hands", "head"),
+                    ("l_toe", "head"),
+                    ("hands", "head"),
                     ("head", "r_heel"), ]
         elif self.name == 'lean':
             defs = [
