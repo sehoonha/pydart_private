@@ -164,7 +164,7 @@ class RangeChecker(object):
         # Each edge has a set of stoppers
         self.stop_sets = [StopperSet(humansize) for _ in range(self.prob.m)]
 
-        for i in range(10):
+        for i in range(30):
             self.set_random_pose()
             for tip, ss in zip(self.prob.tips, self.stop_sets):
                 x = tip.pose()

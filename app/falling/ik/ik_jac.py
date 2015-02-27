@@ -213,7 +213,7 @@ class IKJac(object):
 
         print "==== ik.IKJac optimize...."
         res = None
-        for i in range(5):
+        for i in range(1):
             # x0 = (np.random.rand(self.dim) - 0.5) * 3.14
             x0 = (np.random.rand(self.dim) - 0.5)
             now = scipy.optimize.minimize(self.obj, x0,

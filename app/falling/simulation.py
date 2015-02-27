@@ -39,10 +39,11 @@ import gp
 class Simulation(object):
     def __init__(self):
         self.show_impulse = False
-        # self.name = 'GP_--N_naive_clean'
-        self.name = 'Atlas_##_--N_naive_clean'
-        # self.name = 'Atlas_--N'
-        # self.name = 'GP_--N'
+        # self.name = 'GP_--N_handfree_naive_clean'
+        # self.name = 'Atlas_##_--N_naive_clean'
+        self.name = 'Atlas_##--N'
+        # self.name = 'BioloidGP_--N'
+        # self.name = 'BioloidGP_--N_from_one_foot'
 
         # Init api
         pydart.init()
@@ -199,11 +200,11 @@ class Simulation(object):
                 return True
             elif e.name == 'terminate':
                 self.event_handler.push("terminate", 9999)
-                return False
+                return True
 
         self.event_handler.step()
         # print self.world.nframes, ':', self.event_handler
-        return (self.terminate_time() <= self.world.t + 0.001)
+        # return (self.terminate_time() <= self.world.t + 0.001)
         return False
 
     def render(self):
@@ -256,15 +257,15 @@ class Simulation(object):
             q = self.cfg.saved_target_point
             d = self.cfg.force()
             d[0] = 0.0
-            # len_d = np.linalg.norm(d)
-            # d /= len_d
-            # l = len_d * 0.025 + 0.020
-
-            d[0] = 0.0
             len_d = np.linalg.norm(d)
             d /= len_d
-            len_d /= 60.0
-            l = len_d * 0.025
+            l = len_d * 0.025 + 0.020
+
+            # d[0] = 0.0
+            # len_d = np.linalg.norm(d)
+            # d /= len_d
+            # len_d /= 60.0
+            # l = len_d * 0.025
 
             p = q - l * d
             # p[0] = q[0]
@@ -272,10 +273,10 @@ class Simulation(object):
             rb = 0.01 * (len_d * 0.025 + 1.0)
             hw = 0.015 * (len_d * 0.05 + 1.0)
             hl = 0.015 * (len_d * 0.05 + 1.0)
-            # rb *= 0.5
-            # hw *= 0.5
-            rb *= 2.0
-            hw *= 2.0
+            rb *= 0.5
+            hw *= 0.5
+            # rb *= 2.0
+            # hw *= 2.0
             gltools.render_arrow2(p, q, rb, hw, hl)
 
         glPopMatrix()
@@ -392,6 +393,7 @@ class Simulation(object):
             pp.append(p[0])
         # plt.title('Compare %d Trials on %s' % (num_trials, prob_name),
         name = self.name.replace('_', ' ')
+        name = name.replace('Lean', '')
         t = plt.title('%s' % name,
                       fontdict={'size': 40})
         t.set_y(0.92)
@@ -400,8 +402,8 @@ class Simulation(object):
         plt.ylabel('Y', fontdict=font)
         pp = [pp[0]] + [None] * (n - 1) + [pp[n]] + [None] * (m - 1)
         legends = [None] * len(pp)
-        legends[0] = 'Executed'
-        legends[n] = 'Planned'
+        legends[0] = 'Robot'
+        legends[n] = 'Abstract Model'
         print 'legends:', legends
         plt.legend(pp, legends, fontsize=36,
                    # bbox_to_anchor=(0.15, 0.15))
@@ -412,7 +414,9 @@ class Simulation(object):
         # plt.axes().set_xlim(0.0, 0.70)
         # plt.axes().set_xlim(0.0, 1.50)
         (lo, hi) = plt.axes().get_ylim()
-        plt.axes().set_ylim(0.0, hi + 0.1)
+        # plt.axes().set_ylim(0.0, hi + 0.1)
+        # plt.axes().set_ylim(0.0, 0.2)  # For GP
+        plt.axes().set_ylim(0.0, 1.2)  # For GP
         plt.tick_params(axis='x', labelsize=28)
         plt.tick_params(axis='y', labelsize=28)
 
@@ -453,8 +457,8 @@ class Simulation(object):
         plt.xlabel('X', fontdict=font)
         plt.ylabel('Y', fontdict=font)
         legends = [None] * len(pp)
-        legends[0] = 'Executed'
-        legends[1] = 'Planned'
+        legends[0] = 'Robot'
+        legends[1] = 'Abstract Model'
         plt.legend(pp, legends, fontsize=26,
                    loc='upper left')
 
@@ -477,8 +481,8 @@ class Simulation(object):
         # filename = 'test.csv'
         # filename = 'test2.csv'
         # filename = 'yogamatt00.csv'
-        # filename = 'yogamatt01.csv'
-        filename = ['yogamatt00.csv', 'yogamatt01.csv']
+        filename = 'yogamatt01.csv'
+        # filename = ['yogamatt00.csv', 'yogamatt01.csv']
         if isinstance(filename, str):
             with open(filename) as fin:
                 for line in fin.readlines():
@@ -507,33 +511,33 @@ class Simulation(object):
         if 'TwoFeet' in filename:
             times = [(135.0, 139.0), (216.4, 220.4)]
             colors = ['r', 'b']
-            legends = ['Our approach', 'Baseline']
+            legends = ['Planned', 'Unplanned']
             interactive = False
         elif 'OneFoot' in filename:
             times = [(81.0, 85.0), (122.0, 126.0)]  # 4.5 6.9
             colors = ['r', 'b']
-            legends = ['Our approach', 'Baseline']
+            legends = ['Planned', 'Unplanned']
             interactive = False
         elif 'Rolling' in filename:
             times = [(154.5, 158.5), (197.5, 201.5)]  # 5.23 13.36
             colors = ['r', 'b']
-            legends = ['Our approach', 'Baseline']
+            legends = ['Planned', 'Unplanned']
             interactive = False
         elif 'GP00_new.' in filename:
             times = [(119.5, 123.5), (235.0, 239.0)]  # 8.8 12.1
             colors = ['r', 'b']
-            legends = ['Our approach', 'Baseline']
+            legends = ['Planned', 'Unplanned']
             interactive = False
         elif 'yogamatt00' in filename:
             times = [(152.9, 155.9), (223.7, 226.7)]  # 8.8 12.1
             colors = ['r', 'b']
-            legends = ['Our approach', 'Baseline']
+            legends = ['Planned', 'Unplanned']
             interactive = False
         elif 'yogamatt01' in filename:
             x = 360.2396 + 10.0
             times = [(466.1 - x, 469.1 - x), (557.51 - x, 560.51 - x)]
             colors = ['r', 'b']
-            legends = ['Our approach', 'Baseline']
+            legends = ['Planned', 'Unplanned']
             interactive = False
         # elif 'yogamatt00.csv' in filename:
         #     times = [(153.5, 156.5), (224.5, 227.5),  # 5.49 7.98
@@ -568,13 +572,13 @@ class Simulation(object):
             # print 'y:', y
             p = plt.plot(x, y, color=c, ls=ls, linewidth=2)
             pp.append(p[0])
-        # t = plt.title('Hardware',
-        #               fontdict={'size': 32})
-        # t.set_x(0.4)
-        # t.set_y(0.92)
+        t = plt.title('BioloidGP 0.5N',
+                      fontdict={'size': 36})
+        t.set_x(0.5)
+        t.set_y(0.92)
         font = {'size': 28}
         plt.xlabel('Time', fontdict=font)
-        plt.ylabel('Acceleration at Head', fontdict=font)
+        plt.ylabel('Acceleration of Head', fontdict=font)
         plt.tick_params(axis='x', labelsize=28)
         plt.tick_params(axis='y', labelsize=28)
         (lo, hi) = plt.axes().get_ylim()

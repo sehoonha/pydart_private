@@ -61,7 +61,8 @@ class DynamicTIP:
         return (x.dth1 < 0)
 
     def is_stopped_at_peak(self, x):
-        return fabs(x.th1) < 0.1 and fabs(x.dth1) < 1.0
+        return x.c1 == 6 and fabs(x.th1) < 0.1 and fabs(x.dth1) < 1.0
+        # return x.c1 == 6 and fabs(x.th1) < 0.5
 
     def is_grounded(self, x):
         return (x.th1 < -0.5 * math.pi) or (0.5 * math.pi < x.th1)
@@ -146,11 +147,12 @@ class DynamicTIP:
         # If the current state has negative velocity
         if self.is_stopped(x):
             # print "  " * depth, self.eval_counter, 'stop()', x, j
-            return x, j
-            # if int(x.c1) == 6:  # Only designated contacts
-            #     return (x, j)
-            # else:
-            #     return (x, g_inf)  # If this is not the second
+            # return x, j
+            # if self.is_stopped_at_peak(x):  # Only designated contacts
+            if int(x.c1) == 7:  # Only designated contacts
+                return (x, j)
+            else:
+                return (x, g_inf)  # If this is not the second
 
         # if int(x.c1) >= 1:  # Exceed the maximum contacts
         #     return (x, g_inf)
@@ -189,7 +191,12 @@ class DynamicTIP:
         best_entry = PathEntry(x, None, None, g_inf, g_inf, None)
         for n_dr1 in np.linspace(self.lo_dr, self.hi_dr, self.N_GRID):
             x_now = State(x.th1, x.dth1, x.r1, n_dr1, x.c1, x.t)
+
             while not self.is_grounded(x_now):
+                # if self.is_stopped_at_peak(x_now):
+                #     # print 'stopped at peak!'
+                #     return (x, j)
+
                 # print 'n_dr1:', n_dr1, x_now.th1, x_now.dth1
                 for u in self.stoppers(x_now):
                     x_impact, j_impact = self.impact(x_now, u)

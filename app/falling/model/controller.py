@@ -18,6 +18,7 @@ class Controller(object):
         # PD Control
         if self.skel.m < 10.0:
             self.pd = pd.PDController(self.skel, 60.0, 1.0, 0.5)
+            # self.pd = pd.PDController(self.skel, 120.0, 1.0, 1.0)
         else:
             # self.pd = pd.PDController(self.skel, 600.0, 60.0, 0.3)
             self.pd = pd.AtlasPDController(self.skel)
@@ -159,7 +160,13 @@ class Controller(object):
             # print '!!!!', len(lfoot_contacts)
             return (len(lfoot_contacts) >= 5)
 
+        # # Special case: r_heel to l_heel
+        # if 'torso' in self.tip().c1.bodynames and \
+        #    'r_foot' in self.tip().c2.bodynames:
+        #     return 'r_foot' in contacts
+
         # Generally, proceed to next if there's new contacts
+        # print contacts, pivots, len(contacts - pivots)
         return (contacts - pivots)
 
     def proceed(self, sim):

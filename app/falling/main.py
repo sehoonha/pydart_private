@@ -60,18 +60,18 @@ def bake(win):
 def worker(win):
     """thread worker function"""
     return
-    plan_filename = 'Atlas_Back_500N'
+    plan_filename = 'GP_8.0N_handfree'
     plan_filename += '.plan'
     print 'plan_filename', plan_filename
     name = win.sim.name
 
-    # Naive, Clean
-    bake(win)
+    # # Naive, Clean
+    # bake(win)
 
-    # Naive, Impulse
-    win.sim.show_impulse = True
-    win.sim.name = name.replace('clean', 'impulse')
-    bake(win)
+    # # Naive, Impulse
+    # win.sim.show_impulse = True
+    # win.sim.name = name.replace('clean', 'impulse')
+    # bake(win)
 
     # Load plan
     print 'plan_filename', plan_filename
